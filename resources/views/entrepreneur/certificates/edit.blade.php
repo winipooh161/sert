@@ -1,0 +1,205 @@
+@extends('layouts.lk')
+
+@section('content')
+<div class="container-fluid py-4">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('entrepreneur.certificates.index') }}">Мои сертификаты</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('entrepreneur.certificates.show', $certificate) }}">Просмотр сертификата</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Редактирование</li>
+        </ol>
+    </nav>
+    
+    <h1 class="mb-4">Редактирование сертификата</h1>
+    
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card border-0 rounded-4 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-4">Данные сертификата</h5>
+                    
+                    <form method="POST" action="{{ route('entrepreneur.certificates.update', $certificate) }}">
+                        @csrf
+                        @method('PUT')
+                        
+                        <!-- Получатель -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Информация о получателе</h6>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="recipient_name" class="form-label">Имя получателя *</label>
+                                    <input type="text" class="form-control @error('recipient_name') is-invalid @enderror" 
+                                        id="recipient_name" name="recipient_name" value="{{ old('recipient_name', $certificate->recipient_name) }}" required>
+                                    @error('recipient_name')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="recipient_email" class="form-label">Email получателя</label>
+                                    <input type="email" class="form-control @error('recipient_email') is-invalid @enderror" 
+                                        id="recipient_email" name="recipient_email" value="{{ old('recipient_email', $certificate->recipient_email) }}">
+                                    @error('recipient_email')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="recipient_phone" class="form-label">Телефон получателя</label>
+                                    <input type="tel" class="form-control @error('recipient_phone') is-invalid @enderror" 
+                                        id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone', $certificate->recipient_phone) }}">
+                                    @error('recipient_phone')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Информация о сертификате -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Параметры сертификата</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="amount" class="form-label">Сумма сертификата (руб.) *</label>
+                                    <input type="number" class="form-control @error('amount') is-invalid @enderror" 
+                                        id="amount" name="amount" value="{{ old('amount', $certificate->amount) }}" min="0" step="100" required>
+                                    @error('amount')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Статус *</label>
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+                                        <option value="active" {{ (old('status', $certificate->status) == 'active') ? 'selected' : '' }}>Активен</option>
+                                        <option value="expired" {{ (old('status', $certificate->status) == 'expired') ? 'selected' : '' }}>Истек</option>
+                                        <option value="canceled" {{ (old('status', $certificate->status) == 'canceled') ? 'selected' : '' }}>Отменен</option>
+                                        @if($certificate->status == 'used')
+                                        <option value="used" selected disabled>Использован</option>
+                                        @endif
+                                    </select>
+                                    @error('status')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="valid_from" class="form-label">Действителен с *</label>
+                                    <input type="date" class="form-control @error('valid_from') is-invalid @enderror" 
+                                        id="valid_from" name="valid_from" value="{{ old('valid_from', $certificate->valid_from->format('Y-m-d')) }}" required>
+                                    @error('valid_from')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="valid_until" class="form-label">Действителен до *</label>
+                                    <input type="date" class="form-control @error('valid_until') is-invalid @enderror" 
+                                        id="valid_until" name="valid_until" value="{{ old('valid_until', $certificate->valid_until->format('Y-m-d')) }}" required>
+                                    @error('valid_until')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <label for="message" class="form-label">Сообщение/пожелания</label>
+                                    <textarea class="form-control @error('message') is-invalid @enderror" 
+                                        id="message" name="message" rows="3">{{ old('message', $certificate->message) }}</textarea>
+                                    @error('message')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Дополнительные поля шаблона -->
+                        @if (is_array($template->fields) && count($template->fields) > 0)
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Дополнительные поля</h6>
+                            <div class="row g-3">
+                                @foreach ($template->fields as $key => $field)
+                                    <div class="col-md-6">
+                                        <label for="custom_{{ $key }}" class="form-label">
+                                            {{ $field['label'] ?? $key }} 
+                                            @if (isset($field['required']) && $field['required'])
+                                                <span class="text-danger">*</span>
+                                            @endif
+                                        </label>
+                                        <input type="text" class="form-control @error('custom_fields.'.$key) is-invalid @enderror" 
+                                            id="custom_{{ $key }}" name="custom_fields[{{ $key }}]" 
+                                            value="{{ old('custom_fields.'.$key, isset($certificate->custom_fields[$key]) ? $certificate->custom_fields[$key] : '') }}"
+                                            {{ isset($field['required']) && $field['required'] ? 'required' : '' }}>
+                                        @error('custom_fields.'.$key)
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        
+                        <!-- Кнопки управления формой -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+                            <a href="{{ route('entrepreneur.certificates.show', $certificate) }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fa-solid fa-times me-1"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-save me-1"></i> Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            @if($certificate->status != 'canceled')
+            <div class="card border-0 rounded-4 shadow-sm mt-4 border-danger border-top border-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-danger mb-3">Опасная зона</h5>
+                    <p class="text-muted mb-3">Если вы хотите отменить сертификат, нажмите кнопку ниже. Это действие нельзя будет отменить.</p>
+                    
+                    <form method="POST" action="{{ route('entrepreneur.certificates.destroy', $certificate) }}" id="cancelForm">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmCancellation()">
+                            <i class="fa-solid fa-ban me-1"></i> Отменить сертификат
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endif
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 rounded-4 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Информация о шаблоне</h5>
+                    
+                    @if ($template->image)
+                        <img src="{{ asset('storage/' . $template->image) }}" class="card-img-top rounded-4 mb-3" alt="{{ $template->name }}">
+                    @endif
+                    
+                    <h6 class="fw-bold">{{ $template->name }}</h6>
+                    <p class="text-muted">{{ $template->description }}</p>
+                    
+                    <hr>
+                    
+                    <dl class="row mb-0">
+                        <dt class="col-sm-6">Номер:</dt>
+                        <dd class="col-sm-6">{{ $certificate->certificate_number }}</dd>
+                        
+                        <dt class="col-sm-6">Дата создания:</dt>
+                        <dd class="col-sm-6">{{ $certificate->created_at->format('d.m.Y') }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmCancellation() {
+    if (confirm('Вы уверены, что хотите отменить этот сертификат? Это действие необратимо.')) {
+        document.getElementById('cancelForm').submit();
+    }
+}
+</script>
+@endsection

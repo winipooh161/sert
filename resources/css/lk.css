@@ -1,0 +1,589 @@
+/* Основные стили для кабинета - упрощены и оптимизированы */
+:root {
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 60px;
+    --sidebar-transition: 0.3s ease;
+    --primary: #0d6efd;
+    --success: #198754;
+    --warning: #ffc107;
+    --danger: #dc3545;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Основной контейнер */
+.main-content {
+    min-width: 0;
+    overflow: hidden;
+    transition: var(--sidebar-transition);
+    padding: 0;
+    /* padding-bottom: 30px; */
+}
+
+/* Боковое меню - улучшенная версия */
+aside {
+    width: var(--sidebar-width) !important;
+    transition: width var(--sidebar-transition);
+}
+
+.sidebar-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+/* Стилизация скроллбара */
+.sidebar-sticky::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-sticky::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-sticky::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 10px;
+}
+
+/* Упрощенные стили для пунктов навигации */
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    color: #4a5568;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0.75rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    color: var(--primary);
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    font-size: 1rem;
+    transition: margin var(--sidebar-transition), width var(--sidebar-transition);
+}
+
+.sidebar-text {
+    transition: opacity var(--sidebar-transition);
+}
+
+/* Разделитель */
+.sidebar-divider {
+    height: 0;
+    margin: 0.5rem 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Свернутое состояние бокового меню - оптимизировано */
+.sidebar-collapsed aside {
+    width: var(--sidebar-collapsed-width) !important;
+    overflow: visible;
+}
+
+.sidebar-collapsed .sidebar-text,
+.sidebar-collapsed .sidebar-user-name,
+.sidebar-collapsed .sidebar-user-role,
+.sidebar-collapsed .sidebar-footer span {
+    display: none;
+}
+
+.sidebar-collapsed .sidebar-icon {
+    margin-right: 0;
+    font-size: 1.25rem;
+}
+
+.sidebar-collapsed .sidebar-logo,
+.sidebar-collapsed .sidebar-user {
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding: 0.75rem;
+    margin: 0.25rem auto;
+    width: 40px;
+}
+
+/* Исправляем потенциальную проблему со скрытым содержимым */
+.sidebar-collapsed .sidebar-text,
+.sidebar-collapsed .sidebar-user-name,
+.sidebar-collapsed .sidebar-user-role,
+.sidebar-collapsed .sidebar-footer span {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--sidebar-transition), visibility var(--sidebar-transition);
+    white-space: nowrap;
+}
+
+/* Карточки для страницы шаблонов */
+.template-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+}
+
+.template-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.template-card .card-img-wrapper {
+    position: relative;
+    padding-top: 66.66%; /* 3:2 соотношение сторон */
+    overflow: hidden;
+}
+
+.template-card .card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.template-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.template-card .template-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.template-card:hover .template-overlay {
+    opacity: 1;
+}
+
+.template-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Иконки и бейджи */
+.badge-premium {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(45deg, #ffc107, #ff9800);
+    border: none;
+    padding: 0.35rem 0.65rem;
+}
+
+
+/* Стили для страницы профиля */
+.profile-avatar-wrapper {
+    position: relative;
+    margin: 0 auto;
+}
+
+.profile-avatar-wrapper .rounded-circle {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 3px solid #fff;
+    transition: all 0.3s ease;
+}
+
+.profile-avatar-wrapper:hover .rounded-circle {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-edit-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid #fff;
+    z-index: 5;
+}
+
+.avatar-edit-button:hover {
+    background-color: var(--primary);
+    color: white !important;
+    transform: scale(1.1);
+}
+
+/* Улучшенные стили для вкладок настроек */
+.nav-pills .nav-link {
+    color: #4a5568;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+}
+
+/* Стилизация форм настроек */
+.settings-form .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.settings-form .form-control,
+.settings-form .form-select {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s;
+}
+
+.settings-form .form-control:focus,
+.settings-form .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-color: #a4cafe;
+}
+
+/* Улучшения для мобильной версии */
+@media (max-width: 767.98px) {
+    .profile-section {
+        padding: 1rem;
+    }
+    
+    .sticky-top {
+        position: relative !important;
+        top: 0 !important;
+    }
+    
+    .container-fluid {
+        /* padding-left: 15px; */
+        /* padding-right: 15px; */
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Улучшенные отступы между элементами */
+.card {
+    margin-bottom: 10px !important; /* Добавляем отступ под карточками по умолчанию */
+}
+
+/* Стили специально для карточек в профиле */
+.card.border-0.rounded-4.shadow-sm {
+    /* margin-bottom: 2rem; */
+    overflow: hidden;
+}
+
+.card.border-0.rounded-4.shadow-sm .card-body {
+    padding: 1.75rem !important;  /* Больше внутренних отступов для карточек профиля */
+}
+
+.card.border-0.rounded-4.shadow-sm .card-header {
+    padding: 1.25rem 1.75rem;
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card.border-0.rounded-4.shadow-sm .card-footer {
+    padding: 1.25rem 1.75rem;
+    background: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Улучшаем отступы между компонентами профиля */
+.profile-section {
+    margin-bottom: 2.5rem;
+}
+
+.profile-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Отступы для контейнеров секций */
+.section-container {
+    margin-bottom: 2rem; /* Отступ между основными секциями */
+}
+
+/* Отступы между компонентами страницы */
+.page-section:not(:last-child) {
+    margin-bottom: 2rem;
+}
+
+/* Улучшение отступов в рядах и контейнерах */
+.row {
+    margin-bottom: 1rem; /* Добавляем отступы между рядами */
+}
+
+.row.g-4 {
+    margin-bottom: 0; /* Отменяем отступ если используется grid gap */
+}
+
+/* Отступы внутри контейнера контента */
+.content-wrapper {
+    padding-bottom: 2rem; /* Отступ снизу перед футером */
+}
+
+/* Отступы внутри карточек для улучшения читаемости */
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Отступы в формах */
+form .mb-3:last-child {
+    margin-bottom: 0 !important; /* Убираем лишний отступ у последнего элемента формы */
+}
+
+/* Отступы для секций на страницах профиля */
+.profile-section + .profile-section {
+    margin-top: 2rem;
+}
+
+/* Различные элементы управления должны иметь отступы */
+.form-group:not(:last-child),
+.input-group:not(:last-child) {
+    margin-bottom: 1.25rem;
+}
+
+/* Отступы для заголовков секций */
+.section-title {
+    margin-bottom: 1.5rem;
+}
+/* Стили для контейнера предпросмотра с эмуляцией устройств */
+.certificate-preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Рамка для имитации различных устройств */
+.certificate-preview-wrapper {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для различных устройств */
+.certificate-preview-container[data-current-device="desktop"] .certificate-preview-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.certificate-preview-container[data-current-device="tablet"] .certificate-preview-wrapper {
+    width: 768px;
+    height: 1024px;
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 20px;
+    border: 12px solid #e2e2e2;
+    padding: 0;
+}
+
+.certificate-preview-container[data-current-device="mobile"] .certificate-preview-wrapper {
+    width: 375px;
+    height: 667px;
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: 36px;
+    border: 16px solid #e2e2e2;
+    padding: 0;
+}
+
+/* Класс для повернутого отображения (landscape) */
+.certificate-preview-container.landscape[data-current-device="tablet"] .certificate-preview-wrapper {
+    width: 1024px;
+    height: 768px;
+}
+
+.certificate-preview-container.landscape[data-current-device="mobile"] .certificate-preview-wrapper {
+    width: 667px;
+    height: 375px;
+}
+
+.certificate-preview {
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    transition: transform 0.3s;
+    overflow: auto;
+}
+
+.h-100 {
+    height: 100%;
+}
+
+/* Стили для кнопок переключения устройств */
+.device-toggle .btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+/* Стили для подсказок о плейсхолдерах */
+.template-hint {
+    margin-top: 5px;
+    font-size: 80%;
+    color: #6c757d;
+}
+
+.template-hint code {
+    padding: 2px 4px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    color: #d63384;
+}
+
+/* Выделение плейсхолдеров в предпросмотре для наглядности */
+.certificate-preview .placeholder-highlight {
+    background-color: rgba(13, 110, 253, 0.1);
+    border: 1px dashed #0d6efd;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+iframe#certificatePreview {
+    min-height: 700px;
+}
+
+/* Стили для админ-панели */
+.main-content {
+    /* padding-bottom: 30px; */
+}
+
+/* Фиксированная ширина для таблиц и лучшая адаптивность */
+.table th {
+    white-space: nowrap;
+}
+
+.table-responsive {
+    min-height: 300px;
+}
+
+/* Улучшения для мобильной версии */
+@media (max-width: 767.98px) {
+    .container-fluid {
+        /* padding-left: 15px; */
+        /* padding-right: 15px; */
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Уведомления в админке */
+.alert-custom {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1050;
+    min-width: 300px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Улучшенные стили для сворачивания/разворачивания бокового меню */
+#sidebarToggleBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+#sidebarToggleBtn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#sidebarToggleBtn:active {
+    transform: scale(0.95);
+}
+
+/* Улучшаем отзывчивость на мобильных устройствах */
+@media (max-width: 991.98px) {
+    .offcanvas-lg {
+        max-width: 280px;
+    }
+    
+    #sidebarToggleBtn {
+        display: none !important;
+    }
+}
+
+/* Фикс для отображения в Firefox и Safari */
+@supports (-moz-appearance:none) {
+    .sidebar-collapsed aside {
+        min-width: var(--sidebar-collapsed-width);
+    }
+}
+
+@supports (-webkit-appearance:none) {
+    .sidebar-collapsed aside {
+        min-width: var(--sidebar-collapsed-width);
+    }
+}
+
+.card-img, .card-img-bottom, .card-img-top {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}.avatar-wrapper.rounded-circle {
+    height: 50px;
+    width: 50px;
+}
