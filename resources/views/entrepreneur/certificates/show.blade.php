@@ -34,6 +34,9 @@
                             </li>
                         </ul>
                     </div>
+                    <a href="{{ route('entrepreneur.certificates.print', $certificate) }}" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-print me-2"></i>Печать сертификата
+                    </a>
                     @endif
                 </div>
             </div>
@@ -123,8 +126,10 @@
                                               'valid_until' => $certificate->valid_until->format('d.m.Y'),
                                               'message' => $certificate->message ?? '',
                                               'certificate_number' => $certificate->certificate_number,
-                                              'company_name' => Auth::user()->company ?? config('app.name')]) }}" 
-                class="certificate-preview" width="100%" height="400" frameborder="0"></iframe>
+                                              'company_name' => Auth::user()->company ?? config('app.name')
+                                              // Не передаем логотип в URL
+                                              ]) }}" 
+                id="certificate-preview" class="certificate-preview" width="100%" height="400" frameborder="0"></iframe>
                             </div>
                             
                             <!-- QR-код сертификата -->
@@ -218,7 +223,30 @@
 </div>
 
 <style>
+/* Стили для скрытия бокового меню на этой странице */
+aside, .sidebar-nav, .navbar-toggler {
+    display: none !important;
+}
 
+/* Расширяем main-контент на всю ширину */
+.main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Дополнительные стили для лучшего вида на полном экране */
+.container-fluid {
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Улучшенные стили для навигационной панели без бокового меню */
+.navbar {
+    width: 100% !important;
+}
 </style>
 
 <script>
@@ -306,5 +334,52 @@ function copyPublicUrl() {
         alert('Ссылка скопирована в буфер обмена!');
     });
 }
+
+// Добавляем скрипт для поддержки логотипа после загрузки окна
+document.addEventListener('DOMContentLoaded', function() {
+    const previewFrame = document.getElementById('certificate-preview');
+    if(previewFrame) {
+        // Используем логотип из объекта сертификата или 'none' если логотип не указан
+        const logoUrl = '{{ $certificate->company_logo === null ? "none" : ($certificate->company_logo ? asset("storage/" . $certificate->company_logo) : ($certificate->user->company_logo ? asset("storage/" . $certificate->user->company_logo) : asset("images/default-logo.png"))) }}';
+        
+        // Функция для отправки логотипа в iframe
+        function sendLogoToIframe() {
+            try {
+                console.log("Отправка логотипа через postMessage:", logoUrl);
+                previewFrame.contentWindow.postMessage({
+                    type: 'update_logo',
+                    logo_url: logoUrl
+                }, '*');
+            } catch (error) {
+                console.error("Ошибка при отправке логотипа:", error);
+            }
+        }
+        
+        // Отправляем логотип после загрузки iframe
+        previewFrame.addEventListener('load', function() {
+            console.log("iframe загружен, начинаем отправку логотипа");
+            // Отправляем с небольшой задержкой
+            setTimeout(sendLogoToIframe, 500);
+            
+            // И повторно через секунду для надежности
+            setTimeout(sendLogoToIframe, 1500);
+            
+            // Добавляем еще одну попытку через 2.5 секунды для большей надежности
+            setTimeout(sendLogoToIframe, 2500);
+        });
+        
+        // Для случаев когда iframe уже загружен к моменту выполнения скрипта
+        if (previewFrame.complete) {
+            sendLogoToIframe();
+        }
+        
+        // Слушаем сообщения от iframe для подтверждения обновления
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'logo_updated') {
+                console.log("Получен ответ об обновлении логотипа:", event.data);
+            }
+        });
+    }
+});
 </script>
 @endsection

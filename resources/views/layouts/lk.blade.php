@@ -15,6 +15,12 @@
     
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Select2 (добавляем глобально для всех страниц) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    @stack('styles')
     
     <!-- Scripts -->
     @vite(['resources/css/lk.css', 'resources/js/app.js'])
@@ -103,6 +109,12 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link {{ Route::is('admin.template-categories.*') ? 'active' : '' }}" href="{{ route('admin.template-categories.index') }}">
+                                            <i class="fa-solid fa-folder sidebar-icon"></i>
+                                            <span class="sidebar-text">Категории шаблонов</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link {{ Route::is('admin.certificates.*') ? 'active' : '' }}" href="{{ route('admin.certificates.index') }}">
                                             <i class="fa-solid fa-certificate sidebar-icon"></i>
                                             <span class="sidebar-text">Сертификаты</span>
@@ -176,6 +188,11 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Select2 (добавляем глобально) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/ru.js"></script>
     
     <!-- Скрипт для управления боковым меню -->
     <script>

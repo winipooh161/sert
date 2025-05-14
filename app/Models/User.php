@@ -28,7 +28,8 @@ class User extends Authenticatable
         'position',
         'bio',
         'avatar',
-        'notification_preferences'
+        'notification_preferences',
+        'company_logo', // Добавляем новое поле
     ];
 
     /**
@@ -96,5 +97,19 @@ class User extends Authenticatable
             }
         }
         return false;
+    }
+
+    /**
+     * Получить URL логотипа компании.
+     *
+     * @return string
+     */
+    public function getCompanyLogoUrlAttribute()
+    {
+        if ($this->company_logo) {
+            return asset('storage/' . $this->company_logo);
+        }
+        
+        return asset('images/default-logo.png');
     }
 }

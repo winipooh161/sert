@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CertificateTemplate;
+use App\Models\TemplateCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TemplatesController extends Controller
 {
@@ -32,7 +34,15 @@ class TemplatesController extends Controller
      */
     public function create()
     {
-        return view('admin.templates.create');
+        // Получаем список категорий шаблонов
+        $categories = TemplateCategory::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+            
+        // Получаем список доступных файлов шаблонов
+        $templateFiles = $this->getAvailableTemplateFiles();
+        
+        return view('admin.templates.create', compact('templateFiles', 'categories'));
     }
 
     /**
@@ -40,22 +50,46 @@ class TemplatesController extends Controller
      */
     public function store(Request $request)
     {
+        // Добавляем отладочную информацию (можно убрать после отладки)
+        Log::info('Template store request data:', $request->all());
+        
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category_id' => ['required', 'exists:template_categories,id'],
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'html_template' => ['required', 'string'],
-            'is_premium' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'max:7168'],
+            'template_path' => ['required', 'string'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         try {
+            // Проверяем, существует ли директория сохранения изображений
+            $templateImagePath = storage_path('app/public/templates');
+            if (!is_dir($templateImagePath)) {
+                if (!mkdir($templateImagePath, 0755, true)) {
+                    throw new \Exception('Не удалось создать директорию для сохранения изображений');
+                }
+            }
+
+            // Получаем содержимое HTML файла для поля html_template
+            $templatePath = public_path($validatedData['template_path']);
+            $htmlTemplate = '';
+            
+            if (file_exists($templatePath)) {
+                $htmlTemplate = file_get_contents($templatePath);
+            } else {
+                throw new \Exception('Файл шаблона не найден: ' . $validatedData['template_path']);
+            }
+
             $data = [
                 'name' => $validatedData['name'],
+                'category_id' => $validatedData['category_id'],
                 'description' => $validatedData['description'] ?? null,
-                'html_template' => $validatedData['html_template'],
-                'is_premium' => $request->has('is_premium') ? 1 : 0,
-                'is_active' => $request->has('is_active') ? 1 : 0,
+                'template_path' => $validatedData['template_path'],
+                'html_template' => $htmlTemplate, // Добавляем содержимое HTML файла
+                'is_premium' => $request->has('is_premium'),
+                'is_active' => $request->has('is_active'),
+                'sort_order' => $validatedData['sort_order'] ?? 0,
             ];
             
             if ($request->hasFile('image')) {
@@ -63,7 +97,11 @@ class TemplatesController extends Controller
                 $data['image'] = $path;
             }
 
-            CertificateTemplate::create($data);
+            $template = CertificateTemplate::create($data);
+            
+            if (!$template) {
+                throw new \Exception('Не удалось сохранить шаблон в базе данных');
+            }
 
             return redirect()->route('admin.templates.index')
                 ->with('success', 'Шаблон сертификата успешно создан.');
@@ -78,7 +116,15 @@ class TemplatesController extends Controller
      */
     public function edit(CertificateTemplate $template)
     {
-        return view('admin.templates.edit', compact('template'));
+        // Получаем список категорий шаблонов
+        $categories = TemplateCategory::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+            
+        // Получаем список доступных файлов шаблонов с поддержкой категорий
+        $templateFiles = $this->getAvailableTemplateFiles();
+        
+        return view('admin.templates.edit', compact('template', 'templateFiles', 'categories'));
     }
 
     /**
@@ -88,21 +134,41 @@ class TemplatesController extends Controller
     {
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category_id' => ['required', 'exists:template_categories,id'],
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'html_template' => ['required', 'string'],
-            'is_premium' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'max:7168'],
+            'template_path' => ['required', 'string'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         try {
+            // Логируем полученные данные для отладки
+            Log::info('Template update request data:', $request->all());
+
+            // Получаем содержимое HTML файла для поля html_template
+            $templatePath = public_path($validatedData['template_path']);
+            $htmlTemplate = '';
+            
+            if (file_exists($templatePath)) {
+                $htmlTemplate = file_get_contents($templatePath);
+            } else {
+                throw new \Exception('Файл шаблона не найден: ' . $validatedData['template_path']);
+            }
+
+            // Подготовка данных для обновления
             $data = [
                 'name' => $validatedData['name'],
+                'category_id' => $validatedData['category_id'],
                 'description' => $validatedData['description'] ?? null,
-                'html_template' => $validatedData['html_template'],
+                'template_path' => $validatedData['template_path'],
+                'html_template' => $htmlTemplate,
                 'is_premium' => $request->has('is_premium') ? 1 : 0,
                 'is_active' => $request->has('is_active') ? 1 : 0,
+                'sort_order' => $validatedData['sort_order'] ?? 0,
             ];
+            
+            // Логируем данные после обработки
+            Log::info('Template update processed data:', $data);
             
             if ($request->hasFile('image')) {
                 if ($template->image) {
@@ -113,12 +179,32 @@ class TemplatesController extends Controller
                 $data['image'] = $path;
             }
 
-            $template->update($data);
+            // Явное обновление каждого поля для надежности
+            $template->name = $data['name'];
+            $template->category_id = $data['category_id'];
+            $template->description = $data['description'];
+            $template->template_path = $data['template_path'];
+            $template->html_template = $data['html_template'];
+            $template->is_premium = $data['is_premium'];
+            $template->is_active = $data['is_active'];
+            $template->sort_order = $data['sort_order'];
+            
+            if (isset($data['image'])) {
+                $template->image = $data['image'];
+            }
+            
+            $template->save();
+            
+            // Логируем результат обновления
+            Log::info('Template updated successfully. ID: ' . $template->id);
 
             return redirect()->route('admin.templates.index')
                 ->with('success', 'Шаблон сертификата успешно обновлен.');
         } catch (\Exception $e) {
-            Log::error('Error updating certificate template: ' . $e->getMessage());
+            Log::error('Error updating certificate template: ' . $e->getMessage(), [
+                'template_id' => $template->id,
+                'exception' => $e
+            ]);
             return back()->withInput()->with('error', 'Произошла ошибка при обновлении шаблона: ' . $e->getMessage());
         }
     }
@@ -153,5 +239,38 @@ class TemplatesController extends Controller
         
         return redirect()->route('admin.templates.index')
             ->with('success', 'Шаблон сертификата успешно удален.');
+    }
+
+    /**
+     * Получить список доступных файлов шаблонов с поддержкой категорий
+     */
+    private function getAvailableTemplateFiles()
+    {
+        // Получаем все категории из базы данных
+        $categories = TemplateCategory::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+        
+        $files = [];
+        
+        foreach ($categories as $category) {
+            $categoryPath = public_path('templates/' . $category->directory_name);
+            
+            if (is_dir($categoryPath)) {
+                $htmlFiles = glob($categoryPath . '/*.html');
+                
+                foreach ($htmlFiles as $file) {
+                    $relativePath = 'templates/' . $category->directory_name . '/' . basename($file);
+                    $name = basename($file, '.html');
+                    $name = Str::title(str_replace('-', ' ', $name));
+                    $files[$category->id][$relativePath] = $name;
+                }
+            }
+        }
+        
+        return [
+            'files' => $files,
+            'categories' => $categories
+        ];
     }
 }

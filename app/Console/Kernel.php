@@ -13,6 +13,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        
+        // Запуск очистки временных логотипов каждый день в полночь
+        $schedule->command('temp:clear-logos')->daily();
     }
 
     /**
@@ -24,4 +27,15 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+    
+    /**
+     * Массив команд, регистрируемых вручную.
+     *
+     * @var array
+     */
+    protected $commands = [
+        \App\Console\Commands\MigrateTemplates::class,
+        \App\Console\Commands\SeedTemplateCategories::class,
+        \App\Console\Commands\ClearTempLogos::class,
+    ];
 }

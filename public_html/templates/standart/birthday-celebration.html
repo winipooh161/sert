@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebration Gift Card</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f6ff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .certificate {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #fff6f2 0%, #fff2fb 100%);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(255, 112, 188, 0.15);
+            overflow: hidden;
+        }
+        
+        .celebration-pattern {
+            position: absolute;
+            z-index: 0;
+        }
+        
+        .pattern-top-right {
+            top: -30px;
+            right: -30px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(255, 112, 188, 0.2) 0%, rgba(255, 112, 188, 0) 70%);
+            border-radius: 50%;
+        }
+        
+        .pattern-bottom-left {
+            bottom: -30px;
+            left: -30px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(255, 188, 112, 0.2) 0%, rgba(255, 188, 112, 0) 70%);
+            border-radius: 50%;
+        }
+        
+        .certificate-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            border: 2px dashed #ffb8e0;
+            margin: 15px;
+            border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+        }
+        
+        .certificate-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: -1;
+            background: linear-gradient(45deg, #ff70bc, #ffb870, #ff70bc, #ffb870);
+            background-size: 400% 400%;
+            opacity: 0.1;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%}
+            50% {background-position: 100% 50%}
+            100% {background-position: 0% 50%}
+        }
+        
+        .certificate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #ffb8e0;
+        }
+        
+        .certificate-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff70bc;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .company-logo {
+            max-height: 60px;
+            max-width: 150px;
+            object-fit: contain;
+        }
+        
+        .certificate-content {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .pre-recipient-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .recipient-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #ff70bc;
+            margin-bottom: 25px;
+        }
+        
+        .certificate-amount {
+            font-family: 'Poppins', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: #ff70bc;
+            margin: 25px 0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .certificate-amount:before, .certificate-amount:after {
+            content: "★";
+            display: inline-block;
+            color: #ffb870;
+            font-size: 24px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .certificate-amount:before {
+            left: -30px;
+        }
+        
+        .certificate-amount:after {
+            right: -30px;
+        }
+        
+        .message-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #555;
+            margin: 25px 0;
+            padding: 0 40px;
+        }
+        
+        .certificate-validity {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        
+        .validity-item {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(255, 112, 188, 0.1);
+        }
+        
+        .validity-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .date-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff70bc;
+        }
+        
+        .certificate-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ffb8e0;
+        }
+        
+        .certificate-number {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .certificate-qr {
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .qr-image {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .company-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff70bc;
+            margin-bottom: 5px;
+        }
+        
+        .signature-label {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        @media (max-width: 768px) {
+            .certificate-wrapper {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            .certificate-title {
+                font-size: 24px;
+            }
+            
+            .company-logo {
+                max-height: 50px;
+            }
+            
+            .recipient-name {
+                font-size: 28px;
+            }
+            
+            .certificate-amount {
+                font-size: 34px;
+            }
+            
+            .message-text {
+                font-size: 16px;
+                padding: 0 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .certificate-wrapper {
+                padding: 20px 15px;
+                margin: 5px;
+            }
+            
+            .certificate-header {
+                flex-direction: column;
+                margin-bottom: 20px;
+                gap: 15px;
+            }
+            
+            .certificate-title {
+                font-size: 20px;
+            }
+            
+            .recipient-name {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            
+            .certificate-amount {
+                font-size: 28px;
+            }
+            
+            .message-text {
+                font-size: 15px !important;
+                padding: 0;
+            }
+            
+            .certificate-number, .date-text {
+                font-size: 13px !important;
+            }
+            
+            .certificate-validity {
+                display: flex;
+                gap: 20px;
+                flex-direction: column;
+            }
+            
+            .certificate-footer {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .certificate-qr {
+                margin-left: 0;
+                text-align: left;
+            }
+            
+            .company-logo {
+                max-height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="celebration-pattern pattern-top-right"></div>
+        <div class="celebration-pattern pattern-bottom-left"></div>
+        
+        <div class="certificate-wrapper">
+            <div class="certificate-border"></div>
+            
+            <div class="certificate-header">
+                <h1 class="certificate-title">{company_name}</h1>
+                <img src="{company_logo}" alt="Логотип компании" class="company-logo">
+            </div>
+            
+            <div class="certificate-content">
+                <div class="pre-recipient-text">Праздничный сертификат для</div>
+                <div class="recipient-name">{recipient_name}</div>
+                
+                <div class="certificate-amount">{amount}</div>
+                
+                <div class="message-text">{message}</div>
+                
+                <div class="certificate-validity">
+                    <div class="validity-item">
+                        <div class="validity-label">Действителен с</div>
+                        <div class="date-text">{valid_from}</div>
+                    </div>
+                    <div class="validity-item">
+                        <div class="validity-label">Действителен до</div>
+                        <div class="date-text">{valid_until}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="certificate-footer">
+                <div class="certificate-company">
+                    <div class="company-name">{company_name}</div>
+                    <div class="signature-label">Подпись</div>
+                </div>
+                
+                <div class="certificate-number">№ {certificate_number}</div>
+                
+              
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Обработчик для динамической загрузки логотипа через postMessage
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'update_logo') {
+                const logoUrl = event.data.logo_url;
+                const logoImages = document.querySelectorAll('.company-logo');
+                
+                logoImages.forEach(img => {
+                    if (logoUrl === 'none') {
+                        img.style.display = 'none';
+                    } else {
+                        img.src = logoUrl;
+                        img.style.display = 'block';
+                    }
+                });
+                
+                // Отправляем подтверждение обратно
+                if (event.source) {
+                    event.source.postMessage({
+                        type: 'logo_updated',
+                        success: true
+                    }, '*');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

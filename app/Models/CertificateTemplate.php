@@ -16,12 +16,15 @@ class CertificateTemplate extends Model
      */
     protected $fillable = [
         'name', 
-        'description', 
+        'description',
+        'category_id', 
         'image', 
-        'html_template', 
+        'template_path',  // Путь к HTML файлу шаблона
+        'html_template',  // Добавляем поле для хранения HTML-контента шаблона
         'is_premium',
         'is_active',
-        'fields'
+        'fields',
+        'sort_order'
     ];
 
     /**
@@ -33,7 +36,16 @@ class CertificateTemplate extends Model
         'fields' => 'array',
         'is_premium' => 'boolean',
         'is_active' => 'boolean',
+        'sort_order' => 'integer',
     ];
+
+    /**
+     * Категория шаблона
+     */
+    public function category()
+    {
+        return $this->belongsTo(TemplateCategory::class, 'category_id');
+    }
 
     /**
      * Аксессор для получения URL изображения.
@@ -50,10 +62,34 @@ class CertificateTemplate extends Model
     }
 
     /**
+     * Аксессор для получения полного пути к файлу шаблона
+     *
+     * @return string
+     */
+    public function getTemplateFilePathAttribute()
+    {
+        return public_path($this->template_path);
+    }
+
+    /**
+     * Аксессор для получения HTML содержимого шаблона
+     *
+     * @return string
+     */
+    public function getHtmlTemplateAttribute()
+    {
+        if (file_exists($this->template_file_path)) {
+            return file_get_contents($this->template_file_path);
+        }
+        
+        return '<div class="alert alert-danger">Шаблон не найден</div>';
+    }
+
+    /**
      * Связь с сертификатами.
      */
     public function certificates()
     {
-        return $this->hasMany(Certificate::class, 'template_id');
+        return $this->hasMany(Certificate::class, 'certificate_template_id');
     }
 }

@@ -34,6 +34,22 @@
                         </div>
                         
                         <div class="mb-3">
+                            <label for="category_id" class="form-label">Категория шаблона *</label>
+                            <select class="form-select @error('category_id') is-invalid @enderror" 
+                                id="category_id" name="category_id" required>
+                                <option value="">-- Выберите категорию --</option>
+                                @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id', $template->category_id) == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        
+                        <div class="mb-3">
                             <label for="description" class="form-label">Описание</label>
                             <textarea class="form-control @error('description') is-invalid @enderror" 
                                 id="description" name="description" rows="3">{{ old('description', $template->description) }}</textarea>
@@ -53,7 +69,7 @@
                             
                             <input type="file" class="form-control @error('image') is-invalid @enderror" 
                                 id="image" name="image" accept="image/*">
-                            <div class="form-text">Оставьте пустым, чтобы сохранить текущее изображение. Рекомендуемый размер: 800x600px, максимум 2MB.</div>
+                            <div class="form-text">Оставьте пустым, чтобы сохранить текущее изображение. Рекомендуемый размер: 800x600px, максимум 7MB.</div>
                             @error('image')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -61,7 +77,7 @@
                         
                         <div class="mb-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_premium" name="is_premium" 
+                                <input class="form-check-input" type="checkbox" id="is_premium" name="is_premium" value="1" 
                                     {{ old('is_premium', $template->is_premium) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_premium">Премиум шаблон</label>
                             </div>
@@ -70,7 +86,7 @@
                         
                         <div class="mb-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" 
                                     {{ old('is_active', $template->is_active) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_active">Активен</label>
                             </div>
@@ -78,69 +94,63 @@
                         </div>
                     </div>
                     
-                    <!-- HTML шаблон и поля -->
+                    <!-- Выбор HTML файла шаблона -->
                     <div class="col-md-6">
-                        <h4 class="mb-3">Шаблон HTML</h4>
+                        <h4 class="mb-3">Файл шаблона</h4>
                         
                         <div class="mb-3">
-                            <label for="html_template" class="form-label">HTML код шаблона *</label>
-                            <textarea class="form-control @error('html_template') is-invalid @enderror" 
-                                id="html_template" name="html_template" rows="10" required>{{ old('html_template', $template->html_template) }}</textarea>
-                            <div class="form-text">
-                                Используйте переменные в формате {имя_переменной} для динамических данных.
-                                Например: {recipient_name}, {amount}, {certificate_number}
-                            </div>
-                            @error('html_template')
+                            <label for="template_path" class="form-label">Выберите HTML файл шаблона *</label>
+                            <select class="form-select select2-template-picker @error('template_path') is-invalid @enderror" 
+                                id="template_path" name="template_path" required
+                                data-placeholder="Поиск шаблона..." data-allow-clear="true">
+                                <option value="">-- Выберите файл шаблона --</option>
+                                @foreach($templateFiles['files'] as $categoryId => $files)
+                                    @php 
+                                        $category = $templateFiles['categories']->firstWhere('id', $categoryId);
+                                    @endphp
+                                    <optgroup label="{{ $category ? $category->name : 'Другие' }}" data-category="{{ $categoryId }}">
+                                    @foreach($files as $path => $name)
+                                        <option value="{{ $path }}" {{ old('template_path', $template->template_path) == $path ? 'selected' : '' }}
+                                                data-path="{{ $path }}"
+                                                data-category="{{ $categoryId }}">
+                                            {{ $name }} <small class="text-muted">({{ $path }})</small>
+                                        </option>
+                                    @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            @error('template_path')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <div class="form-text">
+                                HTML файлы шаблонов должны находиться в директории /public/templates/ или ее подпапках
+                            </div>
                         </div>
                         
-                        <h4 class="mb-3 mt-4">Настраиваемые поля</h4>
-                        <div id="fields-container">
-                            @if ($template->fields && count($template->fields) > 0)
-                                @foreach ($template->fields as $key => $field)
-                                    <div class="field-row mb-3">
-                                        <div class="input-group mb-2">
-                                            <span class="input-group-text">Поле</span>
-                                            <input type="text" class="form-control" name="fields[keys][]" value="{{ $key }}" placeholder="Имя поля">
-                                            <span class="input-group-text">Метка</span>
-                                            <input type="text" class="form-control" name="fields[labels][]" value="{{ $field['label'] ?? '' }}" placeholder="Метка поля">
-                                            <div class="input-group-text">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="fields[required][]" value="1" {{ isset($field['required']) && $field['required'] ? 'checked' : '' }}>
-                                                    <label class="form-check-label">Обязательное</label>
-                                                </div>
-                                            </div>
-                                            <button type="button" class="btn btn-outline-danger remove-field">
-                                                <i class="fa-solid fa-times"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                        <!-- Элементы быстрого фильтра по категориям -->
+                        <div class="mb-4 template-category-filters">
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <span class="badge bg-secondary category-filter-badge active" data-category="all">
+                                    <i class="fa-solid fa-filter me-1"></i>Все
+                                </span>
+                                @foreach($templateFiles['categories'] as $category)
+                                    <span class="badge bg-primary category-filter-badge" 
+                                          data-category="{{ $category->id }}"
+                                          {{ $template->category_id == $category->id ? 'class=active' : '' }}>
+                                        {{ $category->name }}
+                                    </span>
                                 @endforeach
-                            @else
-                                <div class="field-row mb-3">
-                                    <div class="input-group mb-2">
-                                        <span class="input-group-text">Поле</span>
-                                        <input type="text" class="form-control" name="fields[keys][]" placeholder="Имя поля, например: company_name">
-                                        <span class="input-group-text">Метка</span>
-                                        <input type="text" class="form-control" name="fields[labels][]" placeholder="Метка поля, например: Название компании">
-                                        <div class="input-group-text">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="fields[required][]" value="1">
-                                                <label class="form-check-label">Обязательное</label>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-danger remove-field">
-                                            <i class="fa-solid fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            @endif
+                            </div>
                         </div>
                         
-                        <button type="button" class="btn btn-outline-primary mb-4" id="add-field">
-                            <i class="fa-solid fa-plus me-1"></i> Добавить поле
-                        </button>
+                        <!-- Предпросмотр шаблона -->
+                        <div class="mt-4">
+                            <h5>Предпросмотр выбранного шаблона</h5>
+                            <div class="template-preview border rounded overflow-hidden mt-2 mb-4">
+                                <iframe id="template-preview-frame" src="{{ asset($template->template_path) }}" frameborder="0" 
+                                    style="width:100%; height:300px;"></iframe>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -175,41 +185,41 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Добавление нового поля
-    document.getElementById('add-field').addEventListener('click', function() {
-        const fieldsContainer = document.getElementById('fields-container');
-        const fieldRow = document.querySelector('.field-row').cloneNode(true);
+    const categorySelect = document.getElementById('category_id');
+    const templatePathSelect = document.getElementById('template_path');
+    const previewFrame = document.getElementById('template-preview-frame');
+    
+    // Фильтрация шаблонов по категории
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        const optgroups = templatePathSelect.querySelectorAll('optgroup');
         
-        // Очистка введенных значений
-        fieldRow.querySelectorAll('input[type="text"]').forEach(input => {
-            input.value = '';
-        });
-        fieldRow.querySelector('input[type="checkbox"]').checked = false;
-        
-        // Добавление обработчика на кнопку удаления
-        fieldRow.querySelector('.remove-field').addEventListener('click', function() {
-            const fieldRows = document.querySelectorAll('.field-row');
-            if (fieldRows.length > 1) {
-                this.closest('.field-row').remove();
+        optgroups.forEach(group => {
+            const category = group.getAttribute('data-category');
+            if (category === selectedCategory) {
+                group.style.display = '';
+                // Сбрасываем текущий выбор
+                templatePathSelect.value = '';
+                updatePreviewVisibility();
             } else {
-                alert('Должно остаться минимум одно поле');
+                group.style.display = 'none';
             }
         });
-        
-        fieldsContainer.appendChild(fieldRow);
     });
     
-    // Обработчики для кнопок удаления уже существующих полей
-    document.querySelectorAll('.remove-field').forEach(button => {
-        button.addEventListener('click', function() {
-            const fieldRows = document.querySelectorAll('.field-row');
-            if (fieldRows.length > 1) {
-                this.closest('.field-row').remove();
-            } else {
-                alert('Должно остаться минимум одно поле');
-            }
-        });
+    // Обработчик изменения выбранного шаблона
+    templatePathSelect.addEventListener('change', function() {
+        const templatePath = this.value;
+        
+        if (templatePath) {
+            previewFrame.src = `/${templatePath}`;
+        }
     });
+    
+    // Если категория уже выбрана, фильтруем шаблоны
+    if (categorySelect.value) {
+        categorySelect.dispatchEvent(new Event('change'));
+    }
 });
 
 function confirmTemplateDeletion() {
@@ -218,4 +228,199 @@ function confirmTemplateDeletion() {
     }
 }
 </script>
+
+<!-- Добавляем CSS для Select2 -->
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    /* Кастомные стили для Select2 */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 0.375rem;
+        padding: 0.25rem 0.5rem;
+        border-color: #dee2e6;
+    }
+    
+    .select2-container--bootstrap-5 .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__option--highlighted {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+    
+    .select2-container--bootstrap-5 .select2-results__option {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .select2-container--bootstrap-5 .select2-results__option:last-child {
+        border-bottom: none;
+    }
+    
+    .select2-container--bootstrap-5 .select2-results__option small {
+        opacity: 0.7;
+        font-size: 0.85em;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Стили для бейджей категорий */
+    .category-filter-badge {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.7;
+    }
+    
+    .category-filter-badge:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+    
+    .category-filter-badge.active {
+        opacity: 1;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    /* Делаем шрифт меньше для длинных путей */
+    .template-path-item {
+        font-size: 0.85em;
+        color: #6c757d;
+    }
+</style>
+@endpush
+
+<!-- Добавляем JavaScript для Select2 и нашей кастомной логики -->
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/ru.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация Select2 с улучшенным UI и поиском
+    $('.select2-template-picker').select2({
+        theme: 'bootstrap-5',
+        language: 'ru',
+        width: '100%',
+        placeholder: 'Поиск шаблона...',
+        allowClear: true,
+        templateResult: formatTemplateResult,
+        templateSelection: formatTemplateSelection,
+        escapeMarkup: function(m) { return m; }
+    });
+    
+    // Функция форматирования опций в выпадающем списке
+    function formatTemplateResult(template) {
+        if (!template.id) return template.text;
+        
+        const path = $(template.element).data('path') || '';
+        const pathParts = path.split('/');
+        const fileName = pathParts.pop() || '';
+        const directory = pathParts.join('/');
+        
+        return `<div class="d-flex flex-column">
+                    <strong>${template.text}</strong>
+                    <span class="template-path-item">${directory}/${fileName}</span>
+                </div>`;
+    }
+    
+    // Функция форматирования выбранного элемента
+    function formatTemplateSelection(template) {
+        if (!template.id) return template.text;
+        return `<span>${template.text}</span>`;
+    }
+    
+    // Логика для предпросмотра шаблона и фильтрации по категориям
+    const categorySelect = document.getElementById('category_id');
+    const templatePathSelect = document.getElementById('template_path');
+    const previewFrame = document.getElementById('template-preview-frame');
+    
+    // Обновляем предпросмотр при изменении выбранного шаблона через Select2
+    $('.select2-template-picker').on('change', function() {
+        const templatePath = $(this).val();
+        
+        if (templatePath) {
+            previewFrame.src = `/${templatePath}`;
+        }
+    });
+    
+    // Фильтрация шаблонов по категории
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        const optgroups = templatePathSelect.querySelectorAll('optgroup');
+        
+        optgroups.forEach(group => {
+            const category = group.getAttribute('data-category');
+            if (category === selectedCategory) {
+                group.style.display = '';
+                // Сбрасываем текущий выбор
+                templatePathSelect.value = '';
+                
+                // Обновляем Select2
+                $('.select2-template-picker').val('').trigger('change');
+            } else {
+                group.style.display = 'none';
+            }
+        });
+    });
+    
+    // Обработчик для бейджей быстрой фильтрации по категориям
+    const categoryBadges = document.querySelectorAll('.category-filter-badge');
+    categoryBadges.forEach(badge => {
+        badge.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-category');
+            
+            // Обновляем активный статус бейджей
+            categoryBadges.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Если выбраны "Все категории"
+            if (categoryId === 'all') {
+                // Показываем все группы
+                const allOptgroups = templatePathSelect.querySelectorAll('optgroup');
+                allOptgroups.forEach(group => {
+                    $(group).prop('disabled', false);
+                });
+            } else {
+                // Скрываем ненужные группы и показываем только выбранную категорию
+                const allOptgroups = templatePathSelect.querySelectorAll('optgroup');
+                allOptgroups.forEach(group => {
+                    const groupCategory = group.getAttribute('data-category');
+                    if (groupCategory === categoryId) {
+                        $(group).prop('disabled', false);
+                        
+                        // По возможности, выбираем первый шаблон из этой категории
+                        const firstOption = group.querySelector('option');
+                        if (firstOption) {
+                            $('.select2-template-picker').val(firstOption.value).trigger('change');
+                        }
+                    } else {
+                        $(group).prop('disabled', true);
+                    }
+                });
+            }
+            
+            // Обновляем Select2 после фильтрации
+            $('.select2-template-picker').select2('destroy').select2({
+                theme: 'bootstrap-5',
+                language: 'ru',
+                width: '100%',
+                placeholder: 'Поиск шаблона...',
+                allowClear: true,
+                templateResult: formatTemplateResult,
+                templateSelection: formatTemplateSelection,
+                escapeMarkup: function(m) { return m; }
+            });
+        });
+    });
+    
+    // Если категория уже выбрана, фильтруем шаблоны
+    if (categorySelect.value) {
+        categorySelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+@endpush
 @endsection

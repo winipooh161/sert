@@ -4,10 +4,10 @@
 <div class="certificate-editor">
     <div class="editor-header">
         <div class="container">
-            <div class="d-flex align-items-center justify-content-between py-3">
-                <h1 class="h4 fw-bold mb-0">Создание сертификата</h1>
+            <div class="d-flex align-items-center justify-content-between py-2 py-sm-3">
+                <h1 class="h4 h5-sm fw-bold mb-0">Создание сертификата</h1>
                 <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Вернуться к шаблонам
+                    <i class="fa-solid fa-arrow-left me-1 me-sm-2"></i><span class="d-none d-sm-inline">Вернуться к шаблонам</span>
                 </a>
             </div>
         </div>
@@ -16,33 +16,33 @@
     <div class="editor-body">
         <div class="container">
             <div class="row">
-                <!-- Форма редактирования сертификата -->
-                <div class="col-lg-2">
+                <!-- Форма редактирования сертификата - колонка будет полной шириной на мобильных -->
+                <div class="col-lg-3 order-2 order-lg-1 mt-3 mt-lg-0">
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-header bg-transparent border-0 pt-3">
-                            <h5 class="fw-bold mb-0">Параметры сертификата</h5>
+                            <h5 class="fw-bold mb-0 fs-6">Параметры сертификата</h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="{{ route('entrepreneur.certificates.store', $template) }}" id="certificateForm">
+                            <form method="POST" action="{{ route('entrepreneur.certificates.store', $template) }}" id="certificateForm" enctype="multipart/form-data">
                                 @csrf
                                 
                                 <!-- Информация о шаблоне -->
-                                <div class="d-flex align-items-center mb-3">
+                                <div class="d-flex align-items-center mb-2 mb-sm-3">
                                     <div>
                                         <h6 class="mb-0">{{ $template->name }}</h6>
                                      
                                     </div>
                                 </div>
                                 
-                                <hr class="mb-3">
+                                <hr class="my-2">
                                 
                                 <!-- Основные параметры сертификата -->
-                                <div class="mb-3">
-                                    <label for="amount" class="form-label">Номинал сертификата</label>
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="amount" class="form-label small">Номинал сертификата</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control @error('amount') is-invalid @enderror" 
+                                        <input type="number" class="form-control form-control-sm @error('amount') is-invalid @enderror" 
                                             id="amount" name="amount" value="{{ old('amount', 3000) }}" min="100" step="100" required>
-                                        <span class="input-group-text">₽</span>
+                                        <span class="input-group-text small">₽</span>
                                     </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -50,25 +50,25 @@
                                     
                                 </div>
                                 
-                                <div class="mb-3">
-                                    <label for="valid_until" class="form-label">Срок действия</label>
-                                    <input type="date" class="form-control @error('valid_until') is-invalid @enderror" 
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="valid_until" class="form-label small">Срок действия</label>
+                                    <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
                                         id="valid_until" name="valid_until" 
                                         value="{{ old('valid_until', now()->addMonths(3)->format('Y-m-d')) }}" 
                                         min="{{ now()->format('Y-m-d') }}" required>
                                     @error('valid_until')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <div class="form-text">Сертификат будет действителен до указанной даты</div>
+                                    <div class="form-text small">Сертификат будет действителен до указанной даты</div>
                                    
                                 </div>
                                 
                                 <input type="hidden" name="valid_from" id="valid_from" value="{{ now()->format('Y-m-d') }}">
                                 
                                 <!-- Информация о получателе -->
-                                <div class="mb-3">
-                                    <label for="recipient_name" class="form-label">Имя получателя</label>
-                                    <input type="text" class="form-control @error('recipient_name') is-invalid @enderror" 
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="recipient_name" class="form-label small">Имя получателя</label>
+                                    <input type="text" class="form-control form-control-sm @error('recipient_name') is-invalid @enderror" 
                                         id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" required>
                                     @error('recipient_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -76,33 +76,76 @@
                                    
                                 </div>
                                 
-                                <div class="mb-3">
-                                    <label for="recipient_email" class="form-label">Email получателя</label>
-                                    <input type="email" class="form-control @error('recipient_email') is-invalid @enderror" 
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="recipient_email" class="form-label small">Email получателя</label>
+                                    <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
                                         id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">
                                     @error('recipient_email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <div class="form-text">Необязательно. Для отправки сертификата по email</div>
+                                    <div class="form-text small">Необязательно. Для отправки сертификата по email</div>
                                 </div>
                                 
                                 <!-- Сообщение -->
-                                <div class="mb-3">
-                                    <label for="message" class="form-label">Сообщение или пожелание</label>
-                                    <textarea class="form-control @error('message') is-invalid @enderror" 
-                                        id="message" name="message" rows="3">{{ old('message') }}</textarea>
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="message" class="form-label small">Сообщение или пожелание</label>
+                                    <textarea class="form-control form-control-sm @error('message') is-invalid @enderror" 
+                                        id="message" name="message" rows="2">{{ old('message') }}</textarea>
                                     @error('message')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                    
                                 </div>
                                 
+                                <!-- Логотип компании -->
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="logo" class="form-label small">Логотип компании</label>
+                                    <div class="mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_default" value="default" checked>
+                                            <label class="form-check-label small" for="logo_default">
+                                                Использовать из профиля
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_custom" value="custom">
+                                            <label class="form-check-label small" for="logo_custom">
+                                                Загрузить новый
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_none" value="none">
+                                            <label class="form-check-label small" for="logo_none">
+                                                Не использовать логотип
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="default_logo_preview" class="mb-2 text-center p-2 border rounded">
+                                        <img src="{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}" 
+                                             class="img-thumbnail" style="max-height: 60px;" alt="Текущий логотип">
+                                        <div class="small text-muted mt-1 fs-7">Текущий логотип</div>
+                                    </div>
+                                    
+                                    <div id="custom_logo_container" class="d-none">
+                                        <input type="file" class="form-control form-control-sm @error('custom_logo') is-invalid @enderror" 
+                                            id="custom_logo" name="custom_logo" accept="image/*">
+                                        <div class="form-text small">Рекомендуемый размер: 300x100px, PNG или JPG</div>
+                                        
+                                        <div id="custom_logo_preview" class="mt-2 text-center"></div>
+                                    </div>
+                                    
+                                    @error('custom_logo')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
                                 <!-- Кнопки управления формой -->
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fa-solid fa-plus me-2"></i>Создать сертификат
+                                <div class="d-grid gap-1 gap-sm-2 mt-3">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fa-solid fa-plus me-1 me-sm-2"></i>Создать сертификат
                                     </button>
-                                    <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary">
+                                    <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary btn-sm">
                                         Отмена
                                     </a>
                                 </div>
@@ -111,13 +154,13 @@
                     </div>
                 </div>
                 
-                <!-- Визуальный предпросмотр сертификата -->
-                <div class="col-lg-10 mb-4 mb-lg-0">
+                <!-- Визуальный предпросмотр сертификата - колонка первая на мобильных -->
+                <div class="col-lg-9 order-1 order-lg-2">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-header bg-transparent border-0 pt-3 d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <h5 class="fw-bold mb-0 me-3">Предпросмотр сертификата</h5>
-                                <div class="badge bg-primary-subtle text-primary">Шаблон: {{ $template->name }}</div>
+                        <div class="card-header bg-transparent border-0 pt-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                            <div class="d-flex align-items-center mb-2 mb-sm-0">
+                                <h5 class="fw-bold mb-0 me-2 fs-6">Предпросмотр</h5>
+                                <span class="badge bg-primary-subtle text-primary small">{{ $template->name }}</span>
                             </div>
                             <div class="device-toggle btn-group" role="group">
                                 <button type="button" class="btn btn-sm btn-outline-secondary active" data-device="desktop">
@@ -131,32 +174,32 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="alert alert-info mb-3">
-                                <i class="fa-solid fa-info-circle me-2"></i>
-                                Это точная копия шаблона из базы данных. Введите данные слева, чтобы увидеть их в сертификате.
+                        <div class="card-body p-2 p-sm-3">
+                            <div class="alert alert-info mb-2 mb-sm-3 py-2 small">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Заполните форму слева, чтобы увидеть изменения в сертификате
                             </div>
                             <div class="certificate-preview-container" data-current-device="desktop">
                                 <div class="certificate-preview-wrapper device-frame">
-                                    <iframe id="certificatePreview" src="{{ route('template.preview', $template) }}" class="certificate-preview" frameborder="0"></iframe>
+                                    <iframe id="certificatePreview" src="{{ route('template.preview', $template) }}" class="certificate-preview" frameborder="0" loading="lazy"></iframe>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-0 pb-3 text-center">
-                            <div class="d-flex justify-content-center">
-                                <div class="btn-group me-3">
-                                    <button type="button" class="btn btn-primary" id="zoomInButton">
+                            <div class="btn-toolbar justify-content-center">
+                                <div class="btn-group me-2">
+                                    <button type="button" class="btn btn-sm btn-primary" id="zoomInButton">
                                         <i class="fa-solid fa-magnifying-glass-plus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary" id="zoomOutButton">
+                                    <button type="button" class="btn btn-sm btn-primary" id="zoomOutButton">
                                         <i class="fa-solid fa-magnifying-glass-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary" id="resetZoomButton">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetZoomButton">
                                         <i class="fa-solid fa-arrows-to-circle"></i>
                                     </button>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-secondary" id="rotateViewButton">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="rotateViewButton">
                                         <i class="fa-solid fa-rotate"></i>
                                     </button>
                                 </div>
@@ -193,16 +236,100 @@ aside, .sidebar-nav, .navbar-toggler {
 .certificate-editor {
     min-height: calc(100vh - 100px);
     background-color: #f8f9fa;
-    padding-bottom: 50px;
+    padding-bottom: 20px;
 }
 
 .editor-header {
     background-color: white;
     border-bottom: 1px solid #e9ecef;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 991.98px) {
+    .certificate-preview-container {
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .editor-body {
+        padding-bottom: 15px;
+    }
+    
+    .certificate-preview-wrapper {
+        max-height: 50vh !important;
+    }
+    
+    .certificate-preview-iframe {
+        height: 50vh !important;
+    }
+    
+    .fs-7 {
+        font-size: 0.8rem !important;
+    }
+    
+    .form-text {
+        margin-top: 0.15rem;
+        font-size: 0.7rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .form-control-sm, .form-select-sm {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .input-group-text.small {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .form-check-label.small {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Улучшенный стиль для мобильного iframe */
+@media (max-width: 575.98px) {
+    .certificate-preview-container {
+        min-height: 300px;
+    }
+    
+    .certificate-preview-wrapper {
+        max-height: 40vh !important;
+    }
+    
+    #certificatePreview {
+        min-height: auto !important;
+        height: 40vh !important;
+    }
+    
+    .device-toggle .btn {
+        padding: 0.2rem 0.4rem !important;
+    }
+}
+
+/* Фикс для iPhone SE и других маленьких устройств */
+@media (max-width: 375px) {
+    .container {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    
+    .card-body, .card-header, .card-footer {
+        padding: 0.5rem !important;
+    }
+    
+    .certificate-preview-container {
+        min-height: 250px;
+    }
+}
 </style>
 
 <script>
@@ -212,23 +339,109 @@ document.addEventListener('DOMContentLoaded', function() {
     const formInputs = document.querySelectorAll('#certificateForm input, #certificateForm textarea');
     const previewContainer = document.querySelector('.certificate-preview-container');
     let scale = 1;
+    let logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
     
-    // Функция обновления предпросмотра
+    // Переключение типа логотипа
+    const logoDefault = document.getElementById('logo_default');
+    const logoCustom = document.getElementById('logo_custom');
+    const logoNone = document.getElementById('logo_none');
+    const defaultLogoPreview = document.getElementById('default_logo_preview');
+    const customLogoContainer = document.getElementById('custom_logo_container');
+    const customLogoInput = document.getElementById('custom_logo');
+    const customLogoPreview = document.getElementById('custom_logo_preview');
+    
+    logoDefault.addEventListener('change', function() {
+        if (this.checked) {
+            defaultLogoPreview.classList.remove('d-none');
+            customLogoContainer.classList.add('d-none');
+            logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
+            console.log("Установлен логотип по умолчанию:", logoUrl);
+            updatePreview();
+        }
+    });
+    
+    logoCustom.addEventListener('change', function() {
+        if (this.checked) {
+            defaultLogoPreview.classList.add('d-none');
+            customLogoContainer.classList.remove('d-none');
+            // Если уже есть загруженный пользовательский логотип
+            if (customLogoPreview.querySelector('img')) {
+                logoUrl = customLogoPreview.querySelector('img').src;
+                console.log("Установлен пользовательский логотип:", logoUrl);
+                updatePreview();
+            }
+        }
+    });
+    
+    // Предпросмотр загруженного логотипа
+    customLogoInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const tempLogoUrl = e.target.result;
+                
+                customLogoPreview.innerHTML = `
+                    <img src="${tempLogoUrl}" class="img-thumbnail" style="max-height: 60px;" alt="Загруженный логотип">
+                    <div class="small text-muted mt-1">Новый логотип</div>
+                `;
+                
+                // Сразу обновляем логотип в предпросмотре с временным локальным URL
+                logoUrl = tempLogoUrl;
+                updatePreview();
+                
+                // Отправляем файл на сервер для временного хранения
+                const formData = new FormData();
+                formData.append('logo', customLogoInput.files[0]);
+                formData.append('_token', '{{ csrf_token() }}');
+                
+                console.log("Отправка логотипа на сервер...");
+                
+                fetch('{{ route('entrepreneur.certificates.temp-logo') }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Сохраняем URL логотипа с сервера
+                        logoUrl = data.logo_url;
+                        console.log("Логотип успешно загружен на сервер:", logoUrl);
+                        // Обновляем превью с серверным URL логотипа
+                        updatePreview();
+                    } else {
+                        console.error('Ошибка загрузки логотипа:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Произошла ошибка:', error);
+                });
+            }
+            
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+    
+    // Улучшенная функция обновления предпросмотра
     const updatePreview = () => {
         // Получаем значения из полей формы
         const recipientName = document.getElementById('recipient_name').value || 'Имя получателя';
         const amount = document.getElementById('amount').value || '3000';
-        const message = document.getElementById('message').value || 'Ваше сообщение или пожелание';
+        const message = document.getElementById('message').value || '';
         
         // Устанавливаем текущую дату и срок действия
-        const validFrom = new Date().toLocaleDateString('ru-RU');
-        const validUntil = new Date(document.getElementById('valid_until').value || Date.now())
-            .toLocaleDateString('ru-RU');
+        const validFrom = document.getElementById('valid_from').value 
+            ? new Date(document.getElementById('valid_from').value).toLocaleDateString('ru-RU')
+            : new Date().toLocaleDateString('ru-RU');
+            
+        const validUntil = document.getElementById('valid_until').value 
+            ? new Date(document.getElementById('valid_until').value).toLocaleDateString('ru-RU')
+            : new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString('ru-RU');
         
         // Компания
         const companyName = '{{ Auth::user()->company ?? config('app.name') }}';
         
-        // Обновляем iframe с новыми параметрами
+        // Создаем параметры для запроса - БЕЗ логотипа
         const params = new URLSearchParams({
             recipient_name: recipientName,
             amount: `${Number(amount).toLocaleString('ru-RU')} ₽`,
@@ -239,25 +452,57 @@ document.addEventListener('DOMContentLoaded', function() {
             company_name: companyName
         });
         
-        previewFrame.src = `{{ route('template.preview', $template) }}?${params.toString()}`;
+        // Обновляем iframe с новыми параметрами
+        const iframeSrc = `{{ route('template.preview', $template) }}?${params.toString()}`;
+        
+        // Проверяем, нужно ли обновлять iframe
+        if (previewFrame.src.split('?')[0] === iframeSrc.split('?')[0]) {
+            // Только обновляем параметры для существующего iframe
+            previewFrame.src = iframeSrc;
+        } else {
+            // Полностью меняем src, если изменился базовый URL
+            previewFrame.src = iframeSrc;
+        }
+        
+        // После загрузки iframe отправляем логотип через postMessage
+        previewFrame.onload = function() {
+            // Оптимизированная отправка логотипа
+            setTimeout(() => {
+                try {
+                    previewFrame.contentWindow.postMessage({
+                        type: 'update_logo',
+                        logo_url: logoUrl
+                    }, '*');
+                } catch (error) {
+                    console.error("Ошибка при отправке сообщения в iframe:", error);
+                }
+            }, 300);
+        };
     };
     
-    // Устанавливаем обработчики событий на все поля ввода для мгновенного обновления
+    // Устанавливаем обработчики событий для полей ввода с троттлингом
+    let updateTimeout;
     formInputs.forEach(input => {
-        // Используем несколько событий для максимальной отзывчивости
         ['input', 'change', 'keyup', 'paste'].forEach(eventType => {
-            input.addEventListener(eventType, updatePreview);
+            input.addEventListener(eventType, function() {
+                if (input.id !== 'custom_logo') {
+                    clearTimeout(updateTimeout);
+                    updateTimeout = setTimeout(updatePreview, 300); // Задержка для улучшения производительности
+                }
+            });
         });
     });
     
-    // Управление масштабом предпросмотра
+    // Управление масштабом предпросмотра с адаптивным шагом
     document.getElementById('zoomInButton').addEventListener('click', function() {
-        scale *= 1.1;
+        const zoomStep = window.innerWidth < 768 ? 1.05 : 1.1;
+        scale *= zoomStep;
         previewFrame.style.transform = `scale(${scale})`;
     });
     
     document.getElementById('zoomOutButton').addEventListener('click', function() {
-        scale *= 0.9;
+        const zoomStep = window.innerWidth < 768 ? 0.95 : 0.9;
+        scale *= zoomStep;
         previewFrame.style.transform = `scale(${scale})`;
     });
     
@@ -266,29 +511,60 @@ document.addEventListener('DOMContentLoaded', function() {
         previewFrame.style.transform = 'scale(1)';
     });
     
-    // Переключение между устройствами (desktop, tablet, mobile)
+    // Переключение между устройствами с учетом размера экрана
     const deviceButtons = document.querySelectorAll('.device-toggle button');
     deviceButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Удаляем активный класс у всех кнопок и добавляем текущей
             deviceButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
-            // Устанавливаем текущее устройство
             const device = this.getAttribute('data-device');
             previewContainer.setAttribute('data-current-device', device);
             
-            // Сбрасываем масштаб при переключении устройства
+            // Автоматически сбрасываем масштаб при переключении устройства
             scale = 1;
             previewFrame.style.transform = 'scale(1)';
+            
+            // Для мобильных устройств, если выбран desktop, переключаем на tablet
+            if (window.innerWidth < 576 && device === 'desktop') {
+                setTimeout(() => {
+                    const tabletButton = document.querySelector('[data-device="tablet"]');
+                    if (tabletButton) tabletButton.click();
+                }, 100);
+            }
         });
     });
     
-    // Поворот устройства (только для планшета и мобильного)
+    // Поворот устройства с улучшенной адаптивностью
     document.getElementById('rotateViewButton').addEventListener('click', function() {
         const currentDevice = previewContainer.getAttribute('data-current-device');
         if (currentDevice !== 'desktop') {
             previewContainer.classList.toggle('landscape');
+            // Сбрасываем масштаб при повороте
+            scale = 1;
+            previewFrame.style.transform = 'scale(1)';
+        }
+    });
+    
+    // Добавляем обработчик для опции "Не использовать логотип"
+    logoNone.addEventListener('change', function() {
+        if (this.checked) {
+            defaultLogoPreview.classList.add('d-none');
+            customLogoContainer.classList.add('d-none');
+            logoUrl = 'none';
+            updatePreview();
+        }
+    });
+    
+    // Адаптивные настройки при изменении размера окна
+    window.addEventListener('resize', function() {
+        // Для мобильных устройств принудительно выбираем tablet или mobile
+        if (window.innerWidth < 576) {
+            const currentDevice = previewContainer.getAttribute('data-current-device');
+            if (currentDevice === 'desktop') {
+                const tabletButton = document.querySelector('[data-device="tablet"]');
+                if (tabletButton) tabletButton.click();
+            }
         }
     });
     

@@ -20,6 +20,7 @@ class Certificate extends Model
         'recipient_phone',
         'amount',
         'message',
+        'company_logo', // Добавляем новое поле
         'custom_fields',
         'valid_from',
         'valid_until',

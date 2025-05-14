@@ -52,6 +52,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Маршрут для переключения активности шаблона
     Route::post('/templates/{template}/toggle-active', [TemplatesController::class, 'toggleActive'])
         ->name('templates.toggle-active');
+    
+    // Для отладки: явно прописываем роут для создания шаблона
+    Route::post('/templates', [TemplatesController::class, 'store'])->name('templates.store');
+});
+
+// Админ - категории шаблонов
+Route::prefix('admin/template-categories')->name('admin.template-categories.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'store'])->name('store');
+    Route::get('/{templateCategory}/edit', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'edit'])->name('edit');
+    Route::put('/{templateCategory}', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'update'])->name('update');
+    Route::delete('/{templateCategory}', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'destroy'])->name('destroy');
+    Route::post('/{templateCategory}/toggle-active', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'toggleActive'])->name('toggle-active');
 });
 
 // Маршруты для предпринимателя 
@@ -78,6 +92,10 @@ Route::prefix('entrepreneur')->name('entrepreneur.')->middleware(['auth', 'role:
     Route::post('/certificates/{template}', [CertificatesController::class, 'store'])
         ->name('certificates.store');
     
+    // Маршрут для временного сохранения логотипа
+    Route::post('/certificates/temp-logo', [CertificatesController::class, 'tempLogo'])
+        ->name('certificates.temp-logo');
+    
     // Дополнительные маршруты для действий с сертификатами
     Route::post('/certificates/{certificate}/send-email', [CertificatesController::class, 'sendEmail'])
         ->name('certificates.send-email');
@@ -86,11 +104,32 @@ Route::prefix('entrepreneur')->name('entrepreneur.')->middleware(['auth', 'role:
     Route::resource('certificates', CertificatesController::class)
         ->except(['create', 'store']);
     
+    // Маршрут для быстрой проверки сертификата по QR-коду
+    Route::get('/certificates/admin-verify/{certificate}', [CertificatesController::class, 'adminVerify'])
+        ->name('certificates.admin-verify');
+    
+    // Маршрут для отметки сертификата как использованного
+    Route::post('/certificates/{certificate}/mark-as-used', [CertificatesController::class, 'markAsUsed'])
+        ->name('certificates.mark-as-used');
+    
     // Аналитика и отчеты
     Route::prefix('analytics')->name('analytics.')->group(function () {
         Route::get('/statistics', [AnalyticsController::class, 'statistics'])->name('statistics');
         Route::get('/reports', [AnalyticsController::class, 'reports'])->name('reports');
     });
+    
+    // Маршруты для печати сертификатов (предприниматель) - исправлено дублирование префикса
+    Route::get('certificates/{certificate}/print', 
+        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'showOptions'])
+        ->name('certificates.print');
+        
+    Route::post('certificates/{certificate}/print', 
+        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'generatePrintable'])
+        ->name('certificates.print.generate');
+        
+    Route::get('certificates/{certificate}/quick-print', 
+        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'generatePrintable'])
+        ->name('certificates.quick-print');
 });
 
 // Маршруты для профиля (доступны всем авторизованным)
@@ -122,4 +161,9 @@ Route::prefix('admin/certificates')->name('admin.certificates.')->middleware(['a
     Route::post('/{certificate}/send-email', [CertificatesController::class, 'sendEmail'])
         ->name('send-email');
 });
+
+// Маршрут для публичной печати сертификата
+Route::get('certificates/{certificate}/print', 
+    [App\Http\Controllers\CertificatePrintController::class, 'printPublic'])
+    ->name('certificates.print');
 

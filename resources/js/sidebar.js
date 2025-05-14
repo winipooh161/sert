@@ -46,6 +46,7 @@ export function initSidebarCollapse() {
     mobileLinks.forEach(function(link) {
         link.addEventListener('click', function() {
             const sidebarMenu = document.getElementById('sidebarMenu');
+            // Проверяем размер экрана и наличие экземпляра offcanvas
             if (window.innerWidth < 992 && sidebarMenu) {
                 const bsOffcanvas = bootstrap.Offcanvas.getInstance(sidebarMenu);
                 if (bsOffcanvas) {
@@ -53,6 +54,20 @@ export function initSidebarCollapse() {
                 }
             }
         });
+    });
+    
+    // Добавляем обработчик события изменения размера окна
+    window.addEventListener('resize', function() {
+        // Если окно стало шире 992px, и меню открыто, закрываем его программно
+        if (window.innerWidth >= 992) {
+            const sidebarMenu = document.getElementById('sidebarMenu');
+            if (sidebarMenu) {
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(sidebarMenu);
+                if (bsOffcanvas) {
+                    bsOffcanvas.hide();
+                }
+            }
+        }
     });
 }
 
