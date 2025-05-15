@@ -94,8 +94,8 @@ class CertificatesController extends Controller
     {
         $request->validate([
             'recipient_name' => ['required', 'string', 'max:255'],
-            'recipient_email' => ['nullable', 'email', 'max:255'],
-            'recipient_phone' => ['nullable', 'string', 'max:20'],
+            'recipient_phone' => ['required', 'string', 'max:20'], // Изменено на required
+            'recipient_email' => ['nullable', 'email', 'max:255'], // Изменено на nullable
             'amount' => ['required', 'numeric', 'min:0'],
             'message' => ['nullable', 'string'],
             'valid_from' => ['required', 'date', 'after_or_equal:today'],
@@ -104,6 +104,17 @@ class CertificatesController extends Controller
             'logo_type' => ['required', 'in:default,custom,none'],
             'custom_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
+
+        // Проверка существования сертификата с указанным номером телефона
+        $existingCertificate = Certificate::where('recipient_phone', $request->recipient_phone)
+            ->where('status', '!=', 'canceled')
+            ->first();
+            
+        if ($existingCertificate) {
+            return back()->withInput()->withErrors([
+                'recipient_phone' => 'Сертификат с таким номером телефона уже существует. Один номер телефона может иметь только один активный сертификат.'
+            ]);
+        }
 
         // Генерация уникального номера сертификата
         $certificateNumber = $this->generateCertificateNumber();
@@ -172,8 +183,8 @@ class CertificatesController extends Controller
         
         $request->validate([
             'recipient_name' => ['required', 'string', 'max:255'],
-            'recipient_email' => ['nullable', 'email', 'max:255'],
-            'recipient_phone' => ['nullable', 'string', 'max:20'],
+            'recipient_phone' => ['required', 'string', 'max:20'], // Изменено на required
+            'recipient_email' => ['nullable', 'email', 'max:255'], // Изменено на nullable
             'amount' => ['required', 'numeric', 'min:0'],
             'message' => ['nullable', 'string'],
             'valid_from' => ['required', 'date'],
@@ -267,6 +278,14 @@ class CertificatesController extends Controller
         return back()->with('success', 'Сертификат был отправлен на адрес ' . $request->email);
     }
 
+    /**
+     * Отправляет сертификат на указанный email
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Certificate  $certificate
+     * @return \Illuminate\Http\Response
+     */
+ 
     /**
      * Временно сохраняет логотип для предпросмотра.
      *

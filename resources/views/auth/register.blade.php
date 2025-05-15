@@ -41,15 +41,15 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="email" class="form-label fw-medium">{{ __('Email адрес') }}</label>
+                                <label for="phone" class="form-label fw-medium">{{ __('Номер телефона') }}</label>
 
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
-                                        <i class="fa-regular fa-envelope text-muted"></i>
+                                        <i class="fa-solid fa-phone text-muted"></i>
                                     </span>
-                                    <input id="email" type="email" class="form-control border-start-0 @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="your.email@example.com">
+                                    <input id="phone" type="tel" class="form-control border-start-0 @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="+7 (___) ___-__-__">
 
-                                    @error('email')
+                                    @error('phone')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
@@ -104,4 +104,24 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Подключаем маску для телефона
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            // Простая функция для форматирования телефона
+            phoneInput.addEventListener('input', function(e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                if (x[1] != '') {
+                    e.target.value = '+' + x[1] + (x[2] ? ' (' + x[2] + ')' : '') + (x[3] ? ' ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+                } else {
+                    e.target.value = '';
+                }
+            });
+        }
+    });
+</script>
+@endpush
 @endsection

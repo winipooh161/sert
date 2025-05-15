@@ -36,18 +36,19 @@
                                     @enderror
                                 </div>
                                 <div class="col-sm-6">
-                                    <label for="recipient_email" class="form-label small">Email получателя</label>
-                                    <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
-                                        id="recipient_email" name="recipient_email" value="{{ old('recipient_email', $certificate->recipient_email) }}">
-                                    @error('recipient_email')
+                                    <label for="recipient_phone" class="form-label small">Телефон получателя *</label>
+                                    <input type="tel" class="form-control form-control-sm bg-light @error('recipient_phone') is-invalid @enderror" 
+                                        id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone', $certificate->recipient_phone) }}" readonly>
+                                    <div class="form-text small text-muted mt-1">Номер телефона нельзя изменить после создания сертификата</div>
+                                    @error('recipient_phone')
                                         <span class="invalid-feedback small">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div class="col-sm-6">
-                                    <label for="recipient_phone" class="form-label small">Телефон получателя</label>
-                                    <input type="tel" class="form-control form-control-sm @error('recipient_phone') is-invalid @enderror" 
-                                        id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone', $certificate->recipient_phone) }}">
-                                    @error('recipient_phone')
+                                    <label for="recipient_email" class="form-label small">Email получателя</label>
+                                    <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
+                                        id="recipient_email" name="recipient_email" value="{{ old('recipient_email', $certificate->recipient_email) }}">
+                                    @error('recipient_email')
                                         <span class="invalid-feedback small">{{ $message }}</span>
                                     @enderror
                                 </div>

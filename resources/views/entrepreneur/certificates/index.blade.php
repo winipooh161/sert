@@ -92,6 +92,10 @@
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
                                         @if($certificate->status == 'active')
+                                        <button type="button" class="btn btn-sm btn-outline-info d-none d-sm-inline-block" title="Копировать ссылку" 
+                                                onclick="copyPublicUrl('{{ route('certificates.public', $certificate->uuid) }}', '{{ $certificate->certificate_number }}')">
+                                            <i class="fa-solid fa-copy"></i>
+                                        </button>
                                         <a href="{{ route('entrepreneur.certificates.edit', $certificate) }}" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-block" title="Редактировать">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
@@ -106,6 +110,11 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 @if($certificate->status == 'active')
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="copyPublicUrl('{{ route('certificates.public', $certificate->uuid) }}', '{{ $certificate->certificate_number }}'); return false;">
+                                                        <i class="fa-solid fa-copy me-2"></i>Копировать ссылку
+                                                    </a>
+                                                </li>
                                                 <li><a class="dropdown-item" href="{{ route('entrepreneur.certificates.edit', $certificate) }}">Редактировать</a></li>
                                                 <li>
                                                     <a class="dropdown-item text-danger" href="javascript:void(0)" 
@@ -132,6 +141,20 @@
                                         <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-sm btn-primary">
                                             <i class="fa-solid fa-plus me-1"></i>Создать первый сертификат
                                         </a>
+                                        
+                                        @if(!Auth::user()->hasRole('user'))
+                                        <div class="alert alert-info mt-3">
+                                            <i class="fa-solid fa-lightbulb me-2"></i>
+                                            <strong>Совет:</strong> Вы также можете переключиться на режим клиента для просмотра полученных сертификатов
+                                            <form action="{{ route('role.switch') }}" method="POST" class="mt-2 text-center">
+                                                @csrf
+                                                <input type="hidden" name="role" value="user">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa-solid fa-user me-2"></i>Переключиться на режим клиента
+                                                </button>
+                                            </form>
+                                        </div>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -188,6 +211,78 @@
     </div>
     @endif
 </div>
+
+<!-- Toast-уведомление для подтверждения копирования -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div id="copyToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa-solid fa-check-circle me-2"></i>
+                <span id="toastMessage">Ссылка скопирована в буфер обмена</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функция для копирования публичной ссылки сертификата
+function copyPublicUrl(url, certNumber) {
+    // Проверяем доступность Clipboard API перед его использованием
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        // Копируем текст в буфер обмена с помощью современного API
+        navigator.clipboard.writeText(url).then(() => {
+            // Показываем toast-уведомление с успешным копированием
+            const toastEl = document.getElementById('copyToast');
+            document.getElementById('toastMessage').textContent = `Ссылка на сертификат ${certNumber} скопирована`;
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 3000
+            });
+            toast.show();
+        }).catch(err => {
+            console.error('Ошибка при копировании: ', err);
+            // Запасной вариант при возникновении ошибок доступа
+            fallbackCopyTextToClipboard(url, certNumber);
+        });
+    } else {
+        // Если Clipboard API недоступен, используем запасной метод
+        fallbackCopyTextToClipboard(url, certNumber);
+    }
+}
+
+// Запасной метод копирования для браузеров без поддержки Clipboard API
+function fallbackCopyTextToClipboard(text, certNumber) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Делаем элемент невидимым
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+  
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            const toastEl = document.getElementById('copyToast');
+            document.getElementById('toastMessage').textContent = `Ссылка на сертификат ${certNumber} скопирована`;
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 3000
+            });
+            toast.show();
+        } else {
+            alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте её вручную: ' + text);
+        }
+    } catch (err) {
+        console.error('Ошибка при копировании: ', err);
+        alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте её вручную: ' + text);
+    }
+  
+    document.body.removeChild(textArea);
+}
+</script>
 
 <style>
 /* Адаптивные стили для таблицы */

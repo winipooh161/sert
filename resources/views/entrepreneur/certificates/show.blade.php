@@ -34,9 +34,6 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ route('entrepreneur.certificates.print', $certificate) }}" class="btn btn-outline-primary">
-                        <i class="fa-solid fa-print me-2"></i>Печать сертификата
-                    </a>
                     @endif
                 </div>
             </div>

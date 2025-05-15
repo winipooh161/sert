@@ -77,6 +77,16 @@
                                 </div>
                                 
                                 <div class="mb-2 mb-sm-3">
+                                    <label for="recipient_phone" class="form-label small">Телефон получателя *</label>
+                                    <input type="tel" class="form-control form-control-sm @error('recipient_phone') is-invalid @enderror" 
+                                        id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone') }}" required>
+                                    @error('recipient_phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text small">Обязательно. Используется для идентификации получателя. На один номер можно создать только один активный сертификат.</div>
+                                </div>
+                                
+                                <div class="mb-2 mb-sm-3">
                                     <label for="recipient_email" class="form-label small">Email получателя</label>
                                     <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
                                         id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">

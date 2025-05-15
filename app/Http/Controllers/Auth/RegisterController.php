@@ -51,7 +51,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone' => ['required', 'string', 'max:20', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
@@ -66,12 +66,12 @@ class RegisterController extends Controller
     {
         $user = User::create([
             'name' => $data['name'],
-            'email' => $data['email'],
+            'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
         ]);
 
         // Назначение роли "предприниматель" новому пользователю
-        $role = Role::where('slug', 'predprinimatel')->first();
+        $role = Role::where('slug', 'user')->first();
         if ($role) {
             $user->roles()->attach($role->id);
         }

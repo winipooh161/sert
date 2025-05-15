@@ -8,6 +8,7 @@ use App\Http\Controllers\Entrepreneur\DashboardController as EntrepreneurDashboa
 use App\Http\Controllers\Entrepreneur\AnalyticsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCertificateController; // Добавляем новый контроллер
+use App\Http\Controllers\User\CertificatesController as UserCertificatesController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,6 +39,9 @@ Route::get('/home', function () {
     }
     if (auth()->user()->hasRole('predprinimatel')) {
         return redirect()->route('entrepreneur.certificates.index');
+    }
+    if (auth()->user()->hasRole('user')) {
+        return redirect()->route('user.certificates.index');
     }
     // Если нет специальных ролей, редирект на главную
     return redirect('/');
@@ -139,6 +143,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
     Route::put('/profile/notifications', [ProfileController::class, 'notifications'])->name('profile.notifications');
+    
+    // Добавляем маршрут для переключения между ролями
+    Route::post('/role/switch', [App\Http\Controllers\RoleSwitcherController::class, 'switchRole'])->name('role.switch');
 });
 
 // Дополнительно: создаем отдельную группу маршрутов для сертификатов админа
@@ -160,6 +167,17 @@ Route::prefix('admin/certificates')->name('admin.certificates.')->middleware(['a
         ->name('destroy');
     Route::post('/{certificate}/send-email', [CertificatesController::class, 'sendEmail'])
         ->name('send-email');
+});
+
+// Маршруты для обычного пользователя
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
+    // Редирект на страницу сертификатов по умолчанию
+    Route::get('/', function () {
+        return redirect()->route('user.certificates.index');
+    });
+    
+    // Маршруты для просмотра сертификатов пользователя
+    Route::get('/certificates', [UserCertificatesController::class, 'index'])->name('certificates.index');
 });
 
 // Маршрут для публичной печати сертификата
