@@ -105,7 +105,7 @@ class CertificatesController extends Controller
             'valid_until' => 'required|date|after:valid_from',
             'message' => 'nullable|string|max:1000',
             'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
         ]);
         
         // Генерация уникального номера сертификата
@@ -197,7 +197,7 @@ class CertificatesController extends Controller
             'custom_fields' => 'nullable|array',
             'logo_type' => 'nullable|in:current,default,none',
             'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Добавляем валидацию для обложки
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480', // Добавляем валидацию для обложки
         ]);
         
         // Проверяем, не пытается ли пользователь изменить телефон

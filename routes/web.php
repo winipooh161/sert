@@ -19,6 +19,22 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', function () {
+    // Проверяем авторизацию пользователя
+    if (Auth::check()) {
+        // Если пользователь авторизован, перенаправляем согласно роли
+        if (auth()->user()->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+        if (auth()->user()->hasRole('predprinimatel')) {
+            return redirect()->route('entrepreneur.certificates.index');
+        }
+        if (auth()->user()->hasRole('user')) {
+            return redirect()->route('user.certificates.index');
+        }
+    }
+    
+    // Если пользователь не авторизован или нет определенной роли,
+    // показываем стандартную страницу приветствия
     return view('welcome');
 });
 

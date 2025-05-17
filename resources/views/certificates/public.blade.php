@@ -142,7 +142,7 @@
     bottom: 180px;
     left: 0;
     width: 100%;
-    /* padding: 0 30px; */
+     padding: 0 0px;
     color: white;
     z-index: 3;
     text-align: center;
@@ -297,7 +297,7 @@
             
             .cover-info {
                 bottom: 60px;
-                padding: 0 20px;
+                padding: 0 0px;
             }
             
             .cover-info h1 {

@@ -1,0 +1,1 @@
+"serviceWorker"in navigator&&window.addEventListener("load",()=>{navigator.serviceWorker.register("/service-worker.js").then(e=>{console.log("ServiceWorker registered with scope:",e.scope)}).catch(e=>{console.error("ServiceWorker registration failed:",e)})});

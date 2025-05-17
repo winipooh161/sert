@@ -6,9 +6,59 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Laravel') }} - Личный кабинет</title>
 
+    <!-- Favicon и иконки -->
+    <link type="image/x-icon" rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+
+    <!-- Дополнительные иконки для десктопных браузеров -->
+    <link type="image/png" sizes="16x16" rel="icon" href="{{ asset('icons/favicon-16x16.png') }}">
+    <link type="image/png" sizes="32x32" rel="icon" href="{{ asset('icons/favicon-32x32.png') }}">
+    <link type="image/png" sizes="96x96" rel="icon" href="{{ asset('icons/favicon-96x96.png') }}">
+    <link type="image/png" sizes="120x120" rel="icon" href="{{ asset('icons/favicon-120x120.png') }}">
+
+    <!-- Иконки для Android -->
+    <link type="image/png" sizes="72x72" rel="icon" href="{{ asset('icons/android-icon-72x72.png') }}">
+    <link type="image/png" sizes="96x96" rel="icon" href="{{ asset('icons/android-icon-96x96.png') }}">
+    <link type="image/png" sizes="144x144" rel="icon" href="{{ asset('icons/android-icon-144x144.png') }}">
+    <link type="image/png" sizes="192x192" rel="icon" href="{{ asset('icons/android-icon-192x192.png') }}">
+    <link type="image/png" sizes="512x512" rel="icon" href="{{ asset('icons/android-icon-512x512.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+    <!-- Иконки для iOS (Apple) -->
+    <link sizes="57x57" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-57x57.png') }}">
+    <link sizes="60x60" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-60x60.png') }}">
+    <link sizes="72x72" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-72x72.png') }}">
+    <link sizes="76x76" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-76x76.png') }}">
+    <link sizes="114x114" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-114x114.png') }}">
+    <link sizes="120x120" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-120x120.png') }}">
+    <link sizes="144x144" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-144x144.png') }}">
+    <link sizes="152x152" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-152x152.png') }}">
+    <link sizes="180x180" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-180x180.png') }}">
+
+    <!-- Иконки для MacOS (Apple) -->
+    <link color="#e52037" rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}">
+
+    <!-- Иконки и цвета для плиток Windows -->
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="msapplication-TileImage" content="{{ asset('icons/mstile-144x144.png') }}">
+    <meta name="msapplication-square70x70logo" content="{{ asset('icons/mstile-70x70.png') }}">
+    <meta name="msapplication-square150x150logo" content="{{ asset('icons/mstile-150x150.png') }}">
+    <meta name="msapplication-wide310x150logo" content="{{ asset('icons/mstile-310x150.png') }}">
+    <meta name="msapplication-square310x310logo" content="{{ asset('icons/mstile-310x310.png') }}">
+    <meta name="application-name" content="{{ config('app.name', 'Laravel') }}">
+    <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Платформа для управления сертификатами">
+    <link rel="manifest" href="{{ asset('/manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('/icons/icon-192x192.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Laravel') }}">
     
     <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -24,6 +74,32 @@
     
     <!-- Scripts -->
     @vite(['resources/css/lk.css', 'resources/js/app.js'])
+
+    <style>
+        /* Стили для баннера установки PWA */
+        #pwa-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 10px 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1050;
+            border-top: 3px solid #007bff;
+        }
+        #pwa-install-ios-instructions {
+            display: none;
+        }
+        #pwa-install-steps {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        #pwa-install-steps li {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
     <div id="app" class="d-flex flex-column vh-100">
@@ -83,6 +159,29 @@
                 </div>
             </main>
         </div>
+
+        <!-- Баннер установки PWA -->
+        <div id="pwa-install-banner" class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-1">Установите приложение</h5>
+                    <p class="mb-0 small text-muted">Добавьте наше приложение на главный экран для быстрого доступа</p>
+                    
+                    <!-- Инструкции для iOS -->
+                    <div id="pwa-install-ios-instructions">
+                        <ol id="pwa-install-steps" class="small">
+                            <li>Нажмите <i class="fa fa-share-square"></i> в нижней панели браузера</li>
+                            <li>Прокрутите и выберите "Добавить на главный экран"</li>
+                            <li>Нажмите "Добавить" в правом верхнем углу</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button id="pwa-install-btn" class="btn btn-primary btn-sm">Установить</button>
+                    <button id="pwa-close-btn" class="btn btn-outline-secondary btn-sm ms-2">Позже</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -92,6 +191,129 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/ru.js"></script>
+    
+    <!-- Скрипт для PWA установки -->
+    <script>
+        // Переменная для хранения события установки (Android)
+        let deferredPrompt;
+        const pwaInstallBanner = document.getElementById('pwa-install-banner');
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        const pwaCloseBtn = document.getElementById('pwa-close-btn');
+        const pwaIosInstructions = document.getElementById('pwa-install-ios-instructions');
+        
+        // Проверяем, установлено ли уже приложение
+        function isAppInstalled() {
+            // Проверка для iOS 
+            if (navigator.standalone) {
+                return true;
+            }
+            
+            // Проверка для Android и других устройств
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                return true;
+            }
+            
+            // Проверяем локальное хранилище - возможно пользователь отклонил установку
+            if (localStorage.getItem('pwa-install-dismissed')) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Проверяем, является ли устройство iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+        
+        // Показываем баннер с правильными инструкциями
+        function showInstallBanner() {
+            // Не показываем баннер если приложение уже установлено или открыто в приложении
+            if (isAppInstalled()) return;
+            
+            // Настраиваем баннер в зависимости от платформы
+            if (isIOS()) {
+                // Для iOS показываем инструкции
+                pwaInstallBtn.style.display = 'none';
+                pwaIosInstructions.style.display = 'block';
+            } else {
+                // Для Android скрываем инструкции и показываем кнопку
+                pwaInstallBtn.style.display = 'block';
+                pwaIosInstructions.style.display = 'none';
+            }
+            
+            // Показываем баннер
+            pwaInstallBanner.style.display = 'block';
+        }
+        
+        // Обрабатываем событие beforeinstallprompt (только для поддерживаемых браузеров)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Предотвращаем автоматическое появление диалога установки браузера
+            e.preventDefault();
+            
+            // Сохраняем событие для использования позже
+            deferredPrompt = e;
+            
+            // Проверяем, активно ли мобильное устройство
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Показываем наш баннер только на мобильных устройствах
+            if (isMobile) {
+                showInstallBanner();
+            }
+        });
+        
+        // Обработчик события по нажатию на кнопку установки
+        pwaInstallBtn.addEventListener('click', async () => {
+            // Скрываем баннер
+            pwaInstallBanner.style.display = 'none';
+            
+            // Проверяем, доступно ли событие установки
+            if (deferredPrompt) {
+                // Показываем диалог установки
+                deferredPrompt.prompt();
+                
+                // Ожидаем ответа пользователя
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                // Очищаем сохраненное событие
+                deferredPrompt = null;
+                
+                // Если пользователь отказался, запоминаем это
+                if (outcome === 'dismissed') {
+                    localStorage.setItem('pwa-install-dismissed', 'true');
+                }
+            }
+        });
+        
+        // Обработчик закрытия баннера
+        pwaCloseBtn.addEventListener('click', () => {
+            pwaInstallBanner.style.display = 'none';
+            
+            // Запоминаем, что пользователь закрыл баннер
+            localStorage.setItem('pwa-install-dismissed', 'true');
+            
+            // Через неделю можно снова показать баннер
+            setTimeout(() => {
+                localStorage.removeItem('pwa-install-dismissed');
+            }, 7 * 24 * 60 * 60 * 1000);
+        });
+        
+        // Проверяем при загрузке страницы, нужно ли показывать баннер для iOS
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ждем немного, чтобы не раздражать пользователя сразу
+            setTimeout(() => {
+                if (isIOS() && !isAppInstalled()) {
+                    showInstallBanner();
+                }
+            }, 2000);
+        });
+        
+        // Проверяем, запущено ли приложение в режиме PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Приложение запущено в режиме PWA');
+        }
+    </script>
     
     <!-- Скрипт для управления боковым меню -->
     <script>

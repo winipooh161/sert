@@ -636,85 +636,50 @@ function getCertificateFolders(certificateId) {
     });
 }
 
-// Функция для обработки длительного нажатия на папку
+// Функция для обработки двойного нажатия на папку
 document.addEventListener('DOMContentLoaded', function() {
-    let folderLongPressTimer;
-    let preventFolderClick = false;
     const folderButtons = document.querySelectorAll('.folder-btn');
     
-    // Длительность долгого нажатия (в миллисекундах)
-    const folderLongPressDuration = 800;
-
     folderButtons.forEach(button => {
         // Сохраняем данные кнопки папки
         const folderId = button.dataset.folderId;
         const folderName = button.dataset.folderName;
         const folderColor = button.dataset.folderColor;
+        let clickTimer = null;
+        let clickCount = 0;
         
-        // Обработчик для клика на кнопку папки
+        // Обработчик клика с задержкой для распознавания двойного клика
         button.addEventListener('click', function(e) {
-            // Если это долгое нажатие, не выполняем переход по ссылке
-            if (preventFolderClick) {
-                e.preventDefault();
-                return;
+            e.preventDefault(); // Предотвращаем стандартное действие (переход по ссылке)
+            
+            clickCount++;
+            
+            if (clickCount === 1) {
+                clickTimer = setTimeout(function() {
+                    clickCount = 0;
+                    // Если это одиночный клик - переходим по ссылке
+                    window.location.href = button.href;
+                }, 300);
+            } else if (clickCount === 2) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                // Если это двойной клик - вызываем действие управления папкой
+                handleFolderAction(folderId, folderName);
+                
+                // Используем безопасную функцию вибрации
+                window.safeVibrate && window.safeVibrate(100);
             }
         });
         
-        // Обработчики начала нажатия для папок
-        button.addEventListener('mousedown', function(e) {
-            preventFolderClick = false;
-            button.classList.add('btn-pressing'); // Добавляем класс анимации
-            
-            folderLongPressTimer = setTimeout(() => {
-                preventFolderClick = true;
-                handleFolderLongPress(folderId, folderName);
-                button.classList.remove('btn-pressing'); // Удаляем класс анимации
-                
-                // Используем безопасную функцию вибрации
-                window.safeVibrate && window.safeVibrate(100);
-            }, folderLongPressDuration);
-        });
-        
-        button.addEventListener('touchstart', function(e) {
-            preventFolderClick = false;
-            button.classList.add('btn-pressing'); // Добавляем класс анимации
-            
-            folderLongPressTimer = setTimeout(() => {
-                preventFolderClick = true;
-                handleFolderLongPress(folderId, folderName);
-                button.classList.remove('btn-pressing'); // Удаляем класс анимации
-                
-                // Используем безопасную функцию вибрации
-                window.safeVibrate && window.safeVibrate(100);
-            }, folderLongPressDuration);
-        }, { passive: true });
-        
-        // Обработчики прерывания нажатия для папок
-        button.addEventListener('mouseup', function() {
-            clearFolderLongPress(button);
-        });
-        button.addEventListener('mouseleave', function() {
-            clearFolderLongPress(button);
-        });
-        button.addEventListener('touchend', function() {
-            clearFolderLongPress(button);
-        });
-        button.addEventListener('touchcancel', function() {
-            clearFolderLongPress(button);
-        });
-        button.addEventListener('touchmove', function() {
-            clearFolderLongPress(button);
+        // Сбрасываем счетчик при уходе мыши с элемента
+        button.addEventListener('mouseout', function() {
+            clickCount = 0;
+            clearTimeout(clickTimer);
         });
     });
     
-    // Очистка таймера долгого нажатия для папок
-    function clearFolderLongPress(button) {
-        clearTimeout(folderLongPressTimer);
-        button.classList.remove('btn-pressing'); // Удаляем класс анимации
-    }
-    
-    // Обработка долгого нажатия на папку - показ модального окна удаления папки
-    function handleFolderLongPress(folderId, folderName) {
+    // Обработка действия для папки - показ модального окна удаления папки
+    function handleFolderAction(folderId, folderName) {
         // Устанавливаем данные в модальном окне
         document.getElementById('folderNameToDelete').textContent = folderName;
         
@@ -725,88 +690,66 @@ document.addEventListener('DOMContentLoaded', function() {
         // Показываем модальное окно
         const deleteFolderModal = new bootstrap.Modal(document.getElementById('deleteFolderModal'));
         deleteFolderModal.show();
-        
-        // Попытка вибрации только если пользователь взаимодействовал с документом
-        if (window.safeVibrate && document.wasInteractedWith) {
-            window.safeVibrate(100);
-        }
     }
 });
 
-// Инициализация обработки клика и долгого нажатия на карточки сертификатов
+// Инициализация обработки двойного нажатия на карточки сертификатов
 document.addEventListener('DOMContentLoaded', function() {
-    let longPressTimer;
-    let preventClick = false;
     const certificateCards = document.querySelectorAll('.certificate-card');
     
-    // Длительность долгого нажатия (в миллисекундах)
-    const longPressDuration = 800;
-
     certificateCards.forEach(card => {
         // Сохраняем данные карточки
         const certificateId = card.dataset.certificateId;
         const publicUrl = card.dataset.publicUrl;
         const certificateNumber = card.dataset.certificateNumber;
+        let clickTimer = null;
+        let clickCount = 0;
         
-        // Обработчик для клика на карточку
+        // Обработчик клика с задержкой для распознавания двойного клика
         card.addEventListener('click', function(e) {
-            // Если это долгое нажатие или клик был на кнопке, не переходим по ссылке
-            if (preventClick || e.target.closest('.btn') || e.target.closest('.dropdown-menu')) {
-                return;
-            }
-            
-            // Открываем публичную ссылку сертификата в новой вкладке
-            window.open(publicUrl, '_blank');
-        });
-        
-        // Обработчики начала нажатия
-        card.addEventListener('mousedown', function(e) {
             // Если клик был на кнопке или в выпадающем меню, не обрабатываем
             if (e.target.closest('.btn') || e.target.closest('.dropdown-menu')) {
                 return;
             }
             
-            preventClick = false;
-            longPressTimer = setTimeout(() => {
-                preventClick = true;
-                handleLongPress(certificateId, certificateNumber);
+            e.preventDefault(); // Предотвращаем любые стандартные действия
+            
+            clickCount++;
+            
+            if (clickCount === 1) {
+                clickTimer = setTimeout(function() {
+                    clickCount = 0;
+                    // Если это одиночный клик - открываем публичную страницу сертификата
+                    window.open(publicUrl, '_blank');
+                }, 300);
+            } else if (clickCount === 2) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                // Если это двойной клик - показываем модальное окно управления папками
+                handleCertificateAction(certificateId, certificateNumber);
                 
                 // Используем безопасную функцию вибрации
                 window.safeVibrate && window.safeVibrate(100);
-            }, longPressDuration);
+            }
         });
         
-        card.addEventListener('touchstart', function(e) {
-            // Если касание было на кнопке или в выпадающем меню, не обрабатываем
-            if (e.target.closest('.btn') || e.target.closest('.dropdown-menu')) {
-                return;
-            }
-            
-            preventClick = false;
-            longPressTimer = setTimeout(() => {
-                preventClick = true;
-                handleLongPress(certificateId, certificateNumber);
+        // Сбрасываем счетчик при уходе мыши с элемента
+        card.addEventListener('mouseout', function() {
+            // Очищаем таймер при уходе с элемента, но не сбрасываем счетчик
+            // чтобы не прерывать возможный двойной клик
+            if (clickCount === 1) {
+                clearTimeout(clickTimer);
                 
-                // Используем безопасную функцию вибрации
-                window.safeVibrate && window.safeVibrate(100);
-            }, longPressDuration);
-        }, { passive: true });
-        
-        // Обработчики прерывания нажатия
-        card.addEventListener('mouseup', clearLongPress);
-        card.addEventListener('mouseleave', clearLongPress);
-        card.addEventListener('touchend', clearLongPress);
-        card.addEventListener('touchcancel', clearLongPress);
-        card.addEventListener('touchmove', clearLongPress);
+                // Даем небольшую задержку перед сбросом счетчика
+                setTimeout(() => {
+                    clickCount = 0;
+                }, 500);
+            }
+        });
     });
     
-    // Очистка таймера долгого нажатия
-    function clearLongPress() {
-        clearTimeout(longPressTimer);
-    }
-    
-    // Обработка долгого нажатия - показ модального окна управления папками
-    function handleLongPress(certificateId, certificateNumber) {
+    // Обработка действия для сертификата - показ модального окна управления папками
+    function handleCertificateAction(certificateId, certificateNumber) {
         // Устанавливаем номер сертификата в модальном окне
         document.getElementById('certificateNumberInModal').textContent = certificateNumber;
         
@@ -827,11 +770,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             getCertificateFolders(certificateId);
         }, 100);
-        
-        // Попытка вибрации только если пользователь взаимодействовал с документом
-        if (window.safeVibrate && document.wasInteractedWith) {
-            window.safeVibrate(100);
-        }
     }
 });
 
@@ -864,9 +802,7 @@ function loadIntroJs() {
     });
 }
 
-/**
- * Запускает обучение для страницы сертификатов пользователя
- */
+// Обновляем текст в подсказке обучения 
 function startUserCertificatesTour() {
     loadIntroJs().then(() => {
         const tour = introJs();
@@ -925,7 +861,7 @@ function startUserCertificatesTour() {
                 },
                 {
                     title: 'Дополнительные функции',
-                    intro: 'Длительное нажатие на карточке сертификата или папке откроет дополнительное меню управления.'
+                    intro: 'Двойной клик на карточке сертификата или папке откроет дополнительное меню управления.'
                 }
             ]);
         } else {
