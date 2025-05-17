@@ -78,8 +78,8 @@
                                 
                                 <div class="mb-2 mb-sm-3">
                                     <label for="recipient_phone" class="form-label small">Телефон получателя *</label>
-                                    <input type="tel" class="form-control form-control-sm @error('recipient_phone') is-invalid @enderror" 
-                                        id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone') }}" required>
+                                    <input type="tel" class="form-control maskphone form-control-sm @error('recipient_phone') is-invalid @enderror" 
+                                        id="recipient_phone" name="recipient_phone"  value="{{ old('recipient_phone') }}" required>
                                     @error('recipient_phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -234,7 +234,47 @@
         </div>
     </div>
 </div>
-
+<script>
+ 
+document.addEventListener("DOMContentLoaded", function () {
+    var inputs = document.querySelectorAll("input.maskphone");
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        input.addEventListener("input", mask);
+        input.addEventListener("focus", mask);
+        input.addEventListener("blur", mask);
+    }
+    function mask(event) {
+        var blank = "+_ (___) ___-__-__";
+        var i = 0;
+        var val = this.value.replace(/\D/g, "").replace(/^8/, "7").replace(/^9/, "79");
+        this.value = blank.replace(/./g, function (char) {
+            if (/[_\d]/.test(char) && i < val.length) return val.charAt(i++);
+            return i >= val.length ? "" : char;
+        });
+        if (event.type == "blur") {
+            if (this.value.length == 2) this.value = "";
+        } else {
+            setCursorPosition(this, this.value.length);
+        }
+    }
+    function setCursorPosition(elem, pos) {
+        elem.focus();
+        if (elem.setSelectionRange) {
+            elem.setSelectionRange(pos, pos);
+            return;
+        }
+        if (elem.createTextRange) {
+            var range = elem.createTextRange();
+            range.collapse(true);
+            range.moveEnd("character", pos);
+            range.moveStart("character", pos);
+            range.select();
+            return;
+        }
+    }
+});
+</script>
 <style>
 /* Стили для скрытия бокового меню на этой странице */
 aside, .sidebar-nav, .navbar-toggler {

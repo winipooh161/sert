@@ -197,6 +197,8 @@
         });
     });
     </script>
+
+
     
     @stack('scripts')
 </body>

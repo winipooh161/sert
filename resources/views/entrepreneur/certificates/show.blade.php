@@ -7,6 +7,9 @@
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h1 class="fw-bold">Подарочный сертификат</h1>
                 <div>
+                    <button type="button" class="btn btn-outline-info me-2" onclick="startEntrepreneurCertificateTour()">
+                        <i class="fa-solid fa-question-circle me-2"></i>Обучение
+                    </button>
                     <a href="{{ route('entrepreneur.certificates.index') }}" class="btn btn-outline-secondary me-2">
                         <i class="fa-solid fa-arrow-left me-2"></i>К списку
                     </a>
@@ -332,50 +335,17 @@ function copyPublicUrl() {
     });
 }
 
-// Добавляем скрипт для поддержки логотипа после загрузки окна
+// Дополним существующий скрипт вызовом тура при необходимости
 document.addEventListener('DOMContentLoaded', function() {
-    const previewFrame = document.getElementById('certificate-preview');
-    if(previewFrame) {
-        // Используем логотип из объекта сертификата или 'none' если логотип не указан
-        const logoUrl = '{{ $certificate->company_logo === null ? "none" : ($certificate->company_logo ? asset("storage/" . $certificate->company_logo) : ($certificate->user->company_logo ? asset("storage/" . $certificate->user->company_logo) : asset("images/default-logo.png"))) }}';
-        
-        // Функция для отправки логотипа в iframe
-        function sendLogoToIframe() {
-            try {
-                console.log("Отправка логотипа через postMessage:", logoUrl);
-                previewFrame.contentWindow.postMessage({
-                    type: 'update_logo',
-                    logo_url: logoUrl
-                }, '*');
-            } catch (error) {
-                console.error("Ошибка при отправке логотипа:", error);
-            }
-        }
-        
-        // Отправляем логотип после загрузки iframe
-        previewFrame.addEventListener('load', function() {
-            console.log("iframe загружен, начинаем отправку логотипа");
-            // Отправляем с небольшой задержкой
-            setTimeout(sendLogoToIframe, 500);
-            
-            // И повторно через секунду для надежности
-            setTimeout(sendLogoToIframe, 1500);
-            
-            // Добавляем еще одну попытку через 2.5 секунды для большей надежности
-            setTimeout(sendLogoToIframe, 2500);
-        });
-        
-        // Для случаев когда iframe уже загружен к моменту выполнения скрипта
-        if (previewFrame.complete) {
-            sendLogoToIframe();
-        }
-        
-        // Слушаем сообщения от iframe для подтверждения обновления
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'logo_updated') {
-                console.log("Получен ответ об обновлении логотипа:", event.data);
-            }
-        });
+    // Проверяем, нужно ли запустить тур автоматически при первом посещении
+    const hasSeenTour = localStorage.getItem('entrepreneur_certificate_tour_seen');
+    if (!hasSeenTour) {
+        // Даем небольшую задержку для полной загрузки страницы
+        setTimeout(() => {
+            startEntrepreneurCertificateTour();
+            // Отмечаем, что тур был показан
+            localStorage.setItem('entrepreneur_certificate_tour_seen', 'true');
+        }, 1000);
     }
 });
 </script>

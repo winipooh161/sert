@@ -36,6 +36,10 @@
                 Мои сертификаты
             @endif
         </h1>
+        
+        <button type="button" class="btn btn-sm btn-outline-info" onclick="startUserCertificatesTour()">
+            <i class="fa-solid fa-question-circle me-1"></i>Обучение
+        </button>
     </div>
 
     <!-- Сообщения об ошибках/успешных операциях -->
@@ -54,7 +58,7 @@
     @endif
 
    
-    <div class="row  row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+    <div class="row row-cols-2 row-cols-sm-2 g-3">
         @forelse ($certificates as $certificate)
             <div class="col">
                 <div class="card border-0 rounded-4 shadow-sm h-100 certificate-card"
@@ -828,6 +832,137 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.safeVibrate && document.wasInteractedWith) {
             window.safeVibrate(100);
         }
+    }
+});
+
+/**
+ * Загружает библиотеку Intro.js если она не загружена
+ * @returns {Promise} Promise, который разрешается после загрузки библиотеки
+ */
+function loadIntroJs() {
+    return new Promise((resolve, reject) => {
+        // Проверяем, загружена ли уже библиотека
+        if (typeof introJs !== 'undefined') {
+            resolve();
+            return;
+        }
+        
+        // Загружаем CSS для Intro.js
+        if (!document.querySelector('link[href*="introjs.min.css"]')) {
+            const linkCSS = document.createElement('link');
+            linkCSS.rel = 'stylesheet';
+            linkCSS.href = 'https://cdn.jsdelivr.net/npm/intro.js@7.0.1/minified/introjs.min.css';
+            document.head.appendChild(linkCSS);
+        }
+        
+        // Загружаем JavaScript библиотеку
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/intro.js@7.0.1/minified/intro.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+/**
+ * Запускает обучение для страницы сертификатов пользователя
+ */
+function startUserCertificatesTour() {
+    loadIntroJs().then(() => {
+        const tour = introJs();
+        
+        tour.setOptions({
+            nextLabel: 'Далее',
+            prevLabel: 'Назад',
+      
+            doneLabel: 'Готово',
+            showBullets: true,
+            showProgress: true,
+            disableInteraction: false,
+            scrollToElement: true,
+            overlayOpacity: 0.7,
+            steps: [
+                {
+                    title: 'Добро пожаловать!',
+                    intro: 'Здесь отображаются ваши подарочные сертификаты. Давайте познакомимся с основными функциями.'
+                },
+                {
+                    element: document.querySelector('.folder-system'),
+                    title: 'Система папок',
+                    intro: 'Здесь вы можете организовать ваши сертификаты по папкам для удобного доступа.'
+                },
+                {
+                    element: document.querySelector('button[data-bs-target="#createFolderModal"]'),
+                    title: 'Создание папки',
+                    intro: 'Нажмите на эту кнопку, чтобы создать новую папку для организации ваших сертификатов.'
+                },
+                {
+                    element: document.querySelector('.folder-navigation'),
+                    title: 'Навигация по папкам',
+                    intro: 'Используйте эти кнопки для переключения между папками с сертификатами.'
+                }
+            ]
+        });
+        
+        // Добавляем шаги в зависимости от наличия сертификатов на странице
+        if (document.querySelector('.certificate-card')) {
+            tour.addSteps([
+                {
+                    element: document.querySelector('.certificate-card'),
+                    title: 'Карточка сертификата',
+                    intro: 'Это карточка вашего подарочного сертификата. Нажмите на нее, чтобы открыть детальную информацию.'
+                },
+                {
+                    element: document.querySelector('.certificate-status-badge'),
+                    title: 'Статус сертификата',
+                    intro: 'Здесь показан текущий статус сертификата: активен, использован, истек или отменен.'
+                },
+                
+                {
+                    element: document.querySelector('.certificate-actions'),
+                    title: 'Действия с сертификатом',
+                    intro: 'Здесь находятся кнопки для просмотра и управления сертификатом.'
+                },
+                {
+                    title: 'Дополнительные функции',
+                    intro: 'Длительное нажатие на карточке сертификата или папке откроет дополнительное меню управления.'
+                }
+            ]);
+        } else {
+            tour.addSteps([
+                {
+                    element: document.querySelector('.col-12 .card'),
+                    title: 'Пока нет сертификатов',
+                    intro: 'Здесь будут отображаться ваши подарочные сертификаты, когда они появятся.'
+                }
+            ]);
+        }
+        
+        tour.addStep({
+            title: 'Готово!',
+            intro: 'Теперь вы знаете, как управлять своими подарочными сертификатами. Если у вас возникнут вопросы, вы всегда можете повторить обучение, нажав кнопку "Обучение".'
+        });
+        
+        tour.start();
+    }).catch(error => {
+        console.error('Не удалось загрузить Intro.js:', error);
+        alert('Не удалось загрузить обучение. Пожалуйста, проверьте интернет-соединение и попробуйте снова.');
+    });
+}
+
+// Автоматический запуск обучения при первом посещении страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, было ли уже показано обучение
+    const hasSeenUserTour = localStorage.getItem('user_certificates_tour_seen');
+    
+    // Если обучение еще не было показано
+    if (!hasSeenUserTour) {
+        // Даем небольшую задержку для полной загрузки страницы
+        setTimeout(() => {
+            startUserCertificatesTour();
+            // Отмечаем, что обучение было показано
+            localStorage.setItem('user_certificates_tour_seen', 'true');
+        }, 1000);
     }
 });
 </script>

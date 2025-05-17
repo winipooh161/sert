@@ -5,18 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CertificateTemplate;
 use App\Models\TemplateCategory;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class TemplatesController extends Controller
 {
+    protected $imageService;
+    
     /**
      * Создание нового экземпляра контроллера.
      */
-    public function __construct()
+    public function __construct(ImageService $imageService)
     {
+        $this->imageService = $imageService;
         $this->middleware(['auth', 'role:admin']);
     }
 
@@ -92,9 +96,9 @@ class TemplatesController extends Controller
                 'sort_order' => $validatedData['sort_order'] ?? 0,
             ];
             
+            // Обработка загрузки изображения шаблона
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('templates', 'public');
-                $data['image'] = $path;
+                $data['image'] = $this->imageService->createTemplateImage($request->file('image'), 'templates');
             }
 
             $template = CertificateTemplate::create($data);
@@ -170,13 +174,15 @@ class TemplatesController extends Controller
             // Логируем данные после обработки
             Log::info('Template update processed data:', $data);
             
+            // Обработка загрузки нового изображения шаблона
             if ($request->hasFile('image')) {
-                if ($template->image) {
-                    Storage::disk('public')->delete($template->image);
+                // Удаляем старое изображение, если оно существует
+                if ($template->image && Storage::exists('public/' . $template->image)) {
+                    Storage::delete('public/' . $template->image);
                 }
                 
-                $path = $request->file('image')->store('templates', 'public');
-                $data['image'] = $path;
+                // Сжимаем и сохраняем новое изображение
+                $data['image'] = $this->imageService->createTemplateImage($request->file('image'), 'templates');
             }
 
             // Явное обновление каждого поля для надежности

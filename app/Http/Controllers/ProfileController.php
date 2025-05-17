@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +11,13 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
+    protected $imageService;
+    
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+    
     /**
      * Показать страницу профиля пользователя.
      *
@@ -31,34 +39,38 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'position' => ['nullable', 'string', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:1000'],
-            'avatar' => ['nullable', 'image', 'max:2048'],
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'company' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|max:2048',
+            'company_logo' => 'nullable|image|max:2048',
         ]);
         
-        // Обновляем основные данные
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->company = $request->company;
-        $user->position = $request->position;
-        $user->bio = $request->bio;
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->company = $validated['company'] ?? null;
         
-        // Загрузка аватара
+        // Обработка аватара с использованием сервиса сжатия изображений
         if ($request->hasFile('avatar')) {
-            // Удаляем старый аватар, если он был
-            if ($user->avatar) {
+            // Удаляем старый аватар, если он существует
+            if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
                 Storage::delete('public/' . $user->avatar);
             }
             
-            // Сохраняем новый аватар
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
+            // Сжимаем и сохраняем новый аватар
+            $user->avatar = $this->imageService->createAvatar($request->file('avatar'), 'avatars');
+        }
+        
+        // Обработка логотипа компании
+        if ($request->hasFile('company_logo')) {
+            // Удаляем старый логотип, если он существует
+            if ($user->company_logo && Storage::exists('public/' . $user->company_logo)) {
+                Storage::delete('public/' . $user->company_logo);
+            }
+            
+            // Сжимаем и сохраняем новый логотип
+            $user->company_logo = $this->imageService->createLogo($request->file('company_logo'), 'company_logos');
         }
         
         $user->save();

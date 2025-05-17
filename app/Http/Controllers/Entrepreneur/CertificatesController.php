@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\CertificateTemplate;
 use App\Models\TemplateCategory;
+use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,14 @@ use Illuminate\Support\Str;
 
 class CertificatesController extends Controller
 {
+    protected $imageService;
+    
     /**
      * Создание нового экземпляра контроллера.
      */
-    public function __construct()
+    public function __construct(ImageService $imageService)
     {
+        $this->imageService = $imageService;
         $this->middleware(['auth', 'role:predprinimatel,admin']);
     }
 
@@ -93,41 +97,37 @@ class CertificatesController extends Controller
     public function store(Request $request, CertificateTemplate $template)
     {
         $request->validate([
-            'recipient_name' => ['required', 'string', 'max:255'],
-            'recipient_phone' => ['required', 'string', 'max:20'], // Изменено на required
-            'recipient_email' => ['nullable', 'email', 'max:255'], // Изменено на nullable
-            'amount' => ['required', 'numeric', 'min:0'],
-            'message' => ['nullable', 'string'],
-            'valid_from' => ['required', 'date', 'after_or_equal:today'],
-            'valid_until' => ['required', 'date', 'after:valid_from'],
-            'custom_fields' => ['nullable', 'array'],
-            'logo_type' => ['required', 'in:default,custom,none'],
-            'custom_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Новое поле для обложки
+            'recipient_name' => 'required|string|max:255',
+            'recipient_phone' => 'required|string|max:20',
+            'recipient_email' => 'nullable|email|max:255',
+            'amount' => 'required|numeric|min:0',
+            'valid_from' => 'required|date',
+            'valid_until' => 'required|date|after:valid_from',
+            'message' => 'nullable|string|max:1000',
+            'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        // Удаляем проверку на существующий сертификат с таким же номером телефона
-        // Теперь можно создавать несколько сертификатов для одного номера
-
+        
         // Генерация уникального номера сертификата
-        $certificateNumber = $this->generateCertificateNumber();
-
-        // Обработка логотипа
+        $certificateNumber = 'CERT-' . strtoupper(Str::random(8));
+        
+        // Определяем логотип компании для сертификата
         $companyLogo = null;
+        
         if ($request->logo_type === 'default') {
             // Используем логотип из профиля пользователя
             $companyLogo = Auth::user()->company_logo;
         } elseif ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {
-            // Сохраняем загруженный логотип
-            $companyLogo = $request->file('custom_logo')->store('certificates/logos', 'public');
-        }
-        // Если logo_type === 'none', оставляем $companyLogo = null
-
-        // Обработка загрузки обложки
+            // Обрабатываем загрузку пользовательского логотипа
+            $companyLogo = $this->imageService->createLogo($request->file('custom_logo'), 'company_logos');
+        } // Если logo_type === 'none', то оставляем companyLogo = null
+        
+        // Загрузка обложки сертификата (если есть)
+        $coverImagePath = null;
         if ($request->hasFile('cover_image')) {
-            $coverImagePath = $request->file('cover_image')->store('certificate_covers', 'public');
+            $coverImagePath = $this->imageService->createCover($request->file('cover_image'), 'certificate_covers');
         }
-
+        
         $certificate = new Certificate([
             'certificate_number' => $certificateNumber,
             'recipient_name' => $request->recipient_name,
@@ -142,11 +142,11 @@ class CertificatesController extends Controller
             'status' => 'active',
             'cover_image' => $coverImagePath ?? null, // Сохраняем путь к обложке
         ]);
-
+        
         $certificate->user()->associate(Auth::user());
         $certificate->template()->associate($template);
         $certificate->save();
-
+        
         return redirect()->route('entrepreneur.certificates.index')
             ->with('success', 'Сертификат успешно создан.');
     }
@@ -197,7 +197,7 @@ class CertificatesController extends Controller
             'custom_fields' => 'nullable|array',
             'logo_type' => 'nullable|in:current,default,none',
             'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Добавляем валидацию для обложки
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Добавляем валидацию для обложки
         ]);
         
         // Проверяем, не пытается ли пользователь изменить телефон
@@ -210,17 +210,34 @@ class CertificatesController extends Controller
         // Обновляем обложку, если она загружена
         if ($request->hasFile('cover_image')) {
             // Удаляем старую обложку, если она существует
-            if ($certificate->cover_image) {
-                Storage::disk('public')->delete($certificate->cover_image);
+            if ($certificate->cover_image && Storage::exists('public/' . $certificate->cover_image)) {
+                Storage::delete('public/' . $certificate->cover_image);
             }
             
-            // Загружаем новую обложку
-            $coverImagePath = $request->file('cover_image')->store('certificate_covers', 'public');
-            $certificate->cover_image = $coverImagePath;
+            // Сжимаем и сохраняем новую обложку
+            $certificate->cover_image = $this->imageService->createCover($request->file('cover_image'), 'certificate_covers');
         }
         
         // Продолжение логики обновления сертификата...
-        // ...existing code...
+        $certificate->recipient_name = $request->recipient_name;
+        $certificate->recipient_email = $request->recipient_email;
+        $certificate->amount = $request->amount;
+        $certificate->message = $request->message;
+        $certificate->valid_from = Carbon::parse($request->valid_from);
+        $certificate->valid_until = Carbon::parse($request->valid_until);
+        $certificate->custom_fields = $request->custom_fields;
+        $certificate->status = $request->status;
+        
+        // Обработка пользовательского логотипа
+        if ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {
+            $logoPath = $this->imageService->createLogo($request->file('custom_logo'), 'company_logos');
+            $certificate->company_logo = $logoPath;
+        }
+        
+        $certificate->save();
+
+        return redirect()->route('entrepreneur.certificates.index')
+            ->with('success', 'Сертификат успешно обновлен.');
     }
 
     /**
@@ -284,107 +301,24 @@ class CertificatesController extends Controller
      */
     public function tempLogo(Request $request)
     {
-        try {
-            if (!$request->hasFile('logo')) {
-                return response()->json(['success' => false, 'error' => 'Файл не найден']);
-            }
-
-            $file = $request->file('logo');
-            // Валидация файла
-            if (!$file->isValid() || 
-                !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'gif'])) {
-                return response()->json(['success' => false, 'error' => 'Недопустимый формат файла']);
-            }
-
-            // Проверяем размер файла (макс. 2MB)
-            $maxSize = 2 * 1024 * 1024;
-            if ($file->getSize() > $maxSize) {
-                return response()->json(['success' => false, 'error' => 'Размер файла не должен превышать 2MB']);
-            }
-
-            // Создаем директорию для временных файлов, если она не существует
-            $tempDir = storage_path('app/public/temp/logos');
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0755, true);
-            }
-
-            // Сохраняем файл во временной директории с уникальным именем
-            $fileName = uniqid('logo_') . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('temp/logos', $fileName, 'public');
+        $request->validate([
+            'logo' => 'required|image|max:2048',
+        ]);
+        
+        if ($request->hasFile('logo')) {
+            // Используем сервис для сжатия и сохранения логотипа
+            $logoPath = $this->imageService->createLogo($request->file('logo'), 'temp');
             
-            // Устанавливаем права доступа (для публичного доступа)
-            chmod(storage_path('app/public/' . $path), 0644);
-            
-            // Оптимизируем логотип если это изображение слишком большое
-            try {
-                if (extension_loaded('gd') && $file->getSize() > 500 * 1024) {
-                    $imagePath = storage_path('app/public/' . $path);
-                    $image = imagecreatefromstring(file_get_contents($imagePath));
-                    
-                    if ($image !== false) {
-                        // Получаем текущие размеры
-                        $width = imagesx($image);
-                        $height = imagesy($image);
-                        
-                        // Если изображение слишком большое, уменьшаем его
-                        if ($width > 500 || $height > 500) {
-                            // Вычисляем новые размеры с сохранением пропорций
-                            if ($width > $height) {
-                                $newWidth = 500;
-                                $newHeight = intval($height * ($newWidth / $width));
-                            } else {
-                                $newHeight = 500;
-                                $newWidth = intval($width * ($newHeight / $height));
-                            }
-                            
-                            // Создаем новое изображение
-                            $newImage = imagecreatetruecolor($newWidth, $newHeight);
-                            
-                            // Для PNG сохраняем прозрачность
-                            if ($file->getClientOriginalExtension() == 'png') {
-                                imagealphablending($newImage, false);
-                                imagesavealpha($newImage, true);
-                                $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
-                                imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
-                            }
-                            
-                            // Изменяем размер
-                            imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-                            
-                            // Сохраняем изображение
-                            if ($file->getClientOriginalExtension() == 'png') {
-                                imagepng($newImage, $imagePath);
-                            } else {
-                                imagejpeg($newImage, $imagePath, 85);
-                            }
-                            
-                            // Освобождаем память
-                            imagedestroy($newImage);
-                        }
-                        imagedestroy($image);
-                    }
-                }
-            } catch (\Exception $e) {
-                // Неудача при оптимизации не должна прерывать работу
-                \Log::warning('Ошибка при оптимизации логотипа: ' . $e->getMessage());
-            }
-            
-            // Формируем полный URL к файлу с временной меткой для предотвращения кеширования
-            $url = asset('storage/' . $path) . '?t=' . time();
-
             return response()->json([
-                'success' => true, 
-                'logo_url' => $url,
-                'file_name' => $fileName,
-                'path' => $path
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Ошибка при обработке временного логотипа: ' . $e->getMessage());
-            return response()->json([
-                'success' => false, 
-                'error' => 'Ошибка при обработке изображения: ' . $e->getMessage()
+                'success' => true,
+                'logo_url' => asset('storage/' . $logoPath)
             ]);
         }
+        
+        return response()->json([
+            'success' => false,
+            'error' => 'Ошибка загрузки логотипа'
+        ], 400);
     }
 
     /**

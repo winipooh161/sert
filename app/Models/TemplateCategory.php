@@ -30,22 +30,14 @@ class TemplateCategory extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
     ];
-
+    
     /**
-     * Шаблоны, принадлежащие к данной категории
+     * Получить все шаблоны, принадлежащие к данной категории.
      */
     public function templates()
     {
-        return $this->hasMany(CertificateTemplate::class, 'category_id');
-    }
-
-    /**
-     * Получить полный путь к директории категории
-     */
-    public function getDirectoryPathAttribute()
-    {
-        return public_path('templates/' . $this->directory_name);
+        return $this->hasMany(Template::class, 'category_id');
     }
 }

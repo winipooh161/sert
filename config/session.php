@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
@@ -31,7 +30,7 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    'lifetime' => env('SESSION_LIFETIME', 10080), // 7 дней (10080 минут)
 
     'expire_on_close' => false,
 
@@ -197,5 +196,4 @@ return [
     */
 
     'same_site' => 'lax',
-
 ];
