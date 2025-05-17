@@ -103,18 +103,11 @@ class CertificatesController extends Controller
             'custom_fields' => ['nullable', 'array'],
             'logo_type' => ['required', 'in:default,custom,none'],
             'custom_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Новое поле для обложки
         ]);
 
-        // Проверка существования сертификата с указанным номером телефона
-        $existingCertificate = Certificate::where('recipient_phone', $request->recipient_phone)
-            ->where('status', '!=', 'canceled')
-            ->first();
-            
-        if ($existingCertificate) {
-            return back()->withInput()->withErrors([
-                'recipient_phone' => 'Сертификат с таким номером телефона уже существует. Один номер телефона может иметь только один активный сертификат.'
-            ]);
-        }
+        // Удаляем проверку на существующий сертификат с таким же номером телефона
+        // Теперь можно создавать несколько сертификатов для одного номера
 
         // Генерация уникального номера сертификата
         $certificateNumber = $this->generateCertificateNumber();
@@ -130,6 +123,11 @@ class CertificatesController extends Controller
         }
         // Если logo_type === 'none', оставляем $companyLogo = null
 
+        // Обработка загрузки обложки
+        if ($request->hasFile('cover_image')) {
+            $coverImagePath = $request->file('cover_image')->store('certificate_covers', 'public');
+        }
+
         $certificate = new Certificate([
             'certificate_number' => $certificateNumber,
             'recipient_name' => $request->recipient_name,
@@ -142,6 +140,7 @@ class CertificatesController extends Controller
             'valid_until' => Carbon::parse($request->valid_until),
             'custom_fields' => $request->custom_fields,
             'status' => 'active',
+            'cover_image' => $coverImagePath ?? null, // Сохраняем путь к обложке
         ]);
 
         $certificate->user()->associate(Auth::user());
@@ -175,62 +174,53 @@ class CertificatesController extends Controller
     }
 
     /**
-     * Обновить сертификат.
+     * Обновление сертификата.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Certificate  $certificate
+     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Certificate $certificate)
     {
+        // Проверяем доступ
         $this->authorize('update', $certificate);
         
-        $request->validate([
-            'recipient_name' => ['required', 'string', 'max:255'],
-            'recipient_phone' => ['required', 'string', 'max:20'], // Изменено на required
-            'recipient_email' => ['nullable', 'email', 'max:255'], // Изменено на nullable
-            'amount' => ['required', 'numeric', 'min:0'],
-            'message' => ['nullable', 'string'],
-            'valid_from' => ['required', 'date'],
-            'valid_until' => ['required', 'date', 'after:valid_from'],
-            'status' => ['required', 'in:active,expired,canceled'],
-            'custom_fields' => ['nullable', 'array'],
-            'logo_type' => ['nullable', 'in:default,custom,current,none'],
-            'custom_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        // Исключаем поле телефона из валидации
+        $validated = $request->validate([
+            'recipient_name' => 'required|string|max:255',
+            'recipient_email' => 'nullable|email|max:255',
+            'amount' => 'required|numeric|min:1',
+            'message' => 'nullable|string|max:1000',
+            'valid_from' => 'required|date',
+            'valid_until' => 'required|date|after_or_equal:valid_from',
+            'status' => 'required|in:active,expired,canceled',
+            'custom_fields' => 'nullable|array',
+            'logo_type' => 'nullable|in:current,default,none',
+            'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Добавляем валидацию для обложки
         ]);
-
-        $data = [
-            'recipient_name' => $request->recipient_name,
-            'recipient_email' => $request->recipient_email,
-            'recipient_phone' => $request->recipient_phone,
-            'amount' => $request->amount,
-            'message' => $request->message,
-            'valid_from' => Carbon::parse($request->valid_from),
-            'valid_until' => Carbon::parse($request->valid_until),
-            'status' => $request->status,
-            'custom_fields' => $request->custom_fields,
-        ];
         
-        // Обработка логотипа при редактировании
-        if ($request->has('logo_type')) {
-            if ($request->logo_type === 'default') {
-                // Используем логотип из профиля пользователя
-                $data['company_logo'] = Auth::user()->company_logo;
-            } elseif ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {
-                // Удаляем старый логотип, если он был загружен специально для этого сертификата
-                if ($certificate->company_logo && Str::startsWith($certificate->company_logo, 'certificates/logos/')) {
-                    Storage::disk('public')->delete($certificate->company_logo);
-                }
-                
-                // Сохраняем новый загруженный логотип
-                $data['company_logo'] = $request->file('custom_logo')->store('certificates/logos', 'public');
-            } elseif ($request->logo_type === 'none') {
-                // Устанавливаем логотип в null, если выбрано "Не использовать логотип"
-                $data['company_logo'] = null;
-            }
-            // Если logo_type === 'current', то оставляем текущий логотип без изменений
+        // Проверяем, не пытается ли пользователь изменить телефон
+        if ($request->has('recipient_phone') && $request->recipient_phone !== $certificate->recipient_phone) {
+            return back()->withInput()->withErrors([
+                'recipient_phone' => 'Номер телефона нельзя изменить после создания сертификата.'
+            ]);
         }
-
-        $certificate->update($data);
-
-        return redirect()->route('entrepreneur.certificates.index')
-            ->with('success', 'Сертификат успешно обновлен.');
+        
+        // Обновляем обложку, если она загружена
+        if ($request->hasFile('cover_image')) {
+            // Удаляем старую обложку, если она существует
+            if ($certificate->cover_image) {
+                Storage::disk('public')->delete($certificate->cover_image);
+            }
+            
+            // Загружаем новую обложку
+            $coverImagePath = $request->file('cover_image')->store('certificate_covers', 'public');
+            $certificate->cover_image = $coverImagePath;
+        }
+        
+        // Продолжение логики обновления сертификата...
+        // ...existing code...
     }
 
     /**

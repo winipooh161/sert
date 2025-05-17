@@ -112,6 +112,31 @@
                             </div>
                         </div>
                         
+                        <!-- Обложка сертификата -->
+                        <div class="mb-3 mb-md-4">
+                            <h6 class="fw-bold mb-2 mb-md-3 fs-7 fs-md-6">Обложка сертификата</h6>
+                            
+                            @if($certificate->cover_image)
+                                <div class="mb-3">
+                                    <label class="form-label small">Текущая обложка</label>
+                                    <div class="current-cover-image p-2 border rounded text-center">
+                                        <img src="{{ asset('storage/' . $certificate->cover_image) }}" 
+                                             class="img-fluid rounded" style="max-height: 150px;" alt="Обложка сертификата">
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <div class="mb-3">
+                                <label for="cover_image" class="form-label small">Загрузить новую обложку</label>
+                                <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
+                                    id="cover_image" name="cover_image" accept="image/*">
+                                <div class="form-text small">Оставьте поле пустым, чтобы сохранить текущую обложку.</div>
+                                @error('cover_image')
+                                    <span class="invalid-feedback small">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        
                         <!-- Логотип компании - компактный вариант для мобильных -->
                         <div class="mb-3 mb-md-4">
                             <h6 class="fw-bold mb-2 mb-md-3 fs-7 fs-md-6">Логотип компании</h6>

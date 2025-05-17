@@ -19,3 +19,12 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+<IfModule mod_headers.c>
+    # Разрешаем CORS для ресурсов Vite в режиме разработки
+    <FilesMatch "\.(js|css|json)$">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, OPTIONS"
+        Header set Access-Control-Allow-Headers "Content-Type, Accept, X-Requested-With, X-CSRF-TOKEN"
+    </FilesMatch>
+</IfModule>

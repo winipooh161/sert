@@ -48,7 +48,7 @@
                 <div class="role-switcher">
                     <form action="{{ route('role.switch') }}" method="POST" id="roleSwitchForm">
                         @csrf
-                        <div class="form-text mb-1 small">Переключение режима:</div>
+                        <div class="form-text mb-1 small ">Режим:</div>
                         <div class="btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="role" id="role_predprinimatel" value="predprinimatel" 
                                 {{ Auth::user()->hasRole('predprinimatel') && !session('active_role') || session('active_role') == 'predprinimatel' ? 'checked' : '' }}
@@ -64,9 +64,7 @@
                                 <i class="fa-solid fa-user me-1"></i>Клиент
                             </label>
                         </div>
-                        <div class="form-text mt-1 small text-center">
-                            <i class="fa-solid fa-info-circle me-1"></i>Вы можете получить обе роли
-                        </div>
+                     
                     </form>
                 </div>
             </div>

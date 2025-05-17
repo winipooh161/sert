@@ -184,4 +184,15 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(f
 Route::get('certificates/{certificate}/print', 
     [App\Http\Controllers\CertificatePrintController::class, 'printPublic'])
     ->name('certificates.print');
+// Маршруты для управления папками сертификатов
+Route::prefix('user/folders')->name('user.folders.')->middleware(['auth', 'role:user'])->group(function () {
+    Route::post('/', [App\Http\Controllers\User\CertificateFolderController::class, 'store'])->name('store');
+    Route::put('/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'update'])->name('update');
+    Route::delete('/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'destroy'])->name('destroy');
+});
 
+// Маршруты для добавления/удаления сертификатов из папок
+Route::post('/user/certificates/{certificate}/add-to-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'addCertificate'])->name('user.certificates.add-to-folder');
+Route::delete('/user/certificates/{certificate}/remove-from-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'removeCertificate'])->name('user.certificates.remove-from-folder');
+// Новый маршрут для получения списка папок сертификата
+Route::get('/user/certificates/{certificate}/folders', [App\Http\Controllers\User\CertificateFolderController::class, 'getCertificateFolders'])->name('user.certificates.folders');

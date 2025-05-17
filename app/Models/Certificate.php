@@ -20,7 +20,8 @@ class Certificate extends Model
         'recipient_phone',
         'amount',
         'message',
-        'company_logo', // Добавляем новое поле
+        'company_logo',
+        'cover_image', // Добавляем новое поле
         'custom_fields',
         'valid_from',
         'valid_until',
@@ -65,5 +66,37 @@ class Certificate extends Model
     public function template()
     {
         return $this->belongsTo(CertificateTemplate::class, 'certificate_template_id');
+    }
+
+    /**
+     * Получить URL изображения обложки сертификата.
+     *
+     * @return string
+     */
+    public function getCoverImageUrlAttribute()
+    {
+        if ($this->cover_image) {
+            return asset('storage/' . $this->cover_image);
+        }
+        
+        // Возвращаем URL изображения шаблона, если обложка не задана
+        return $this->template && $this->template->image 
+            ? asset('storage/' . $this->template->image) 
+            : asset('images/certificate-placeholder.jpg');
+    }
+
+    /**
+     * Папки, в которых находится сертификат
+     */
+    public function folders()
+    {
+        // Явно указываем столбцы связующей таблицы
+        return $this->belongsToMany(
+            CertificateFolder::class, 
+            'certificate_folder', 
+            'certificate_id', 
+            'certificate_folder_id'
+        )
+        ->withTimestamps();
     }
 }

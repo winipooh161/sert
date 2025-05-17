@@ -5,12 +5,12 @@
     "src": "resources/css/app.css"
   },
   "resources/css/lk.css": {
-    "file": "assets/lk-c8e52e68.css",
+    "file": "assets/lk-a0094bb3.css",
     "isEntry": true,
     "src": "resources/css/lk.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-3d543ef4.js",
+    "file": "assets/app-7840a376.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

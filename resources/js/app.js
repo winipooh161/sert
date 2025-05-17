@@ -9,19 +9,94 @@ window.IMask = IMask;
 // Импортируем функции для управления боковой панелью
 import { initSidebar, initSidebarCollapse } from './sidebar';
 
+/**
+ * Безопасная функция вибрации, которая проверяет поддержку и не вызывает ошибок
+ * Использует проверку на взаимодействие пользователя с документом
+ * @param {number|number[]} pattern - Длительность вибрации или массив с паттерном
+ */
+window.safeVibrate = function(pattern) {
+    try {
+        // Проверяем поддержку вибрации и взаимодействие пользователя с документом
+        if (navigator.vibrate && typeof navigator.vibrate === 'function' && 
+            document.hasFocus() && document.wasInteractedWith) {
+            navigator.vibrate(pattern);
+        }
+    } catch (e) {
+        console.warn('Vibration API не поддерживается или недоступна', e);
+    }
+};
+
+// Добавляем флаг для отслеживания взаимодействия пользователя с документом
+document.wasInteractedWith = false;
+document.addEventListener('click', function() {
+    document.wasInteractedWith = true;
+}, { once: false, passive: true, capture: true });
+
+document.addEventListener('touchstart', function() {
+    document.wasInteractedWith = true;
+}, { once: false, passive: true, capture: true });
+
+/**
+ * Улучшенная функция для выполнения AJAX-запросов с обработкой ошибок
+ * @param {string} url - URL для запроса
+ * @param {Object} options - Параметры fetch
+ * @returns {Promise} - Promise с результатом
+ */
+window.fetchWithErrorHandling = async function(url, options = {}) {
+    try {
+        // Добавляем CSRF-токен к запросам
+        if (!options.headers) {
+            options.headers = {};
+        }
+        
+        if (!options.headers['Content-Type'] && !options.headers['content-type']) {
+            options.headers['Content-Type'] = 'application/json';
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            options.headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+        
+        const response = await fetch(url, options);
+        
+        // Проверяем статус ответа
+        if (!response.ok) {
+            const contentType = response.headers.get('content-type');
+            let errorData = {};
+            
+            // Пытаемся распарсить ошибку как JSON, если это возможно
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    console.error('Не удалось распарсить JSON ответ', e);
+                }
+            } else {
+                errorData.message = `Ошибка HTTP: ${response.status} ${response.statusText}`;
+            }
+            
+            throw new Error(errorData.message || `Ошибка HTTP: ${response.status}`);
+        }
+        
+        // Проверяем, есть ли контент в ответе
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        } else {
+            return response.text();
+        }
+    } catch (error) {
+        console.error('Ошибка при выполнении запроса:', error);
+        throw error;
+    }
+};
+
 // Функция инициализации масок ввода и валидации полей
 function initInputMasks() {
-    // Маска для телефона в формате +7 (XXX) XXX-XX-XX
-    const phoneInputs = document.querySelectorAll('input[type="tel"], input[name="phone"]');
-    if (phoneInputs.length > 0) {
-        phoneInputs.forEach(input => {
-            IMask(input, {
-                mask: '+7 (000) 000-00-00',
-                lazy: false,
-                placeholderChar: '_'
-            });
-        });
-    }
+    // Маска для телефона в формате +7 (XXX
+    // ) XXX-XX-XX
+  
     
     // Валидация для имени (только русские буквы)
     const nameInputs = document.querySelectorAll('input[name="name"]');

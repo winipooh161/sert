@@ -30,14 +30,45 @@
         <!-- ===================== МОБИЛЬНАЯ ШАПКА ===================== -->
         <header class="navbar navbar-expand-lg sticky-top bg-white border-bottom d-lg-none">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                
-                <!-- Кнопка переключения бокового меню -->
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+               <div class="sidebar-user d-flex align-items-center border-bottom ">
+                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                <div class="avatar-wrapper rounded-circle overflow-hidden flex-shrink-0" style="">
+                    @if(Auth::user()->avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-100 h-100 object-fit-cover">
+                    @else
+                        <div class="w-100 h-100 bg-primary text-white d-flex align-items-center justify-content-center">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                    @endif
+                </div>
+                <div class="user-info overflow-hidden">
+                    <h6 class="mb-0 sidebar-user-name text-truncate">{{ Auth::user()->name }}</h6>
+                   
+                </div>
+            </div>
+                
+                <!-- Кнопка переключения бокового меню -->
+               <!-- Кнопка быстрого создания сертификата -->
+            @if(Auth::user()->hasRole('predprinimatel') && session('active_role') != 'predprinimatel')
+            <div class="ms-auto">
+                <form action="{{ route('role.switch') }}" method="POST" id="quickCreateForm">
+                    @csrf
+                    <input type="hidden" name="role" value="predprinimatel">
+                    <input type="hidden" name="redirect" value="{{ route('entrepreneur.certificates.select-template') }}">
+                    <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;" title="Создать сертификат">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </form>
+            </div>
+            @elseif(Auth::user()->hasRole('predprinimatel'))
+            <div class="ms-auto">
+                <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;" title="Создать сертификат">
+                    <i class="fa-solid fa-plus"></i>
+                </a>
+            </div>
+            @endif
             </div>
         </header>
 

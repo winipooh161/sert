@@ -150,6 +150,19 @@
                                     @enderror
                                 </div>
                                 
+                                <!-- Добавляем блок загрузки обложки сертификата -->
+                                <div class="mb-2 mb-sm-3">
+                                    <label for="cover_image" class="form-label small">Обложка сертификата *</label>
+                                    <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
+                                        id="cover_image" name="cover_image" accept="image/*" required>
+                                    @error('cover_image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text small">Обязательное поле. Загрузите изображение, которое будет отображаться в карточке сертификата. Рекомендуемый размер: 500x300px.</div>
+                                    
+                                    <div id="cover_image_preview" class="mt-2 text-center"></div>
+                                </div>
+
                                 <!-- Кнопки управления формой -->
                                 <div class="d-grid gap-1 gap-sm-2 mt-3">
                                     <button type="submit" class="btn btn-primary btn-sm">
@@ -575,6 +588,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tabletButton = document.querySelector('[data-device="tablet"]');
                 if (tabletButton) tabletButton.click();
             }
+        }
+    });
+    
+    // Предпросмотр изображения обложки сертификата
+    const coverImageInput = document.getElementById('cover_image');
+    const coverImagePreview = document.getElementById('cover_image_preview');
+    
+    coverImageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                coverImagePreview.innerHTML = `
+                    <div class="card shadow-sm">
+                        <div class="card-body p-2">
+                            <h6 class="card-title small mb-2">Предпросмотр обложки</h6>
+                            <img src="${e.target.result}" class="img-fluid rounded mb-2" style="max-height: 200px;" alt="Предпросмотр обложки">
+                            <p class="text-muted mb-0 small">Так обложка будет выглядеть в карточке сертификата</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            reader.readAsDataURL(this.files[0]);
         }
     });
     

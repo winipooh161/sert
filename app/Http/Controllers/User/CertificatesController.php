@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
+use App\Models\CertificateFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,6 +37,22 @@ class CertificatesController extends Controller
                 }
             });
         
+        // Получаем папки пользователя
+        $folders = CertificateFolder::where('user_id', Auth::id())->get();
+        
+        // Если выбрана папка, получаем только сертификаты из этой папки
+        $currentFolder = null;
+        if ($request->has('folder') && !empty($request->folder)) {
+            $currentFolder = CertificateFolder::where('id', $request->folder)
+                                            ->where('user_id', Auth::id())
+                                            ->first();
+            
+            if ($currentFolder) {
+                $certificateIds = $currentFolder->certificates->pluck('id')->toArray();
+                $query->whereIn('id', $certificateIds);
+            }
+        }
+        
         // Фильтр по статусу
         if ($request->has('status') && !empty($request->status)) {
             $query->where('status', $request->status);
@@ -48,13 +65,19 @@ class CertificatesController extends Controller
         }
         
         // Получение результатов с пагинацией и сохранение параметров запроса
-        $certificates = $query->latest()->paginate(10)->withQueryString();
+        $certificates = $query->latest()->paginate(9)->withQueryString();
         
         // Дополнительная статистика
         $activeCount = $query->where('status', 'active')->count();
         $totalAmount = $query->where('status', 'active')->sum('amount');
         
-        return view('user.certificates.index', compact('certificates', 'activeCount', 'totalAmount'));
+        return view('user.certificates.index', compact(
+            'certificates',
+            'folders',
+            'currentFolder',
+            'activeCount',
+            'totalAmount'
+        ));
     }
 
     // Метод show удален, т.к. пользователи больше не могут видеть детали сертификата через LK

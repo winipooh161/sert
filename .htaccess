@@ -1,7 +1,14 @@
+<IfModule mod_headers.c>
+    # Разрешаем CORS для ресурсов Vite в режиме разработки
+    <FilesMatch "\.(js|css|json)$">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, OPTIONS"
+        Header set Access-Control-Allow-Headers "Content-Type, Accept, X-Requested-With, X-CSRF-TOKEN"
+    </FilesMatch>
+</IfModule>
 
+# Перенаправление на public/index.php
 <IfModule mod_rewrite.c>
-    RewriteEngine on
-    AddDefaultCharset UTF-8
-    RewriteCond %{REQUEST_URI} !^public
+    RewriteEngine On
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
