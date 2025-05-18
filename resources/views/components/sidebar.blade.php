@@ -105,6 +105,12 @@
                                 <span class="sidebar-text">Сертификаты</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Route::is('admin.animation-effects.*') ? 'active' : '' }}" href="{{ route('admin.animation-effects.index') }}">
+                                <i class="fa-solid fa-wand-sparkles sidebar-icon"></i>
+                                <span class="sidebar-text">Анимационные эффекты</span>
+                            </a>
+                        </li>
                     @endif
                     
                     @php

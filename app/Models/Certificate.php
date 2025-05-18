@@ -21,7 +21,8 @@ class Certificate extends Model
         'amount',
         'message',
         'company_logo',
-        'cover_image', // Добавляем новое поле
+        'cover_image',
+        'animation_effect_id', // Добавляем новое поле
         'custom_fields',
         'valid_from',
         'valid_until',
@@ -98,5 +99,13 @@ class Certificate extends Model
             'certificate_folder_id'
         )
         ->withTimestamps();
+    }
+
+    /**
+     * Анимационный эффект сертификата
+     */
+    public function animationEffect()
+    {
+        return $this->belongsTo(AnimationEffect::class);
     }
 }

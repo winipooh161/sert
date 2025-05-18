@@ -390,7 +390,7 @@ form .mb-3:last-child {
 .certificate-preview-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100%;
     position: relative;
     transition: all 0.3s ease;
@@ -854,4 +854,135 @@ iframe#certificatePreview {
 .card-body.p-3.flex {
     padding-bottom: 45px !important; /* Достаточно места для кнопок */
     min-height: 80px; /* Минимальная высота для корректного отображения */
+}
+.certificate-editor {
+    min-height: calc(100vh - 100px);
+    background-color: #f8f9fa;
+    padding-bottom: 20px;
+}
+
+.editor-header {
+    background-color: white;
+    border-bottom: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+}
+
+/* Стили для табов */
+.nav-tabs .nav-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: -1px;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.nav-tabs .nav-link:hover, 
+.nav-tabs .nav-link:focus {
+    border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 991.98px) {
+    .certificate-preview-container {
+        min-height: 350px;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .editor-body {
+        padding-bottom: 15px;
+    }
+    
+    .certificate-preview-wrapper {
+        max-height: 50vh !important;
+    }
+    
+    .certificate-preview-iframe {
+        height: 50vh !important;
+    }
+    
+    .fs-7 {
+        font-size: 0.8rem !important;
+    }
+    
+    .form-text {
+        margin-top: 0.15rem;
+        font-size: 0.7rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .form-control-sm, .form-select-sm {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .input-group-text.small {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .form-check-label.small {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Улучшенный стиль для мобильного iframe */
+@media (max-width: 575.98px) {
+    .certificate-preview-container {
+        min-height: 300px;
+    }
+    
+    .certificate-preview-wrapper {
+        max-height: 40vh !important;
+    }
+    
+    #certificatePreview {
+        min-height: auto !important;
+        height: 40vh !important;
+    }
+    
+    .device-toggle .btn {
+        padding: 0.2rem 0.4rem !important;
+    }
+    
+    /* Для экономии места на мобильных устройствах */
+    .card-header-tabs .nav-link {
+        padding: 0.3rem 0.5rem !important;
+    }
+}
+
+/* Фикс для iPhone SE и других маленьких устройств */
+@media (max-width: 375px) {
+   
+    
+    .card-body, .card-header, .card-footer {
+        padding: 0.5rem !important;
+    }
+    
+    .certificate-preview-container {
+        min-height: 250px;
+    }
+    
+    /* Уменьшаем размер табов на очень маленьких экранах */
+    .card-header-tabs .nav-link {
+        padding: 0.25rem 0.35rem !important;
+        font-size: 0.7rem !important;
+    }
 }

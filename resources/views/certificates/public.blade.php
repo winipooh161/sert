@@ -32,6 +32,10 @@
     <meta name="author" content="{{ $certificate->user->company ?? config('app.name') }}">
     <meta name="robots" content="index, follow">
     
+    <!-- Стили -->
+    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+
     <!-- Структурированные данные JSON-LD -->
     <script type="application/ld+json">
     {
@@ -59,451 +63,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
 
+    <!-- Стили для анимационных эффектов -->
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-        
-        /* Основной контейнер */
-        .main-container {
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        /* Секция с обложкой */
-        .cover-section {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            background-color: #000;
-        }
-        
-        /* Контейнер для обложки */
-        .cover-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Обложка сертификата */
-        .cover-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-            transform: scale(1);
-        }
-        
-        /* Анимация появления обложки */
-        @keyframes fadeInCover {
-            from { opacity: 0; transform: scale(1.1); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .cover-image {
-            animation: fadeInCover 1.5s ease forwards;
-        }
-        
-        /* Затемнение поверх обложки */
-        .cover-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, 
-                rgba(0,0,0,0.2) 0%, 
-                rgba(0,0,0,0.3) 70%, 
-                rgba(0,0,0,0.7) 100%);
-            z-index: 2;
-        }
-        
-        /* Название и информация о сертификате */
-      .cover-info {
-    position: absolute;
-    bottom: 180px;
-    left: 0;
-    width: 100%;
-     padding: 0 0px;
-    color: white;
-    z-index: 3;
-    text-align: center;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-        
-        .cover-info h1 {
-            font-size: 32px;
-            margin: 0 0 10px;
-            font-weight: 700;
-        }
-        
-        .cover-info p {
-            font-size: 18px;
-            margin: 5px 0;
-            opacity: 0.9;
-        }
-        
-        /* Индикатор свайпа/скролла */
-        .swipe-indicator {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: white;
-            z-index: 3;
-            animation: bounce 2s infinite;
-            width: 100px;
-        }
-        
-        .swipe-indicator i {
-            font-size: 24px;
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .swipe-indicator span {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        /* Анимация индикатора */
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-            40% { transform: translateY(-15px) translateX(-50%); }
-            60% { transform: translateY(-7px) translateX(-50%); }
-        }
-        
-        /* Секция с сертификатом */
-        .certificate-section {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            background-color: #fff;
-        }
-        
-        .certificate-container {
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        iframe#certificate-frame {
-            height: 100vh;
-            width: 100%;
-            border: none;
-            display: block;
-        }
-        
-        /* Для состояния после скролла/свайпа */
-        .scrolled .cover-section {
-            transform: translateY(-100%);
-        }
-        
-        .scrolled .certificate-section {
-            transform: translateY(-100%);
-        }
-        
-        /* Стили для QR-кода администратора */
-        .admin-qr-code {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-qr-code img {
-            max-width: 150px;
-            height: auto;
-        }
-        
-        .admin-qr-code p {
-            margin: 5px 0;
-            font-size: 12px;
-            color: #555;
-        }
-        
-        /* Адаптивные стили */
-        @media (max-width: 768px) {
-            .admin-qr-code {
-                bottom: 10px;
-                right: 10px;
-                padding: 8px;
-            }
-            
-            .admin-qr-code img {
-                max-width: 100px;
-            }
-            
-            .cover-info h1 {
-                font-size: 24px;
-            }
-            
-            .cover-info p {
-                font-size: 14px;
-            }
-            
-            .swipe-indicator i {
-                font-size: 20px;
-            }
-            
-            .swipe-indicator span {
-                font-size: 12px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .admin-qr-code {
-                bottom: 5px;
-                right: 5px;
-                padding: 5px;
-            }
-            
-            .admin-qr-code img {
-                max-width: 80px;
-            }
-            
-            .admin-qr-code p {
-                font-size: 10px;
-            }
-            
-            .cover-info {
-                bottom: 60px;
-                padding: 0 0px;
-            }
-            
-            .cover-info h1 {
-                font-size: 20px;
-            }
-            
-            .cover-info p {
-                font-size: 13px;
-            }
-        }
-        
-        /* Добавляем кнопку для скрытия/показа QR кода на мобильных устройствах */
-        .admin-qr-toggle {
-            display: none;
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            text-align: center;
-            line-height: 40px;
-            z-index: 1001;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        
-        @media (max-width: 480px) {
-            .admin-qr-toggle {
-                display: block;
-            }
-            
-            .admin-qr-code {
-                transform: translateY(200%);
-                opacity: 0;
-                visibility: hidden;
-            }
-            
-            .admin-qr-code.visible {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-        }
-        
-        /* Стили для модального окна QR-кода на весь экран */
-        .qr-fullscreen-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .qr-fullscreen-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-        
-        .qr-fullscreen-content {
-            text-align: center;
-            max-width: 90%;
-        }
-        
-        .qr-fullscreen-content img {
-            max-width: 80%;
-            max-height: 70vh;
-            margin-bottom: 20px;
-        }
-        
-        .qr-fullscreen-content p {
-            color: white;
-            font-size: 16px;
-            margin: 15px 0;
-        }
-        
-        .qr-close-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: transparent;
-            border: 2px solid white;
-            color: white;
-            font-size: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .qr-close-button:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Стили для кнопки печати */
-        .print-button {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-
-        .print-button .btn {
-            color: #000;
-            background: #fff;
-            border-radius: 20px;
-            border: none;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .print-button .btn:hover {
-            transform: scale(1.1);
-        }
-
-        /* Стили для модального окна выбора формата печати */
-        .print-options-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .print-options-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .print-options-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-            position: relative;
-        }
-
-        .print-close-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: transparent;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .print-format-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* Адаптивность для мобильных устройств */
-        @media (max-width: 768px) {
-            .print-button {
-                bottom: 20px;
-                left: 10px;
-            }
-            
-            .print-button .btn {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-            
-            /* На мобильных показываем текст о свайпе */
-            .swipe-indicator span.desktop-text {
-                display: none;
-            }
-        }
-        
-        /* Для десктопов показываем текст о скролле */
-        @media (min-width: 769px) {
-            .swipe-indicator span.mobile-text {
-                display: none;
-            }
-        }
+     
     </style>
 </head>
 <body>
@@ -517,7 +79,11 @@
                 <div class="cover-info">
                     <h1>Подарочный сертификат</h1>
                     <p>{{ $certificate->recipient_name }}</p>
-                    <p>на сумму {{ number_format($certificate->amount, 0, '.', ' ') }} ₽</p>
+                    <p>на сумму {{ number_format($certificate->amount, 0, '.', ' ') }} ₽</p><br>
+                    <p class="certificate-timer">Дней до окончания сертификата: <br>
+                        <span id="daysRemaining" class="days-remaining">{{ $certificate->valid_until->diffInDays(now()) }}</span>
+                        <span id="daysText">{{ $certificate->valid_until->diffInDays(now()) == 1 ? 'день' : ($certificate->valid_until->diffInDays(now()) >= 2 && $certificate->valid_until->diffInDays(now()) <= 4 ? 'дня' : 'дней') }}</span>
+                    </p>
                 </div>
                 
                 <div class="swipe-indicator" id="swipeIndicator">
@@ -585,6 +151,11 @@
             </div>
         </div>
     </div>
+    
+    <!-- Убираем кнопку для запуска анимационного эффекта -->
+    
+    <!-- Контейнер для анимационного эффекта -->
+    <div class="animation-effect-container" id="animationEffectContainer"></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -593,6 +164,8 @@
         const certificateSection = document.getElementById('certificateSection');
         const swipeIndicator = document.getElementById('swipeIndicator');
         const iframe = document.getElementById('certificate-frame');
+        const animationEffectContainer = document.getElementById('animationEffectContainer');
+        let animationTriggered = false; // Флаг для отслеживания запуска анимации
         
         // Получаем URL логотипа
         const logoUrl = '{{ $certificate->company_logo === null ? "none" : ($certificate->company_logo ? asset("storage/" . $certificate->company_logo) : ($certificate->user->company_logo ? asset("storage/" . $certificate->user->company_logo) : asset("images/default-logo.png"))) }}';
@@ -601,6 +174,19 @@
         // Функция для перехода к сертификату
         function showCertificate() {
             mainContainer.classList.add('scrolled');
+            
+            // Запускаем анимационный эффект автоматически при скролле к сертификату
+            // если он не был запущен ранее
+            if (!animationTriggered) {
+                animationTriggered = true;
+                loadAnimationEffect().then(() => {
+                    if (effectData) {
+                        setTimeout(() => {
+                            launchAnimationEffect();
+                        }, 500); // Небольшая задержка для плавности
+                    }
+                });
+            }
         }
         
         // Функция для возврата к обложке
@@ -696,6 +282,11 @@
                     console.warn("Не удалось обновить логотип:", event.data.error);
                 }
             }
+            
+            // Реагируем на сообщение о загрузке сертификата
+            if (event.data && event.data.type === 'certificate_loaded') {
+                console.log("Получено уведомление о загрузке сертификата:", event.data.template);
+            }
         });
         
         // Для iframe, которые могли быть загружены до установки обработчиков
@@ -738,7 +329,7 @@
             }
         });
         
-        // Закрытие по нажатию клавиши ESC
+        // Закрытие по нажатии клавиши ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && qrFullscreen.classList.contains('active')) {
                 qrFullscreen.classList.remove('active');
@@ -762,12 +353,195 @@
         }
     });
 
-    // Закрытие по нажатию Esc
+    // Закрытие по нажатия Esc
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && document.getElementById('printOptionsOverlay').classList.contains('active')) {
             hidePrintOptions();
         }
     });
+
+    // Добавляем функцию для обновления оставшихся дней и склонения слова
+    function updateDaysRemaining() {
+        // Получаем даты из сертификата
+        const validUntilDate = new Date('{{ $certificate->valid_until }}');
+        const currentDate = new Date();
+        
+        // Вычисляем разницу в днях
+        const timeDiff = validUntilDate - currentDate;
+        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        // Получаем элементы для обновления
+        const daysRemainingElement = document.getElementById('daysRemaining');
+        const daysTextElement = document.getElementById('daysText');
+        
+        // Обновляем число дней
+        daysRemainingElement.textContent = daysDiff > 0 ? daysDiff : 0;
+        
+        // Функция для правильного склонения слова "день"
+        function getDaysDeclension(days) {
+            if (days % 10 === 1 && days % 100 !== 11) {
+                return 'день';
+            } else if ([2, 3, 4].includes(days % 10) && ![12, 13, 14].includes(days % 100)) {
+                return 'дня';
+            } else {
+                return 'дней';
+            }
+        }
+        
+        // Обновляем текст с правильным склонением
+        if (daysDiff <= 0) {
+            daysRemainingElement.textContent = '0';
+            daysTextElement.textContent = 'дней';
+            daysRemainingElement.classList.add('expired');
+        } else {
+            daysTextElement.textContent = getDaysDeclension(daysDiff);
+            
+            // Добавляем соответствующие классы для стилизации
+            if (daysDiff <= 3) {
+                daysRemainingElement.classList.add('critical');
+            } else if (daysDiff <= 7) {
+                daysRemainingElement.classList.add('warning');
+            } else {
+                daysRemainingElement.classList.add('normal');
+            }
+        }
+    }
+    
+    // Запускаем функцию при загрузке страницы
+    updateDaysRemaining();
+
+    // Обработчик для анимационного эффекта
+    const launchEffectButton = document.getElementById('launchEffectButton');
+    const effectContainer = document.getElementById('animationEffectContainer');
+    let effectData = null;
+    
+    // Функция для загрузки эффекта
+    async function loadAnimationEffect() {
+        try {
+            @if(isset($certificate->animation_effect_id) && $certificate->animation_effect_id)
+            const response = await fetch('{{ route("animation-effects.get") }}');
+            const effects = await response.json();
+            effectData = effects.find(effect => effect.id === {{ $certificate->animation_effect_id }});
+            
+            if (effectData) {
+                console.log('Загружен анимационный эффект:', effectData.name);
+            }
+            @endif
+        } catch (error) {
+            console.error('Ошибка при загрузке анимационного эффекта:', error);
+        }
+    }
+    
+    // Функция для запуска анимации
+    function launchAnimationEffect() {
+        if (!effectData) return;
+        
+        // Очищаем контейнер
+        effectContainer.innerHTML = '';
+        
+        // Получаем параметры эффекта
+        const particles = Array.isArray(effectData.particles) ? effectData.particles : ['✨'];
+        const type = effectData.type || 'emoji';
+        const direction = effectData.direction || 'random';
+        const speed = effectData.speed || 'normal';
+        const quantity = Math.min(effectData.quantity || 50, 100);
+        
+        // Создаем частицы
+        for (let i = 0; i < quantity; i++) {
+            const particle = document.createElement('span');
+            particle.className = `animation-particle animation-${type}`;
+            
+            // Выбираем случайную частицу
+            const randomParticle = particles[Math.floor(Math.random() * particles.length)];
+            particle.textContent = randomParticle;
+            
+            // Случайное позиционирование в зависимости от эффекта
+            let left, top;
+            
+            if (type === 'snow' || type === 'leaves') {
+                left = Math.random() * 100;
+                top = -10 - Math.random() * 10; // Начинаем за пределами экрана сверху
+            } else if (type === 'fireworks') {
+                left = 40 + Math.random() * 20; // Примерно посередине
+                top = 70 + Math.random() * 20; // Снизу экрана
+            } else {
+                left = Math.random() * 100;
+                top = Math.random() * 100;
+            }
+            
+            particle.style.left = `${left}%`;
+            particle.style.top = `${top}%`;
+            
+            // Случайный размер
+            const size = Math.floor(Math.random() * 24) + 16;
+            particle.style.fontSize = `${size}px`;
+            
+            // Случайная задержка анимации
+            const delay = Math.random() * 3;
+            particle.style.animationDelay = `${delay}s`;
+            
+            // Скорость анимации
+            let duration;
+            switch (speed) {
+                case 'slow': duration = 5 + Math.random() * 3; break;
+                case 'fast': duration = 2 + Math.random() * 1; break;
+                case 'normal':
+                default: duration = 3 + Math.random() * 2; break;
+            }
+            particle.style.animationDuration = `${duration}s`;
+            
+            // Направление движения
+            if (direction === 'center') {
+                particle.classList.add('direction-center');
+            } else if (direction === 'top') {
+                particle.classList.add('direction-top');
+            } else if (direction === 'bottom') {
+                particle.classList.add('direction-bottom');
+            } else if (direction === 'random') {
+                const randomDirection = ['random-1', 'random-2', 'random-3'][Math.floor(Math.random() * 3)];
+                particle.classList.add(`direction-${randomDirection}`);
+            }
+            
+            // Добавляем частицу в контейнер
+            effectContainer.appendChild(particle);
+        }
+        
+        // Показываем анимацию
+        effectContainer.style.display = 'block';
+        
+        // Очищаем контейнер через некоторое время
+        setTimeout(() => {
+            // Постепенное удаление частиц для более плавного завершения
+            const particles = effectContainer.querySelectorAll('.animation-particle');
+            particles.forEach((particle, index) => {
+                setTimeout(() => {
+                    particle.style.transition = 'opacity 0.5s ease';
+                    particle.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 500);
+                }, index * 50);
+            });
+        }, 7000);
+    }
+    
+    // Инициализация
+    if (launchEffectButton) {
+        loadAnimationEffect();
+        
+        launchEffectButton.addEventListener('click', function() {
+            launchAnimationEffect();
+            
+            // Анимация кнопки при нажатии
+            this.classList.add('animate__animated', 'animate__rubberBand');
+            setTimeout(() => {
+                this.classList.remove('animate__animated', 'animate__rubberBand');
+            }, 1000);
+        });
+    }
     </script>
 </body>
 </html>

@@ -14,157 +14,202 @@
     </div>
     
     <div class="editor-body">
-        <div class="container">
+        <div class="container-fluid">
             <div class="row">
                 <!-- Форма редактирования сертификата - колонка будет полной шириной на мобильных -->
                 <div class="col-lg-3 order-2 order-lg-1 mt-3 mt-lg-0">
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-header bg-transparent border-0 pt-3">
-                            <h5 class="fw-bold mb-0 fs-6">Параметры сертификата</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold mb-0 fs-6">Параметры сертификата</h5>
+                                <span class="badge bg-primary-subtle text-primary">{{ $template->name }}</span>
+                            </div>
+                            
+                            <!-- Добавляем систему вкладок -->
+                            <ul class="nav nav-tabs card-header-tabs" id="certificateTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-tab-content" 
+                                            type="button" role="tab" aria-controls="main-tab-content" aria-selected="true">
+                                        <i class="fa-solid fa-info-circle me-1"></i><span class="d-none d-md-inline">Основное</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-tab-content" 
+                                            type="button" role="tab" aria-controls="visual-tab-content" aria-selected="false">
+                                        <i class="fa-solid fa-image me-1"></i><span class="d-none d-md-inline">Визуал</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-tab-content" 
+                                            type="button" role="tab" aria-controls="advanced-tab-content" aria-selected="false">
+                                        <i class="fa-solid fa-sliders me-1"></i><span class="d-none d-md-inline">Ещё</span>
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ route('entrepreneur.certificates.store', $template) }}" id="certificateForm" enctype="multipart/form-data">
                                 @csrf
                                 
-                                <!-- Информация о шаблоне -->
-                                <div class="d-flex align-items-center mb-2 mb-sm-3">
-                                    <div>
-                                        <h6 class="mb-0">{{ $template->name }}</h6>
-                                     
-                                    </div>
-                                </div>
-                                
-                                <hr class="my-2">
-                                
-                                <!-- Основные параметры сертификата -->
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="amount" class="form-label small">Номинал сертификата</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control form-control-sm @error('amount') is-invalid @enderror" 
-                                            id="amount" name="amount" value="{{ old('amount', 3000) }}" min="100" step="100" required>
-                                        <span class="input-group-text small">₽</span>
-                                    </div>
-                                    @error('amount')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    
-                                </div>
-                                
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="valid_until" class="form-label small">Срок действия</label>
-                                    <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
-                                        id="valid_until" name="valid_until" 
-                                        value="{{ old('valid_until', now()->addMonths(3)->format('Y-m-d')) }}" 
-                                        min="{{ now()->format('Y-m-d') }}" required>
-                                    @error('valid_until')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text small">Сертификат будет действителен до указанной даты</div>
-                                   
-                                </div>
-                                
-                                <input type="hidden" name="valid_from" id="valid_from" value="{{ now()->format('Y-m-d') }}">
-                                
-                                <!-- Информация о получателе -->
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="recipient_name" class="form-label small">Имя получателя</label>
-                                    <input type="text" class="form-control form-control-sm @error('recipient_name') is-invalid @enderror" 
-                                        id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" required>
-                                    @error('recipient_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                   
-                                </div>
-                                
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="recipient_phone" class="form-label small">Телефон получателя *</label>
-                                    <input type="tel" class="form-control maskphone form-control-sm @error('recipient_phone') is-invalid @enderror" 
-                                        id="recipient_phone" name="recipient_phone"  value="{{ old('recipient_phone') }}" required>
-                                    @error('recipient_phone')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text small">Обязательно. Используется для идентификации получателя. На один номер можно создать только один активный сертификат.</div>
-                                </div>
-                                
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="recipient_email" class="form-label small">Email получателя</label>
-                                    <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
-                                        id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">
-                                    @error('recipient_email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text small">Необязательно. Для отправки сертификата по email</div>
-                                </div>
-                                
-                                <!-- Сообщение -->
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="message" class="form-label small">Сообщение или пожелание</label>
-                                    <textarea class="form-control form-control-sm @error('message') is-invalid @enderror" 
-                                        id="message" name="message" rows="2">{{ old('message') }}</textarea>
-                                    @error('message')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                   
-                                </div>
-                                
-                                <!-- Логотип компании -->
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="logo" class="form-label small">Логотип компании</label>
-                                    <div class="mb-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_default" value="default" checked>
-                                            <label class="form-check-label small" for="logo_default">
-                                                Использовать из профиля
-                                            </label>
+                                <!-- Контент вкладок -->
+                                <div class="tab-content" id="certificateTabsContent">
+                                    <!-- Вкладка с основной информацией -->
+                                    <div class="tab-pane fade show active" id="main-tab-content" role="tabpanel" aria-labelledby="main-tab">
+                                        <!-- Основные параметры сертификата -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="amount" class="form-label small fw-bold">Номинал сертификата *</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control form-control-sm @error('amount') is-invalid @enderror" 
+                                                    id="amount" name="amount" value="{{ old('amount', 3000) }}" min="100" step="100" required>
+                                                <span class="input-group-text small">₽</span>
+                                            </div>
+                                            @error('amount')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Введите сумму номинала сертификата</div>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_custom" value="custom">
-                                            <label class="form-check-label small" for="logo_custom">
-                                                Загрузить новый
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="logo_type" id="logo_none" value="none">
-                                            <label class="form-check-label small" for="logo_none">
-                                                Не использовать логотип
-                                            </label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="default_logo_preview" class="mb-2 text-center p-2 border rounded">
-                                        <img src="{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}" 
-                                             class="img-thumbnail" style="max-height: 60px;" alt="Текущий логотип">
-                                        <div class="small text-muted mt-1 fs-7">Текущий логотип</div>
-                                    </div>
-                                    
-                                    <div id="custom_logo_container" class="d-none">
-                                        <input type="file" class="form-control form-control-sm @error('custom_logo') is-invalid @enderror" 
-                                            id="custom_logo" name="custom_logo" accept="image/*">
-                                        <div class="form-text small">Рекомендуемый размер: 300x100px, PNG или JPG</div>
                                         
-                                        <div id="custom_logo_preview" class="mt-2 text-center"></div>
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="valid_until" class="form-label small fw-bold">Срок действия *</label>
+                                            <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
+                                                id="valid_until" name="valid_until" 
+                                                value="{{ old('valid_until', now()->addMonths(3)->format('Y-m-d')) }}" 
+                                                min="{{ now()->format('Y-m-d') }}" required>
+                                            @error('valid_until')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Сертификат будет действителен до указанной даты</div>
+                                        </div>
+                                        
+                                        <input type="hidden" name="valid_from" id="valid_from" value="{{ now()->format('Y-m-d') }}">
+                                        
+                                        <!-- Информация о получателе -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="recipient_name" class="form-label small fw-bold">Имя получателя *</label>
+                                            <input type="text" class="form-control form-control-sm @error('recipient_name') is-invalid @enderror" 
+                                                id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" required>
+                                            @error('recipient_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Укажите имя человека, который получит сертификат</div>
+                                        </div>
+                                        
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="recipient_phone" class="form-label small fw-bold">Телефон получателя *</label>
+                                            <input type="tel" class="form-control maskphone form-control-sm @error('recipient_phone') is-invalid @enderror" 
+                                                id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone') }}" required>
+                                            @error('recipient_phone')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Номер телефона для идентификации получателя</div>
+                                        </div>
+                                        
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="recipient_email" class="form-label small fw-bold">Email получателя</label>
+                                            <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
+                                                id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">
+                                            @error('recipient_email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Необязательно. Для отправки сертификата по email</div>
+                                        </div>
                                     </div>
                                     
-                                    @error('custom_logo')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <!-- Добавляем блок загрузки обложки сертификата -->
-                                <div class="mb-2 mb-sm-3">
-                                    <label for="cover_image" class="form-label small">Обложка сертификата *</label>
-                                    <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
-                                        id="cover_image" name="cover_image" accept="image/*" required>
-                                    @error('cover_image')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text small">Обязательное поле. Загрузите изображение, которое будет отображаться в карточке сертификата. Рекомендуемый размер: 500x300px.</div>
+                                    <!-- Вкладка с визуальными настройками -->
+                                    <div class="tab-pane fade" id="visual-tab-content" role="tabpanel" aria-labelledby="visual-tab">
+                                        <!-- Обложка сертификата -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="cover_image" class="form-label small fw-bold">Обложка сертификата *</label>
+                                            <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
+                                                id="cover_image" name="cover_image" accept="image/*" required>
+                                            @error('cover_image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Загрузите изображение для карточки сертификата. Рекомендуемый размер: 500x300px</div>
+                                            
+                                            <div id="cover_image_preview" class="mt-2 text-center"></div>
+                                        </div>
+                                        
+                                        <!-- Логотип компании -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="logo" class="form-label small fw-bold">Логотип компании</label>
+                                            <div class="mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_default" value="default" checked>
+                                                    <label class="form-check-label small" for="logo_default">
+                                                        Использовать из профиля
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_custom" value="custom">
+                                                    <label class="form-check-label small" for="logo_custom">
+                                                        Загрузить новый
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_none" value="none">
+                                                    <label class="form-check-label small" for="logo_none">
+                                                        Не использовать логотип
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="default_logo_preview" class="mb-2 text-center p-2 border rounded">
+                                                <img src="{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}" 
+                                                    class="img-thumbnail" style="max-height: 60px;" alt="Текущий логотип">
+                                                <div class="small text-muted mt-1 fs-7">Текущий логотип</div>
+                                            </div>
+                                            
+                                            <div id="custom_logo_container" class="d-none">
+                                                <input type="file" class="form-control form-control-sm @error('custom_logo') is-invalid @enderror" 
+                                                    id="custom_logo" name="custom_logo" accept="image/*">
+                                                <div class="form-text small">Рекомендуемый размер: 300x100px, PNG или JPG</div>
+                                                
+                                                <div id="custom_logo_preview" class="mt-2 text-center"></div>
+                                            </div>
+                                            
+                                            @error('custom_logo')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                     
-                                    <div id="cover_image_preview" class="mt-2 text-center"></div>
+                                    <!-- Вкладка с дополнительными настройками -->
+                                    <div class="tab-pane fade" id="advanced-tab-content" role="tabpanel" aria-labelledby="advanced-tab">
+                                        <!-- Сообщение -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="message" class="form-label small fw-bold">Сообщение или пожелание</label>
+                                            <textarea class="form-control form-control-sm @error('message') is-invalid @enderror" 
+                                                id="message" name="message" rows="3">{{ old('message') }}</textarea>
+                                            @error('message')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text small">Добавьте персональное сообщение или пожелание для получателя</div>
+                                        </div>
+                                        
+                                        <!-- Добавляем выбор анимационного эффекта -->
+                                        <div class="mb-2 mb-sm-3">
+                                            <label for="animation_effect_id" class="form-label small fw-bold">Анимационный эффект</label>
+                                            <div class="input-group">
+                                                <input type="hidden" name="animation_effect_id" id="animation_effect_id" value="{{ old('animation_effect_id') }}">
+                                                <input type="text" class="form-control form-control-sm" id="selected_effect_name" placeholder="Не выбран" readonly>
+                                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#animationEffectsModal">
+                                                    <i class="fa-solid fa-wand-sparkles me-1"></i>Выбрать
+                                                </button>
+                                            </div>
+                                            <div class="form-text small">Выберите анимационный эффект, который будет отображаться при просмотре сертификата</div>
+                                        </div>
+                                        
+                                        <!-- Место для дополнительных настроек -->
+                                        <div class="alert alert-info py-2 small">
+                                            <i class="fa-solid fa-info-circle me-1"></i>
+                                            Совет: вы сможете распечатать сертификат после его создания
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Кнопки управления формой -->
-                                <div class="d-grid gap-1 gap-sm-2 mt-3">
+                                <div class="d-grid gap-1 gap-sm-2 mt-3 pt-2 border-top">
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="fa-solid fa-plus me-1 me-sm-2"></i>Создать сертификат
                                     </button>
@@ -234,9 +279,34 @@
         </div>
     </div>
 </div>
+<!-- Модальное окно выбора анимационных эффектов -->
+<div class="modal fade" id="animationEffectsModal" tabindex="-1" aria-labelledby="animationEffectsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="animationEffectsModalLabel">Выбор анимационного эффекта</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3" id="effectsList">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2">Загрузка доступных эффектов...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-sm btn-primary" id="selectEffectButton" disabled data-bs-dismiss="modal">Выбрать эффект</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
- 
 document.addEventListener("DOMContentLoaded", function () {
+    // Маска для телефона (существующий код)
     var inputs = document.querySelectorAll("input.maskphone");
     for (var i = 0; i < inputs.length; i++) {
         var input = inputs[i];
@@ -273,131 +343,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
     }
-});
-</script>
-<style>
-/* Стили для скрытия бокового меню на этой странице */
-aside, .sidebar-nav, .navbar-toggler {
-    display: none !important;
-}
-
-/* Расширяем main-контент на всю ширину */
-.main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    padding:0 !important;
-}
-
-/* Переопределяем стили для container чтобы дать больше места */
-.container {
-    max-width: 100% !important;
-}
-
-.certificate-editor {
-    min-height: calc(100vh - 100px);
-    background-color: #f8f9fa;
-    padding-bottom: 20px;
-}
-
-.editor-header {
-    background-color: white;
-    border-bottom: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 15px;
-}
-
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 991.98px) {
-    .certificate-preview-container {
-        min-height: 350px;
-    }
-}
-
-@media (max-width: 767.98px) {
-    .editor-body {
-        padding-bottom: 15px;
-    }
     
-    .certificate-preview-wrapper {
-        max-height: 50vh !important;
-    }
+    // Инициализируем вкладки
+    const tabButtons = document.querySelectorAll('#certificateTabs .nav-link');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // При переключении вкладок обновляем предпросмотр для отображения актуальных данных
+            setTimeout(updatePreview, 50);
+        });
+    });
     
-    .certificate-preview-iframe {
-        height: 50vh !important;
-    }
-    
-    .fs-7 {
-        font-size: 0.8rem !important;
-    }
-    
-    .form-text {
-        margin-top: 0.15rem;
-        font-size: 0.7rem !important;
-    }
-    
-    .btn-sm {
-        padding: 0.25rem 0.5rem !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .form-control-sm, .form-select-sm {
-        padding: 0.2rem 0.5rem !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .input-group-text.small {
-        padding: 0.2rem 0.5rem !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .form-check-label.small {
-        font-size: 0.75rem !important;
-    }
-}
-
-/* Улучшенный стиль для мобильного iframe */
-@media (max-width: 575.98px) {
-    .certificate-preview-container {
-        min-height: 300px;
-    }
-    
-    .certificate-preview-wrapper {
-        max-height: 40vh !important;
-    }
-    
-    #certificatePreview {
-        min-height: auto !important;
-        height: 40vh !important;
-    }
-    
-    .device-toggle .btn {
-        padding: 0.2rem 0.4rem !important;
-    }
-}
-
-/* Фикс для iPhone SE и других маленьких устройств */
-@media (max-width: 375px) {
-    .container {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-    }
-    
-    .card-body, .card-header, .card-footer {
-        padding: 0.5rem !important;
-    }
-    
-    .certificate-preview-container {
-        min-height: 250px;
-    }
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Элементы DOM
+    // Элементы DOM для предпросмотра
     const previewFrame = document.getElementById('certificatePreview');
     const formInputs = document.querySelectorAll('#certificateForm input, #certificateForm textarea');
     const previewContainer = document.querySelector('.certificate-preview-container');
@@ -657,6 +613,296 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Инициализация предпросмотра
     updatePreview();
+    
+    // Загрузка и обработка анимационных эффектов
+    const effectsList = document.getElementById('effectsList');
+    const selectEffectButton = document.getElementById('selectEffectButton');
+    const animationEffectIdInput = document.getElementById('animation_effect_id');
+    const selectedEffectNameInput = document.getElementById('selected_effect_name');
+    let selectedEffectId = null;
+    let effects = [];
+    
+    // Функция для загрузки списка эффектов
+    function loadAnimationEffects() {
+        fetch('{{ route("animation-effects.get") }}')
+            .then(response => response.json())
+            .then(data => {
+                effects = data;
+                renderEffectsList(data);
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке эффектов:', error);
+                effectsList.innerHTML = `
+                    <div class="col-12 text-center py-4">
+                        <i class="fa-solid fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+                        <p>Не удалось загрузить анимационные эффекты</p>
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadAnimationEffects()">
+                            <i class="fa-solid fa-refresh me-1"></i>Попробовать снова
+                        </button>
+                    </div>
+                `;
+            });
+    }
+    
+    // Функция для отображения списка эффектов
+    function renderEffectsList(effects) {
+        if (!effects || effects.length === 0) {
+            effectsList.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="fa-solid fa-ghost text-muted fs-1 mb-3"></i>
+                    <p>Анимационные эффекты не найдены</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Создаем карточку для отсутствия эффекта
+        let effectsHtml = `
+            <div class="col-sm-6 col-lg-4">
+                <div class="card h-100 effect-card ${!selectedEffectId ? 'selected' : ''}" data-effect-id="">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Без эффекта</h6>
+                        <p class="card-text text-muted small">Сертификат без анимации</p>
+                    </div>
+                    <div class="card-footer bg-transparent text-center">
+                        <button type="button" class="btn btn-sm ${!selectedEffectId ? 'btn-primary' : 'btn-outline-primary'}" onclick="previewEffect(null)">
+                            Выбрать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Добавляем карточки для каждого эффекта
+        effects.forEach(effect => {
+            const isSelected = selectedEffectId === effect.id;
+            const particlesPreview = Array.isArray(effect.particles) && effect.particles.length > 0
+                ? effect.particles.slice(0, 5).join(' ')
+                : '✨';
+            
+            effectsHtml += `
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card h-100 effect-card ${isSelected ? 'selected' : ''}" data-effect-id="${effect.id}">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">${effect.name}</h6>
+                            <p class="particles-preview">${particlesPreview}</p>
+                            <p class="card-text text-muted small">${effect.description || 'Анимационный эффект'}</p>
+                            <div class="badge bg-secondary-subtle text-secondary small mb-1">${getEffectTypeName(effect.type)}</div>
+                        </div>
+                        <div class="card-footer bg-transparent text-center">
+                            <button type="button" class="btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-primary'}" onclick="previewEffect(${effect.id})">
+                                ${isSelected ? 'Выбрано' : 'Выбрать'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        effectsList.innerHTML = effectsHtml;
+        
+        // Глобальная функция для предпросмотра эффекта
+        window.previewEffect = function(effectId) {
+            // Снимаем выделение со всех карточек
+            document.querySelectorAll('.effect-card').forEach(card => {
+                card.classList.remove('selected');
+                const button = card.querySelector('.btn');
+                button.classList.replace('btn-primary', 'btn-outline-primary');
+                button.textContent = 'Выбрать';
+            });
+            
+            // Выделяем выбранную карточку
+            if (effectId !== null) {
+                const selectedCard = document.querySelector(`.effect-card[data-effect-id="${effectId}"]`);
+                if (selectedCard) {
+                    selectedCard.classList.add('selected');
+                    const button = selectedCard.querySelector('.btn');
+                    button.classList.replace('btn-outline-primary', 'btn-primary');
+                    button.textContent = 'Выбрано';
+                }
+            } else {
+                // Если выбрано "Без эффекта"
+                const noEffectCard = document.querySelector('.effect-card[data-effect-id=""]');
+                if (noEffectCard) {
+                    noEffectCard.classList.add('selected');
+                    const button = noEffectCard.querySelector('.btn');
+                    button.classList.replace('btn-outline-primary', 'btn-primary');
+                }
+            }
+            
+            // Сохраняем выбранный эффект
+            selectedEffectId = effectId;
+            selectEffectButton.disabled = false;
+            
+            // Активируем временный предпросмотр эффекта, если он выбран
+            if (effectId !== null) {
+                const effect = effects.find(e => e.id === effectId);
+                if (effect) {
+                    showEffectPreview(effect);
+                }
+            }
+        };
+    }
+    
+    // Получение названия типа эффекта
+    function getEffectTypeName(type) {
+        const types = {
+            'emoji': 'Эмодзи',
+            'confetti': 'Конфетти',
+            'snow': 'Снег',
+            'fireworks': 'Фейерверк',
+            'bubbles': 'Пузыри',
+            'leaves': 'Листья',
+            'stars': 'Звёзды'
+        };
+        return types[type] || type;
+    }
+    
+    // Предпросмотр эффекта в модальном окне
+    function showEffectPreview(effect) {
+        // Создаем временный контейнер для предпросмотра эффекта
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'effect-preview-container';
+        previewContainer.style.position = 'absolute';
+        previewContainer.style.top = '0';
+        previewContainer.style.left = '0';
+        previewContainer.style.width = '100%';
+        previewContainer.style.height = '100%';
+        previewContainer.style.pointerEvents = 'none';
+        previewContainer.style.zIndex = '1050';
+        document.body.appendChild(previewContainer);
+        
+        // Создаем частицы для эффекта
+        const particleCount = Math.min(effect.quantity || 30, 30);
+        const particles = Array.isArray(effect.particles) ? effect.particles : ['✨'];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            
+            // Случайное расположение
+            particle.style.position = 'absolute';
+            particle.style.left = `${Math.random() * 90 + 5}%`;
+            particle.style.top = `${Math.random() * 50 + 25}%`;
+            
+            // Случайный размер
+            const size = Math.floor(Math.random() * 16) + 16;
+            particle.style.fontSize = `${size}px`;
+            
+            // Случайная задержка анимации
+            const delay = Math.random() * 2;
+            particle.style.animationDelay = `${delay}s`;
+            
+            // Анимация
+            particle.style.animation = `float-${effect.type} 3s ease-in-out infinite`;
+            
+            // Содержимое частицы
+            const particleText = particles[Math.floor(Math.random() * particles.length)];
+            particle.textContent = particleText;
+            
+            // Добавляем частицу в контейнер
+            previewContainer.appendChild(particle);
+        }
+        
+        // Удаляем предпросмотр через несколько секунд
+        setTimeout(() => {
+            if (previewContainer.parentNode) {
+                previewContainer.parentNode.removeChild(previewContainer);
+            }
+        }, 2000);
+    }
+    
+    // Применение выбранного эффекта
+    selectEffectButton.addEventListener('click', function() {
+        animationEffectIdInput.value = selectedEffectId || '';
+        
+        if (selectedEffectId) {
+            const selectedEffect = effects.find(effect => effect.id === selectedEffectId);
+            selectedEffectNameInput.value = selectedEffect ? selectedEffect.name : 'Выбранный эффект';
+        } else {
+            selectedEffectNameInput.value = 'Без эффекта';
+        }
+    });
+    
+    // Инициализация при открытии модального окна
+    document.getElementById('animationEffectsModal').addEventListener('show.bs.modal', function () {
+        // Если список эффектов еще не загружен
+        if (effects.length === 0) {
+            loadAnimationEffects();
+        }
+    });
 });
 </script>
+<style>
+/* Стили для скрытия бокового меню на этой странице */
+aside, .sidebar-nav, .navbar-toggler {
+    display: none !important;
+}
+
+/* Стили для карточек эффектов */
+.effect-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.effect-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.effect-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.particles-preview {
+    font-size: 1.5em;
+    line-height: 1;
+    margin: 10px 0;
+    letter-spacing: 0.2em;
+}
+
+/* Анимации для предпросмотра эффектов */
+@keyframes float-emoji {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes float-confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+}
+
+@keyframes float-snow {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    50% { transform: translateY(15px) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+}
+
+@keyframes float-fireworks {
+    0% { transform: scale(0.3) translateY(0); opacity: 1; }
+    50% { transform: scale(1) translateY(-30px); opacity: 0.8; }
+    100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
+}
+
+@keyframes float-bubbles {
+    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+    50% { transform: translateY(-20px) scale(1.1) rotate(10deg); opacity: 0.9; }
+    100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+}
+
+@keyframes float-leaves {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(10px) rotate(10deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes float-stars {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+    50% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    100% { transform: scale(1) rotate(90deg); opacity: 0.8; }
+}
+</style>
 @endsection

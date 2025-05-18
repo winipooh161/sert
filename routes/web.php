@@ -77,6 +77,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/templates', [TemplatesController::class, 'store'])->name('templates.store');
 });
 
+// Маршруты для анимационных эффектов (админка)
+Route::prefix('admin/animation-effects')->name('admin.animation-effects.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'store'])->name('store');
+    Route::get('/{animationEffect}/edit', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'edit'])->name('edit');
+    Route::put('/{animationEffect}', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'update'])->name('update');
+    Route::delete('/{animationEffect}', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'destroy'])->name('destroy');
+    Route::post('/{animationEffect}/toggle-status', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('/{animationEffect}/preview', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'preview'])->name('preview');
+});
+
+// Публичный API для получения анимационных эффектов
+Route::get('/api/animation-effects', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'getEffects'])->name('animation-effects.get');
+
 // Админ - категории шаблонов
 Route::prefix('admin/template-categories')->name('admin.template-categories.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'index'])->name('index');
