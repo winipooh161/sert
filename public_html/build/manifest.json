@@ -1,0 +1,27 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-3f918edb.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/css/lk.css": {
+    "file": "assets/lk-afaedef2.css",
+    "isEntry": true,
+    "src": "resources/css/lk.css"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-7840a376.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/pwa.js": {
+    "file": "assets/pwa-74e5fa53.js",
+    "isEntry": true,
+    "src": "resources/js/pwa.js"
+  },
+  "resources/js/sidebar.js": {
+    "file": "assets/sidebar-6c6d4410.js",
+    "isEntry": true,
+    "src": "resources/js/sidebar.js"
+  }
+}

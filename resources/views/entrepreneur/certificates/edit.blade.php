@@ -190,6 +190,20 @@
                         </div>
                         @endif
                         
+                        <!-- Выбор анимационного эффекта -->
+                        <div class="mb-3">
+                            <label for="animation_effect_id" class="form-label small">Анимационный эффект</label>
+                            <div class="input-group input-group-sm">
+                                <input type="hidden" name="animation_effect_id" id="animation_effect_id" value="{{ old('animation_effect_id', $certificate->animation_effect_id) }}">
+                                <input type="text" class="form-control" id="selected_effect_name" 
+                                    value="{{ $certificate->animationEffect ? $certificate->animationEffect->name : 'Без эффекта' }}" readonly>
+                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#animationEffectsModal">
+                                    <i class="fa-solid fa-wand-sparkles me-1"></i>Выбрать
+                                </button>
+                            </div>
+                            <div class="form-text small">Анимационный эффект при просмотре сертификата</div>
+                        </div>
+                        
                         <!-- Кнопки управления формой -->
                         <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end mt-3 pt-3 border-top">
                             <a href="{{ route('entrepreneur.certificates.show', $certificate) }}" class="btn btn-sm btn-outline-secondary order-2 order-sm-1">
@@ -276,6 +290,32 @@
     </div>
 </div>
 
+<!-- Модальное окно выбора анимационных эффектов -->
+<div class="modal fade" id="animationEffectsModal" tabindex="-1" aria-labelledby="animationEffectsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="animationEffectsModalLabel">Выбор анимационного эффекта</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3" id="effectsList">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2">Загрузка доступных эффектов...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-sm btn-primary" id="selectEffectButton" disabled data-bs-dismiss="modal">Выбрать эффект</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 /* Дополнительные стили для улучшения адаптивности */
 @media (max-width: 767.98px) {
@@ -319,6 +359,36 @@
         top: 0 !important;
     }
 }
+
+/* Стили для карточек эффектов */
+.effect-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.effect-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.effect-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+/* Анимации для предпросмотра эффектов */
+@keyframes float-emoji {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes float-confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+}
 </style>
 
 <script>
@@ -327,5 +397,86 @@ function confirmCancellation() {
         document.getElementById('cancelForm').submit();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Функционал для работы с анимационными эффектами
+    const effectsList = document.getElementById('effectsList');
+    const selectEffectButton = document.getElementById('selectEffectButton');
+    const animationEffectIdInput = document.getElementById('animation_effect_id');
+    const selectedEffectNameInput = document.getElementById('selected_effect_name');
+    let selectedEffectId = {{ $certificate->animation_effect_id ?? 'null' }};
+    let effects = [];
+    
+    // Функция для загрузки списка эффектов
+    function loadAnimationEffects() {
+        fetch('{{ route("animation-effects.get") }}')
+            .then(response => response.json())
+            .then(data => {
+                effects = data;
+                renderEffectsList(data);
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке эффектов:', error);
+                effectsList.innerHTML = `
+                    <div class="col-12 text-center py-4">
+                        <i class="fa-solid fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+                        <p>Не удалось загрузить анимационные эффекты</p>
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadAnimationEffects()">
+                            <i class="fa-solid fa-refresh me-1"></i>Попробовать снова
+                        </button>
+                    </div>
+                `;
+            });
+    }
+    
+    // Функция для отображения списка эффектов
+    function renderEffectsList(effects) {
+        effectsList.innerHTML = '';
+        
+        effects.forEach(effect => {
+            const isSelected = (effect.id === selectedEffectId);
+            const effectCard = document.createElement('div');
+            effectCard.className = 'col-6 col-md-4 effect-card' + (isSelected ? ' selected' : '');
+            effectCard.innerHTML = `
+                <div class="card rounded-3 border-0 shadow-sm" style="cursor: pointer;" onclick="selectEffect(${effect.id}, '${effect.name}')">
+                    <div class="card-body text-center">
+                        <i class="fa-solid fa-sparkles fa-2x text-primary mb-2"></i>
+                        <h6 class="card-title fs-6 mb-1">${effect.name}</h6>
+                        <p class="card-text small text-muted">${effect.description}</p>
+                    </div>
+                </div>
+            `;
+            
+            effectsList.appendChild(effectCard);
+        });
+    }
+    
+    // Применение выбранного эффекта
+    window.selectEffect = function(id, name) {
+        selectedEffectId = id;
+        
+        document.querySelectorAll('.effect-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        const selectedCard = Array.from(document.querySelectorAll('.effect-card')).find(card => {
+            return card.querySelector('.card-title').textContent.trim() === name;
+        });
+        
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
+        
+        selectEffectButton.disabled = false;
+    }
+    
+    // Инициализация при открытии модального окна
+    document.getElementById('animationEffectsModal').addEventListener('show.bs.modal', function () {
+        // Если список эффектов еще не загружен
+        if (effects.length === 0) {
+            loadAnimationEffects();
+        }
+    });
+});
 </script>
 @endsection

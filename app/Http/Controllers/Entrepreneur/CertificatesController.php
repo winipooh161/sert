@@ -106,6 +106,7 @@ class CertificatesController extends Controller
             'message' => 'nullable|string|max:1000',
             'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
+            'animation_effect_id' => 'nullable|integer|exists:animation_effects,id', // Добавляем валидацию
         ]);
         
         // Генерация уникального номера сертификата
@@ -141,6 +142,7 @@ class CertificatesController extends Controller
             'custom_fields' => $request->custom_fields,
             'status' => 'active',
             'cover_image' => $coverImagePath ?? null, // Сохраняем путь к обложке
+            'animation_effect_id' => $request->animation_effect_id, // Добавляем поле animation_effect_id
         ]);
         
         $certificate->user()->associate(Auth::user());
@@ -197,7 +199,8 @@ class CertificatesController extends Controller
             'custom_fields' => 'nullable|array',
             'logo_type' => 'nullable|in:current,default,none',
             'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480', // Добавляем валидацию для обложки
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
+            'animation_effect_id' => 'nullable|integer|exists:animation_effects,id', // Добавляем валидацию
         ]);
         
         // Проверяем, не пытается ли пользователь изменить телефон
@@ -227,6 +230,7 @@ class CertificatesController extends Controller
         $certificate->valid_until = Carbon::parse($request->valid_until);
         $certificate->custom_fields = $request->custom_fields;
         $certificate->status = $request->status;
+        $certificate->animation_effect_id = $request->animation_effect_id; // Добавляем поле animation_effect_id
         
         // Обработка пользовательского логотипа
         if ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {

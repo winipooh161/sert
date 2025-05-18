@@ -810,6 +810,7 @@ iframe#certificatePreview {
 /* Стили для обложки сертификата */
 .certificate-cover-wrapper {
     position: relative;
+    width: 100%;
     height: 280px;
     overflow: hidden;
 }
