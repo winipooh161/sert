@@ -7,8 +7,8 @@
         <div class="sidebar-sticky d-flex flex-column h-100">
             <!-- Лого и название проекта -->
             <div class="sidebar-logo d-none d-lg-flex align-items-center ps-4 py-3">
-                <a href="{{ url('/') }}" class="text-decoration-none d-flex align-items-center">
-                    <span class="fs-5 fw-semibold text-dark sidebar-logo-text">{{ config('app.name', 'Laravel') }}</span>
+                <a href="<?php echo e(url('/')); ?>" class="text-decoration-none d-flex align-items-center">
+                    <span class="fs-5 fw-semibold text-dark sidebar-logo-text"><?php echo e(config('app.name', 'Laravel')); ?></span>
                 </a>
                 <button id="sidebarToggleBtn" class="btn btn-sm btn-link ms-auto me-3 text-dark d-none d-lg-block">
                     <i class="fa-solid fa-bars"></i>
@@ -18,47 +18,50 @@
             <!-- Профиль пользователя -->
             <div class="sidebar-user d-flex align-items-center border-bottom p-3">
                 <div class="avatar-wrapper rounded-circle overflow-hidden flex-shrink-0" style="">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-100 h-100 object-fit-cover">
-                    @else
+                    <?php if(Auth::user()->avatar): ?>
+                        <img src="<?php echo e(asset('storage/' . Auth::user()->avatar)); ?>" alt="<?php echo e(Auth::user()->name); ?>" class="w-100 h-100 object-fit-cover">
+                    <?php else: ?>
                         <div class="w-100 h-100 bg-primary text-white d-flex align-items-center justify-content-center">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                            <?php echo e(substr(Auth::user()->name, 0, 1)); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="user-info overflow-hidden">
-                    <h6 class="mb-0 sidebar-user-name text-truncate">{{ Auth::user()->name }}</h6>
+                    <h6 class="mb-0 sidebar-user-name text-truncate"><?php echo e(Auth::user()->name); ?></h6>
                     <span class="text-muted small sidebar-user-role d-block text-truncate">
-                        @if(Auth::user()->hasRole('admin'))
+                        <?php if(Auth::user()->hasRole('admin')): ?>
                             Администратор
-                        @elseif(Auth::user()->hasRole('predprinimatel'))
+                        <?php elseif(Auth::user()->hasRole('predprinimatel')): ?>
                             Предприниматель
-                        @elseif(Auth::user()->hasRole('user'))
+                        <?php elseif(Auth::user()->hasRole('user')): ?>
                             Пользователь
-                        @else
+                        <?php else: ?>
                             Пользователь
-                        @endif
+                        <?php endif; ?>
                     </span>
                 </div>
             </div>
             
             <!-- Переключатель ролей -->
-            @if(Auth::user()->hasAnyRole(['predprinimatel', 'user']))
+            <?php if(Auth::user()->hasAnyRole(['predprinimatel', 'user'])): ?>
             <div class="px-3 py-2 border-bottom">
                 <div class="role-switcher">
-                    <form action="{{ route('role.switch') }}" method="POST" id="roleSwitchForm">
-                        @csrf
+                    <form action="<?php echo e(route('role.switch')); ?>" method="POST" id="roleSwitchForm">
+                        <?php echo csrf_field(); ?>
                         <div class="form-text mb-1 small ">Режим:</div>
                         <div class="btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="role" id="role_predprinimatel" value="predprinimatel" 
-                                {{ Auth::user()->hasRole('predprinimatel') && !session('active_role') || session('active_role') == 'predprinimatel' ? 'checked' : '' }}
+                                <?php echo e(Auth::user()->hasRole('predprinimatel') && !session('active_role') || session('active_role') == 'predprinimatel' ? 'checked' : ''); ?>
+
                                 onchange="document.getElementById('roleSwitchForm').submit()">
                             <label class="btn btn-outline-primary btn-sm rounded-start-2" for="role_predprinimatel">
                                 <i class="fa-solid fa-briefcase me-1"></i>  <span class="sidebar-text">Предприниматель</span>
                             </label>
                             
                             <input type="radio" class="btn-check" name="role" id="role_user" value="user" 
-                                {{ Auth::user()->hasRole('user') && !Auth::user()->hasRole('predprinimatel') || session('active_role') == 'user' ? 'checked' : '' }}
+                                <?php echo e(Auth::user()->hasRole('user') && !Auth::user()->hasRole('predprinimatel') || session('active_role') == 'user' ? 'checked' : ''); ?>
+
                                 onchange="document.getElementById('roleSwitchForm').submit()">
                             <label class="btn btn-outline-primary btn-sm rounded-end-2" for="role_user">
                                 <i class="fa-solid fa-user me-1"></i> <span class="sidebar-text">Клиент</span>
@@ -68,52 +71,52 @@
                     </form>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
             
             <!-- Упрощенная навигация -->
             <nav class="sidebar-nav flex-grow-1 py-3">
                 <ul class="nav flex-column">
-                    @if(Auth::user()->hasRole('admin'))
+                    <?php if(Auth::user()->hasRole('admin')): ?>
                         <!-- Навигация администратора -->
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.dashboard') ? 'active' : ''); ?>" href="<?php echo e(route('admin.dashboard')); ?>">
                                 <i class="fa-solid fa-gauge-high sidebar-icon"></i>
                                 <span class="sidebar-text">Панель управления</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.users.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.users.index')); ?>">
                                 <i class="fa-solid fa-users sidebar-icon"></i>
                                 <span class="sidebar-text">Пользователи</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.templates.*') ? 'active' : '' }}" href="{{ route('admin.templates.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.templates.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.templates.index')); ?>">
                                 <i class="fa-solid fa-palette sidebar-icon"></i>
                                 <span class="sidebar-text">Шаблоны</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.template-categories.*') ? 'active' : '' }}" href="{{ route('admin.template-categories.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.template-categories.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.template-categories.index')); ?>">
                                 <i class="fa-solid fa-folder sidebar-icon"></i>
                                 <span class="sidebar-text">Категории шаблонов</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.certificates.*') ? 'active' : '' }}" href="{{ route('admin.certificates.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.certificates.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.certificates.index')); ?>">
                                 <i class="fa-solid fa-certificate sidebar-icon"></i>
                                 <span class="sidebar-text">Сертификаты</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.animation-effects.*') ? 'active' : '' }}" href="{{ route('admin.animation-effects.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('admin.animation-effects.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.animation-effects.index')); ?>">
                                 <i class="fa-solid fa-wand-sparkles sidebar-icon"></i>
                                 <span class="sidebar-text">Анимационные эффекты</span>
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
                     
-                    @php
+                    <?php
                         // Определяем активную роль для отображения соответствующего меню
                         $activeRole = session('active_role');
                         
@@ -126,56 +129,56 @@
                         if (!$activeRole && Auth::user()->hasRole('user')) {
                             $activeRole = 'user';
                         }
-                    @endphp
+                    ?>
                     
-                    @if($activeRole == 'predprinimatel' && Auth::user()->hasAnyRole(['predprinimatel', 'admin']))
+                    <?php if($activeRole == 'predprinimatel' && Auth::user()->hasAnyRole(['predprinimatel', 'admin'])): ?>
                         <!-- Навигация предпринимателя - только самое важное -->
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('entrepreneur.certificates.index') ? 'active' : '' }}" href="{{ route('entrepreneur.certificates.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('entrepreneur.certificates.index') ? 'active' : ''); ?>" href="<?php echo e(route('entrepreneur.certificates.index')); ?>">
                                 <i class="fa-solid fa-certificate sidebar-icon"></i>
                                 <span class="sidebar-text">Мои сертификаты</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('entrepreneur.certificates.select-template') ? 'active' : '' }}" href="{{ route('entrepreneur.certificates.select-template') }}">
+                            <a class="nav-link <?php echo e(Route::is('entrepreneur.certificates.select-template') ? 'active' : ''); ?>" href="<?php echo e(route('entrepreneur.certificates.select-template')); ?>">
                                 <i class="fa-solid fa-plus sidebar-icon"></i>
                                 <span class="sidebar-text">Создать сертификат</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('entrepreneur.analytics.*') ? 'active' : '' }}" href="{{ route('entrepreneur.analytics.statistics') }}">
+                            <a class="nav-link <?php echo e(Route::is('entrepreneur.analytics.*') ? 'active' : ''); ?>" href="<?php echo e(route('entrepreneur.analytics.statistics')); ?>">
                                 <i class="fa-solid fa-chart-simple sidebar-icon"></i>
                                 <span class="sidebar-text">Аналитика</span>
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
                     
-                    @if($activeRole == 'user' && Auth::user()->hasAnyRole(['user', 'predprinimatel', 'admin']))
+                    <?php if($activeRole == 'user' && Auth::user()->hasAnyRole(['user', 'predprinimatel', 'admin'])): ?>
                         <!-- Навигация обычного пользователя -->
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::is('user.certificates.*') ? 'active' : '' }}" href="{{ route('user.certificates.index') }}">
+                            <a class="nav-link <?php echo e(Route::is('user.certificates.*') ? 'active' : ''); ?>" href="<?php echo e(route('user.certificates.index')); ?>">
                                 <i class="fa-solid fa-certificate sidebar-icon"></i>
                                 <span class="sidebar-text">Мои сертификаты</span>
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
                     
                     <!-- Общие упрощенные пункты меню -->
                     <li class="nav-item sidebar-divider"></li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('profile.*') ? 'active' : '' }}" href="{{ route('profile.index') }}">
+                        <a class="nav-link <?php echo e(Route::is('profile.*') ? 'active' : ''); ?>" href="<?php echo e(route('profile.index')); ?>">
                             <i class="fa-solid fa-user sidebar-icon"></i>
                             <span class="sidebar-text">Профиль</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('logout') }}" 
+                        <a class="nav-link" href="<?php echo e(route('logout')); ?>" 
                            onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
                             <i class="fa-solid fa-right-from-bracket sidebar-icon"></i>
                             <span class="sidebar-text">Выход</span>
                         </a>
-                        <form id="sidebar-logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                            @csrf
+                        <form id="sidebar-logout-form" action="<?php echo e(route('logout')); ?>" method="POST" class="d-none">
+                            <?php echo csrf_field(); ?>
                         </form>
                     </li>
                 </ul>
@@ -212,3 +215,4 @@ body.sidebar-collapsed .role-switcher {
     text-align: center;
 }
 </style>
+<?php /**PATH C:\OSPanel\domains\sert\resources\views/components/sidebar.blade.php ENDPATH**/ ?>

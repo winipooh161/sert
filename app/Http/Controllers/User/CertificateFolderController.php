@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
-use App\Models\CertificateFolder;
+use App\Models\Folder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,14 +29,14 @@ class CertificateFolderController extends Controller
         ]);
 
         // Проверяем количество существующих папок у пользователя
-        $userFoldersCount = CertificateFolder::where('user_id', Auth::id())->count();
+        $userFoldersCount = Folder::where('user_id', Auth::id())->count();
         
         // Если у пользователя уже 5 папок, запрещаем создание новой
         if ($userFoldersCount >= 5) {
             return redirect()->back()->with('error', 'Вы не можете создать больше 5 папок. Пожалуйста, удалите существующие папки, прежде чем создавать новые.');
         }
 
-        $folder = new CertificateFolder([
+        $folder = new Folder([
             'name' => $request->name,
             'color' => $request->color,
         ]);
@@ -50,7 +50,7 @@ class CertificateFolderController extends Controller
     /**
      * Добавить сертификат в папку.
      */
-    public function addCertificate(Request $request, Certificate $certificate, CertificateFolder $folder)
+    public function addCertificate(Request $request, Certificate $certificate, Folder $folder)
     {
         // Проверка доступа
         if ($folder->user_id !== Auth::id()) {
@@ -127,7 +127,7 @@ class CertificateFolderController extends Controller
     /**
      * Удалить сертификат из папки.
      */
-    public function removeCertificate(Certificate $certificate, CertificateFolder $folder)
+    public function removeCertificate(Certificate $certificate, Folder $folder)
     {
         // Проверка доступа
         if ($folder->user_id !== Auth::id()) {
@@ -163,7 +163,7 @@ class CertificateFolderController extends Controller
     /**
      * Обновить папку.
      */
-    public function update(Request $request, CertificateFolder $folder)
+    public function update(Request $request, Folder $folder)
     {
         // Проверка доступа
         if ($folder->user_id !== Auth::id()) {
@@ -186,7 +186,7 @@ class CertificateFolderController extends Controller
     /**
      * Удалить папку.
      */
-    public function destroy(CertificateFolder $folder)
+    public function destroy(Folder $folder)
     {
         // Проверка доступа
         if ($folder->user_id !== Auth::id()) {
@@ -198,5 +198,82 @@ class CertificateFolderController extends Controller
         $folder->delete();
 
         return redirect()->back()->with('success', 'Папка успешно удалена');
+    }
+
+    /**
+     * Получение списка папок с информацией о принадлежности сертификата к ним
+     */
+    public function getFolders(Certificate $certificate)
+    {
+        // Проверяем доступ к сертификату
+        if ($certificate->user_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому сертификату'
+            ], 403);
+        }
+        
+        // Получаем все папки пользователя
+        $folders = Auth::user()->folders;
+        
+        // Получаем ID папок, в которых находится сертификат
+        $certificateFolderIds = $certificate->folders()->pluck('folders.id')->toArray();
+        
+        // Добавляем флаг has_certificate к каждой папке
+        $folders = $folders->map(function ($folder) use ($certificateFolderIds) {
+            $folder->has_certificate = in_array($folder->id, $certificateFolderIds);
+            return $folder;
+        });
+        
+        return response()->json([
+            'success' => true,
+            'folders' => $folders,
+            'certificate_id' => $certificate->id
+        ]);
+    }
+    
+    /**
+     * Добавление сертификата в папку
+     */
+    public function addToFolder(Certificate $certificate, Folder $folder)
+    {
+        // Проверяем доступ к сертификату и папке
+        if ($certificate->user_id != Auth::id() || $folder->user_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому сертификату или папке'
+            ], 403);
+        }
+        
+        // Проверяем, что сертификат еще не в этой папке
+        if (!$certificate->folders()->where('folders.id', $folder->id)->exists()) {
+            $certificate->folders()->attach($folder->id);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Сертификат добавлен в папку'
+        ]);
+    }
+    
+    /**
+     * Удаление сертификата из папки
+     */
+    public function removeFromFolder(Certificate $certificate, Folder $folder)
+    {
+        // Проверяем доступ к сертификату и папке
+        if ($certificate->user_id != Auth::id() || $folder->user_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому сертификату или папке'
+            ], 403);
+        }
+        
+        $certificate->folders()->detach($folder->id);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Сертификат удален из папки'
+        ]);
     }
 }

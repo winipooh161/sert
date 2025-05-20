@@ -1,51 +1,51 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }} - Личный кабинет</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo e(config('app.name', 'Laravel')); ?> - Личный кабинет</title>
 
     <!-- Favicon и иконки -->
-    <link type="image/x-icon" rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link type="image/x-icon" rel="shortcut icon" href="<?php echo e(asset('favicon.ico')); ?>">
 
     <!-- Дополнительные иконки для десктопных браузеров -->
-    <link type="image/png" sizes="16x16" rel="icon" href="{{ asset('icons/favicon-16x16.png') }}">
-    <link type="image/png" sizes="32x32" rel="icon" href="{{ asset('icons/favicon-32x32.png') }}">
-    <link type="image/png" sizes="96x96" rel="icon" href="{{ asset('icons/favicon-96x96.png') }}">
-    <link type="image/png" sizes="120x120" rel="icon" href="{{ asset('icons/favicon-120x120.png') }}">
+    <link type="image/png" sizes="16x16" rel="icon" href="<?php echo e(asset('icons/favicon-16x16.png')); ?>">
+    <link type="image/png" sizes="32x32" rel="icon" href="<?php echo e(asset('icons/favicon-32x32.png')); ?>">
+    <link type="image/png" sizes="96x96" rel="icon" href="<?php echo e(asset('icons/favicon-96x96.png')); ?>">
+    <link type="image/png" sizes="120x120" rel="icon" href="<?php echo e(asset('icons/favicon-120x120.png')); ?>">
 
     <!-- Иконки для Android -->
-    <link type="image/png" sizes="72x72" rel="icon" href="{{ asset('icons/android-icon-72x72.png') }}">
-    <link type="image/png" sizes="96x96" rel="icon" href="{{ asset('icons/android-icon-96x96.png') }}">
-    <link type="image/png" sizes="144x144" rel="icon" href="{{ asset('icons/android-icon-144x144.png') }}">
-    <link type="image/png" sizes="192x192" rel="icon" href="{{ asset('icons/android-icon-192x192.png') }}">
-    <link type="image/png" sizes="512x512" rel="icon" href="{{ asset('icons/android-icon-512x512.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link type="image/png" sizes="72x72" rel="icon" href="<?php echo e(asset('icons/android-icon-72x72.png')); ?>">
+    <link type="image/png" sizes="96x96" rel="icon" href="<?php echo e(asset('icons/android-icon-96x96.png')); ?>">
+    <link type="image/png" sizes="144x144" rel="icon" href="<?php echo e(asset('icons/android-icon-144x144.png')); ?>">
+    <link type="image/png" sizes="192x192" rel="icon" href="<?php echo e(asset('icons/android-icon-192x192.png')); ?>">
+    <link type="image/png" sizes="512x512" rel="icon" href="<?php echo e(asset('icons/android-icon-512x512.png')); ?>">
+    <link rel="manifest" href="<?php echo e(asset('manifest.json')); ?>">
 
     <!-- Иконки для iOS (Apple) -->
-    <link sizes="57x57" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-57x57.png') }}">
-    <link sizes="60x60" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-60x60.png') }}">
-    <link sizes="72x72" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-72x72.png') }}">
-    <link sizes="76x76" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-76x76.png') }}">
-    <link sizes="114x114" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-114x114.png') }}">
-    <link sizes="120x120" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-120x120.png') }}">
-    <link sizes="144x144" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-144x144.png') }}">
-    <link sizes="152x152" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-152x152.png') }}">
-    <link sizes="180x180" rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-180x180.png') }}">
+    <link sizes="57x57" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-57x57.png')); ?>">
+    <link sizes="60x60" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-60x60.png')); ?>">
+    <link sizes="72x72" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-72x72.png')); ?>">
+    <link sizes="76x76" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-76x76.png')); ?>">
+    <link sizes="114x114" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-114x114.png')); ?>">
+    <link sizes="120x120" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-120x120.png')); ?>">
+    <link sizes="144x144" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-144x144.png')); ?>">
+    <link sizes="152x152" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-152x152.png')); ?>">
+    <link sizes="180x180" rel="apple-touch-icon" href="<?php echo e(asset('icons/apple-touch-icon-180x180.png')); ?>">
 
     <!-- Иконки для MacOS (Apple) -->
-    <link color="#e52037" rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}">
+    <link color="#e52037" rel="mask-icon" href="<?php echo e(asset('icons/safari-pinned-tab.svg')); ?>">
 
     <!-- Иконки и цвета для плиток Windows -->
     <meta name="msapplication-TileColor" content="#2b5797">
-    <meta name="msapplication-TileImage" content="{{ asset('icons/mstile-144x144.png') }}">
-    <meta name="msapplication-square70x70logo" content="{{ asset('icons/mstile-70x70.png') }}">
-    <meta name="msapplication-square150x150logo" content="{{ asset('icons/mstile-150x150.png') }}">
-    <meta name="msapplication-wide310x150logo" content="{{ asset('icons/mstile-310x150.png') }}">
-    <meta name="msapplication-square310x310logo" content="{{ asset('icons/mstile-310x310.png') }}">
-    <meta name="application-name" content="{{ config('app.name', 'Laravel') }}">
-    <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+    <meta name="msapplication-TileImage" content="<?php echo e(asset('icons/mstile-144x144.png')); ?>">
+    <meta name="msapplication-square70x70logo" content="<?php echo e(asset('icons/mstile-70x70.png')); ?>">
+    <meta name="msapplication-square150x150logo" content="<?php echo e(asset('icons/mstile-150x150.png')); ?>">
+    <meta name="msapplication-wide310x150logo" content="<?php echo e(asset('icons/mstile-310x150.png')); ?>">
+    <meta name="msapplication-square310x310logo" content="<?php echo e(asset('icons/mstile-310x310.png')); ?>">
+    <meta name="application-name" content="<?php echo e(config('app.name', 'Laravel')); ?>">
+    <meta name="msapplication-config" content="<?php echo e(asset('browserconfig.xml')); ?>">
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -54,11 +54,11 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Платформа для управления сертификатами">
-    <link rel="manifest" href="{{ asset('/manifest.json') }}">
-    <link rel="apple-touch-icon" href="{{ asset('/icons/icon-192x192.png') }}">
+    <link rel="manifest" href="<?php echo e(asset('/manifest.json')); ?>">
+    <link rel="apple-touch-icon" href="<?php echo e(asset('/icons/icon-192x192.png')); ?>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Laravel') }}">
+    <meta name="apple-mobile-web-app-title" content="<?php echo e(config('app.name', 'Laravel')); ?>">
     
     <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -70,10 +70,10 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
     
     <!-- Scripts -->
-    @vite(['resources/css/lk.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/lk.css', 'resources/js/app.js']); ?>
 
     <style>
         /* Стили для баннера установки PWA */
@@ -111,51 +111,52 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="avatar-wrapper rounded-circle overflow-hidden flex-shrink-0" style="">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-100 h-100 object-fit-cover">
-                    @else
+                    <?php if(Auth::user()->avatar): ?>
+                        <img src="<?php echo e(asset('storage/' . Auth::user()->avatar)); ?>" alt="<?php echo e(Auth::user()->name); ?>" class="w-100 h-100 object-fit-cover">
+                    <?php else: ?>
                         <div class="w-100 h-100 bg-primary text-white d-flex align-items-center justify-content-center">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                            <?php echo e(substr(Auth::user()->name, 0, 1)); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="user-info overflow-hidden">
-                    <h6 class="mb-0 sidebar-user-name text-truncate">{{ Auth::user()->name }}</h6>
+                    <h6 class="mb-0 sidebar-user-name text-truncate"><?php echo e(Auth::user()->name); ?></h6>
                    
                 </div>
             </div>
                 
                 <!-- Кнопка переключения бокового меню -->
                <!-- Кнопка быстрого создания сертификата -->
-            @if(Auth::user()->hasRole('predprinimatel') && session('active_role') != 'predprinimatel')
+            <?php if(Auth::user()->hasRole('predprinimatel') && session('active_role') != 'predprinimatel'): ?>
             <div class="ms-auto">
-                <form action="{{ route('role.switch') }}" method="POST" id="quickCreateForm">
-                    @csrf
+                <form action="<?php echo e(route('role.switch')); ?>" method="POST" id="quickCreateForm">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="role" value="predprinimatel">
-                    <input type="hidden" name="redirect" value="{{ route('entrepreneur.certificates.select-template') }}">
+                    <input type="hidden" name="redirect" value="<?php echo e(route('entrepreneur.certificates.select-template')); ?>">
                     <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
                         <i class="fa-solid fa-plus fs-5"></i>
                     </button>
                 </form>
             </div>
-            @elseif(Auth::user()->hasRole('predprinimatel'))
+            <?php elseif(Auth::user()->hasRole('predprinimatel')): ?>
             <div class="ms-auto">
-                <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
+                <a href="<?php echo e(route('entrepreneur.certificates.select-template')); ?>" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
                     <i class="fa-solid fa-plus fs-5"></i>
                 </a>
             </div>
-            @endif
+            <?php endif; ?>
             </div>
         </header>
 
         <div class="container-fluid vh-100 d-flex flex-grow-1 p-0">
             <!-- ===================== БОКОВАЯ НАВИГАЦИЯ ===================== -->
-            @include('components.sidebar')
+            <?php echo $__env->make('components.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
             <!-- ===================== ОСНОВНОЕ СОДЕРЖИМОЕ ===================== -->
             <main class="flex-grow-1 main-content overflow-auto">
                 <div class="content-wrapper">
-                    @yield('content')
+                    <?php echo $__env->yieldContent('content'); ?>
                 </div>
             </main>
         </div>
@@ -422,6 +423,7 @@
 
 
     
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH C:\OSPanel\domains\sert\resources\views/layouts/lk.blade.php ENDPATH**/ ?>

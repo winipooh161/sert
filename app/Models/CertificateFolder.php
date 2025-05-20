@@ -6,31 +6,33 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class CertificateFolder extends Model
+class CertificateFolder extends Pivot
 {
     use HasFactory;
 
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = true;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'certificate_folder';
+
+    /**
+     * Атрибуты, которые можно массово назначать.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'name',
-        'color',
-        'user_id'
+        'certificate_id',
+        'folder_id',
     ];
-
-    /**
-     * Пользователь, которому принадлежит папка
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Сертификаты в папке
-     */
-    public function certificates(): BelongsToMany
-    {
-        return $this->belongsToMany(Certificate::class, 'certificate_folder', 'certificate_folder_id', 'certificate_id')
-            ->withTimestamps();
-    }
 }

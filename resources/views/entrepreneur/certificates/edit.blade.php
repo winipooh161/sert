@@ -317,78 +317,7 @@
 </div>
 
 <style>
-/* Дополнительные стили для улучшения адаптивности */
-@media (max-width: 767.98px) {
-    .form-control-sm, .form-select-sm {
-        font-size: 0.875rem;
-        padding: 0.25rem 0.5rem !important;
-    }
-    
-    .form-check-inline {
-        margin-right: 0.75rem;
-    }
-    
-    .fs-7 {
-        font-size: 0.85rem !important;
-    }
-    
-    .form-label.small {
-        font-size: 0.75rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .btn-sm {
-        padding: 0.25rem 0.5rem !important;
-        font-size: 0.75rem;
-    }
-}
 
-@media (max-width: 575.98px) {
-    .form-check-inline {
-        display: block;
-        margin-right: 0;
-        margin-bottom: 0.5rem;
-    }
-    
-    .breadcrumb {
-        font-size: 0.75rem;
-    }
-    
-    .sticky-top {
-        position: relative !important;
-        top: 0 !important;
-    }
-}
-
-/* Стили для карточек эффектов */
-.effect-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 1px solid #dee2e6;
-}
-
-.effect-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.effect-card.selected {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
-}
-
-/* Анимации для предпросмотра эффектов */
-@keyframes float-emoji {
-    0% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(180deg); }
-    100% { transform: translateY(0) rotate(360deg); }
-}
-
-@keyframes float-confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
-}
 </style>
 
 <script>

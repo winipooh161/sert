@@ -222,8 +222,53 @@ Route::prefix('user/folders')->name('user.folders.')->middleware(['auth', 'role:
     Route::delete('/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'destroy'])->name('destroy');
 });
 
-// Маршруты для добавления/удаления сертификатов из папок
-Route::post('/user/certificates/{certificate}/add-to-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'addCertificate'])->name('user.certificates.add-to-folder');
-Route::delete('/user/certificates/{certificate}/remove-from-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'removeCertificate'])->name('user.certificates.remove-from-folder');
-// Новый маршрут для получения списка папок сертификата
-Route::get('/user/certificates/{certificate}/folders', [App\Http\Controllers\User\CertificateFolderController::class, 'getCertificateFolders'])->name('user.certificates.folders');
+// Маршруты для управления папками пользователя
+Route::post('/user/folders', [App\Http\Controllers\User\FoldersController::class, 'store'])
+    ->name('user.folders.store')
+    ->middleware(['auth', 'role:user']);
+    
+Route::delete('/user/folders/{folder}', [App\Http\Controllers\User\FoldersController::class, 'destroy'])
+    ->name('user.folders.destroy')
+    ->middleware(['auth', 'role:user']);
+
+// Маршруты для получения папок сертификата и управления ими
+Route::prefix('user/certificates')->name('user.certificates.')->middleware(['auth', 'role:user'])->group(function () {
+    // Получение списка папок с информацией о принадлежности сертификата
+    Route::get('/{certificate}/folders', [App\Http\Controllers\User\CertificateFolderController::class, 'getFolders'])
+        ->name('folders');
+    
+    // Добавление сертификата в папку
+    Route::post('/{certificate}/add-to-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'addToFolder'])
+        ->name('add-to-folder');
+    
+    // Удаление сертификата из папки
+    Route::delete('/{certificate}/remove-from-folder/{folder}', [App\Http\Controllers\User\CertificateFolderController::class, 'removeFromFolder'])
+        ->name('remove-from-folder');
+});
+
+// Маршрут для ленивой загрузки сертификатов
+Route::get('/user/certificates/load-more', [UserCertificatesController::class, 'loadMore'])
+    ->name('user.certificates.load-more')
+    ->middleware(['auth', 'role:user']);
+
+// Маршруты для работы с папками сертификатов
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    // Создание папки
+    Route::post('/folders', [App\Http\Controllers\FolderController::class, 'store'])->name('folders.store');
+    
+    // Удаление папки
+    Route::delete('/folders/{folder}', [App\Http\Controllers\FolderController::class, 'destroy'])->name('folders.destroy');
+    
+    // Получение папок сертификата
+    Route::get('/certificates/{certificate}/folders', [App\Http\Controllers\FolderController::class, 'getCertificateFolders'])->name('certificates.folders');
+    
+    // Добавление сертификата в папку
+    Route::post('/certificates/{certificate}/add-to-folder/{folder}', [App\Http\Controllers\FolderController::class, 'addCertificateToFolder'])->name('certificates.add-to-folder');
+    
+    // Удаление сертификата из папки
+    Route::delete('/certificates/{certificate}/remove-from-folder/{folder}', [App\Http\Controllers\FolderController::class, 'removeCertificateFromFolder'])->name('certificates.remove-from-folder');
+});
+
+if (app()->environment('production')) {
+    URL::forceScheme('https');
+}

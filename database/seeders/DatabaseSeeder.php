@@ -12,9 +12,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RoleSeeder::class,
-            CertificateTemplateSeeder::class,
-            // Можно добавить больше сидеров по мере необходимости
+            RolesSeeder::class,
+            AdminUserSeeder::class,
+            TemplateCategoriesSeeder::class,
+            AnimationEffectsSeeder::class,
+            StickyPackagesSeeder::class, // Добавляем новый сидер для стиков
         ]);
     }
 }

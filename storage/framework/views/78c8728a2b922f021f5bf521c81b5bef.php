@@ -1,12 +1,12 @@
-@extends('layouts.lk')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 <div class="certificate-editor">
     <div class="editor-header">
         <div class="container">
             <div class="d-flex align-items-center justify-content-between py-2 py-sm-3">
                 <h1 class="h4 h5-sm fw-bold mb-0">Создание сертификата</h1>
-                <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="<?php echo e(route('entrepreneur.certificates.select-template')); ?>" class="btn btn-outline-secondary btn-sm">
                     <i class="fa-solid fa-arrow-left me-1 me-sm-2"></i><span class="d-none d-sm-inline">Вернуться к шаблонам</span>
                 </a>
             </div>
@@ -22,7 +22,7 @@
                         <div class="card-header bg-transparent border-0 pt-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="fw-bold mb-0 fs-6">Параметры сертификата</h5>
-                                <span class="badge bg-primary-subtle text-primary">{{ $template->name }}</span>
+                                <span class="badge bg-primary-subtle text-primary"><?php echo e($template->name); ?></span>
                             </div>
                             
                             <!-- Добавляем систему вкладок -->
@@ -48,8 +48,8 @@
                             </ul>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="{{ route('entrepreneur.certificates.store', $template) }}" id="certificateForm" enctype="multipart/form-data">
-                                @csrf
+                            <form method="POST" action="<?php echo e(route('entrepreneur.certificates.store', $template)); ?>" id="certificateForm" enctype="multipart/form-data">
+                                <?php echo csrf_field(); ?>
                                 
                                 <!-- Контент вкладок -->
                                 <div class="tab-content" id="certificateTabsContent">
@@ -59,58 +59,128 @@
                                         <div class="mb-2 mb-sm-3">
                                             <label for="amount" class="form-label small fw-bold">Номинал сертификата *</label>
                                             <div class="input-group">
-                                                <input type="number" class="form-control form-control-sm @error('amount') is-invalid @enderror" 
-                                                    id="amount" name="amount" value="{{ old('amount', 3000) }}" min="100" step="100" required>
+                                                <input type="number" class="form-control form-control-sm <?php $__errorArgs = ['amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                                    id="amount" name="amount" value="<?php echo e(old('amount', 3000)); ?>" min="100" step="100" required>
                                                 <span class="input-group-text small">₽</span>
                                             </div>
-                                            @error('amount')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <?php $__errorArgs = ['amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Введите сумму номинала сертификата</div>
                                         </div>
                                         
                                         <div class="mb-2 mb-sm-3">
                                             <label for="valid_until" class="form-label small fw-bold">Срок действия *</label>
-                                            <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
+                                            <input type="date" class="form-control form-control-sm <?php $__errorArgs = ['valid_until'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                 id="valid_until" name="valid_until" 
-                                                value="{{ old('valid_until', now()->addMonths(3)->format('Y-m-d')) }}" 
-                                                min="{{ now()->format('Y-m-d') }}" required>
-                                            @error('valid_until')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                                value="<?php echo e(old('valid_until', now()->addMonths(3)->format('Y-m-d'))); ?>" 
+                                                min="<?php echo e(now()->format('Y-m-d')); ?>" required>
+                                            <?php $__errorArgs = ['valid_until'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Сертификат будет действителен до указанной даты</div>
                                         </div>
                                         
-                                        <input type="hidden" name="valid_from" id="valid_from" value="{{ now()->format('Y-m-d') }}">
+                                        <input type="hidden" name="valid_from" id="valid_from" value="<?php echo e(now()->format('Y-m-d')); ?>">
                                         
                                         <!-- Информация о получателе -->
                                         <div class="mb-2 mb-sm-3">
                                             <label for="recipient_name" class="form-label small fw-bold">Имя получателя *</label>
-                                            <input type="text" class="form-control form-control-sm @error('recipient_name') is-invalid @enderror" 
-                                                id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" required>
-                                            @error('recipient_name')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <input type="text" class="form-control form-control-sm <?php $__errorArgs = ['recipient_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                                id="recipient_name" name="recipient_name" value="<?php echo e(old('recipient_name')); ?>" required>
+                                            <?php $__errorArgs = ['recipient_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Укажите имя человека, который получит сертификат</div>
                                         </div>
                                         
                                         <div class="mb-2 mb-sm-3">
                                             <label for="recipient_phone" class="form-label small fw-bold">Телефон получателя *</label>
-                                            <input type="tel" class="form-control maskphone form-control-sm @error('recipient_phone') is-invalid @enderror" 
-                                                id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone') }}" required>
-                                            @error('recipient_phone')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <input type="tel" class="form-control maskphone form-control-sm <?php $__errorArgs = ['recipient_phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                                id="recipient_phone" name="recipient_phone" value="<?php echo e(old('recipient_phone')); ?>" required>
+                                            <?php $__errorArgs = ['recipient_phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Номер телефона для идентификации получателя</div>
                                         </div>
                                         
                                         <div class="mb-2 mb-sm-3">
                                             <label for="recipient_email" class="form-label small fw-bold">Email получателя</label>
-                                            <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
-                                                id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">
-                                            @error('recipient_email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <input type="email" class="form-control form-control-sm <?php $__errorArgs = ['recipient_email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                                id="recipient_email" name="recipient_email" value="<?php echo e(old('recipient_email')); ?>">
+                                            <?php $__errorArgs = ['recipient_email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Необязательно. Для отправки сертификата по email</div>
                                         </div>
                                     </div>
@@ -120,11 +190,25 @@
                                         <!-- Обложка сертификата -->
                                         <div class="mb-2 mb-sm-3">
                                             <label for="cover_image" class="form-label small fw-bold">Обложка сертификата *</label>
-                                            <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
+                                            <input type="file" class="form-control form-control-sm <?php $__errorArgs = ['cover_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                 id="cover_image" name="cover_image" accept="image/*" required>
-                                            @error('cover_image')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <?php $__errorArgs = ['cover_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Загрузите изображение для карточки сертификата. Рекомендуемый размер: 500x300px</div>
                                             
                                             <div id="cover_image_preview" class="mt-2 text-center"></div>
@@ -155,22 +239,36 @@
                                             </div>
                                             
                                             <div id="default_logo_preview" class="mb-2 text-center p-2 border rounded">
-                                                <img src="{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}" 
+                                                <img src="<?php echo e(Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png')); ?>" 
                                                     class="img-thumbnail" style="max-height: 60px;" alt="Текущий логотип">
                                                 <div class="small text-muted mt-1 fs-7">Текущий логотип</div>
                                             </div>
                                             
                                             <div id="custom_logo_container" class="d-none">
-                                                <input type="file" class="form-control form-control-sm @error('custom_logo') is-invalid @enderror" 
+                                                <input type="file" class="form-control form-control-sm <?php $__errorArgs = ['custom_logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                     id="custom_logo" name="custom_logo" accept="image/*">
                                                 <div class="form-text small">Рекомендуемый размер: 300x100px, PNG или JPG</div>
                                                 
                                                 <div id="custom_logo_preview" class="mt-2 text-center"></div>
                                             </div>
                                             
-                                            @error('custom_logo')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <?php $__errorArgs = ['custom_logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
                                     
@@ -179,11 +277,25 @@
                                         <!-- Сообщение -->
                                         <div class="mb-2 mb-sm-3">
                                             <label for="message" class="form-label small fw-bold">Сообщение или пожелание</label>
-                                            <textarea class="form-control form-control-sm @error('message') is-invalid @enderror" 
-                                                id="message" name="message" rows="3">{{ old('message') }}</textarea>
-                                            @error('message')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <textarea class="form-control form-control-sm <?php $__errorArgs = ['message'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                                id="message" name="message" rows="3"><?php echo e(old('message')); ?></textarea>
+                                            <?php $__errorArgs = ['message'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             <div class="form-text small">Добавьте персональное сообщение или пожелание для получателя</div>
                                         </div>
                                         
@@ -191,7 +303,7 @@
                                         <div class="mb-2 mb-sm-3">
                                             <label for="animation_effect_id" class="form-label small fw-bold">Анимационный эффект</label>
                                             <div class="input-group">
-                                                <input type="hidden" name="animation_effect_id" id="animation_effect_id" value="{{ old('animation_effect_id') }}">
+                                                <input type="hidden" name="animation_effect_id" id="animation_effect_id" value="<?php echo e(old('animation_effect_id')); ?>">
                                                 <input type="text" class="form-control form-control-sm" id="selected_effect_name" placeholder="Не выбран" readonly>
                                                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#animationEffectsModal">
                                                     <i class="fa-solid fa-wand-sparkles me-1"></i>Выбрать
@@ -213,7 +325,7 @@
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="fa-solid fa-plus me-1 me-sm-2"></i>Создать сертификат
                                     </button>
-                                    <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary btn-sm">
+                                    <a href="<?php echo e(route('entrepreneur.certificates.select-template')); ?>" class="btn btn-outline-secondary btn-sm">
                                         Отмена
                                     </a>
                                 </div>
@@ -228,7 +340,7 @@
                         <div class="card-header bg-transparent border-0 pt-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
                             <div class="d-flex align-items-center mb-2 mb-sm-0">
                                 <h5 class="fw-bold mb-0 me-2 fs-6">Предпросмотр</h5>
-                                <span class="badge bg-primary-subtle text-primary small">{{ $template->name }}</span>
+                                <span class="badge bg-primary-subtle text-primary small"><?php echo e($template->name); ?></span>
                             </div>
                             <div class="device-toggle btn-group" role="group">
                                 <button type="button" class="btn btn-sm btn-outline-secondary active" data-device="desktop">
@@ -249,7 +361,7 @@
                             </div>
                             <div class="certificate-preview-container" data-current-device="desktop">
                                 <div class="certificate-preview-wrapper device-frame">
-                                    <iframe id="certificatePreview" src="{{ route('template.preview', $template) }}" class="certificate-preview" frameborder="0" loading="lazy"></iframe>
+                                    <iframe id="certificatePreview" src="<?php echo e(route('template.preview', $template)); ?>" class="certificate-preview" frameborder="0" loading="lazy"></iframe>
                                 </div>
                             </div>
                         </div>
@@ -358,7 +470,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formInputs = document.querySelectorAll('#certificateForm input, #certificateForm textarea');
     const previewContainer = document.querySelector('.certificate-preview-container');
     let scale = 1;
-    let logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
+    let logoUrl = '<?php echo e(Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png')); ?>';
     
     // Переключение типа логотипа
     const logoDefault = document.getElementById('logo_default');
@@ -373,7 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (this.checked) {
             defaultLogoPreview.classList.remove('d-none');
             customLogoContainer.classList.add('d-none');
-            logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
+            logoUrl = '<?php echo e(Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png')); ?>';
             console.log("Установлен логотип по умолчанию:", logoUrl);
             updatePreview();
         }
@@ -412,11 +524,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Отправляем файл на сервер для временного хранения
                 const formData = new FormData();
                 formData.append('logo', customLogoInput.files[0]);
-                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('_token', '<?php echo e(csrf_token()); ?>');
                 
                 console.log("Отправка логотипа на сервер...");
                 
-                fetch('{{ route('entrepreneur.certificates.temp-logo') }}', {
+                fetch('<?php echo e(route('entrepreneur.certificates.temp-logo')); ?>', {
                     method: 'POST',
                     body: formData
                 })
@@ -458,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
             : new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString('ru-RU');
         
         // Компания
-        const companyName = '{{ Auth::user()->company ?? config('app.name') }}';
+        const companyName = '<?php echo e(Auth::user()->company ?? config('app.name')); ?>';
         
         // Создаем параметры для запроса - БЕЗ логотипа
         const params = new URLSearchParams({
@@ -472,7 +584,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
         // Обновляем iframe с новыми параметрами
-        const iframeSrc = `{{ route('template.preview', $template) }}?${params.toString()}`;
+        const iframeSrc = `<?php echo e(route('template.preview', $template)); ?>?${params.toString()}`;
         
         // Проверяем, нужно ли обновлять iframe
         if (previewFrame.src.split('?')[0] === iframeSrc.split('?')[0]) {
@@ -624,7 +736,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Функция для загрузки списка эффектов
     function loadAnimationEffects() {
-        fetch('{{ route("animation-effects.get") }}')
+        fetch('<?php echo e(route("animation-effects.get")); ?>')
             .then(response => response.json())
             .then(data => {
                 effects = data;
@@ -833,6 +945,78 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <style>
+/* Стили для скрытия бокового меню на этой странице */
+aside, .sidebar-nav, .navbar-toggler {
+    display: none !important;
+}
 
+/* Стили для карточек эффектов */
+.effect-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.effect-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.effect-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.particles-preview {
+    font-size: 1.5em;
+    line-height: 1;
+    margin: 10px 0;
+    letter-spacing: 0.2em;
+}
+
+/* Анимации для предпросмотра эффектов */
+@keyframes float-emoji {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes float-confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+}
+
+@keyframes float-snow {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    50% { transform: translateY(15px) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+}
+
+@keyframes float-fireworks {
+    0% { transform: scale(0.3) translateY(0); opacity: 1; }
+    50% { transform: scale(1) translateY(-30px); opacity: 0.8; }
+    100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
+}
+
+@keyframes float-bubbles {
+    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+    50% { transform: translateY(-20px) scale(1.1) rotate(10deg); opacity: 0.9; }
+    100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+}
+
+@keyframes float-leaves {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(10px) rotate(10deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes float-stars {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+    50% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    100% { transform: scale(1) rotate(90deg); opacity: 0.8; }
+}
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.lk', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\OSPanel\domains\sert\resources\views/entrepreneur/certificates/create.blade.php ENDPATH**/ ?>

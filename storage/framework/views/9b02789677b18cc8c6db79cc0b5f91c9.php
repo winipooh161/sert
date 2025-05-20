@@ -1,6 +1,6 @@
-@extends('layouts.lk')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid py-3 py-md-4">
     <!-- Система папок для сертификатов -->
     <div class="folder-system mb-4">
@@ -11,22 +11,23 @@
             
             <div class="folder-navigation overflow-hidden">
                 <div class="btn-group d-flex flex-nowrap" style="min-width: max-content;">
-                    <a href="{{ route('user.certificates.index') }}" class="btn btn-sm {{ !request('folder') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                    <a href="<?php echo e(route('user.certificates.index')); ?>" class="btn btn-sm <?php echo e(!request('folder') ? 'btn-primary' : 'btn-outline-secondary'); ?>">
                         <i class="fa-solid fa-certificate me-1"></i>Все
                     </a>
                     
-                    @forelse($folders ?? [] as $folder)
-                    <a href="{{ route('user.certificates.index', ['folder' => $folder->id]) }}" 
-                        class="btn btn-sm {{ request('folder') == $folder->id ? 'btn-primary' : 'btn-outline-secondary' }} folder-btn"
-                        data-folder-id="{{ $folder->id }}" data-folder-name="{{ $folder->name }}"
-                        data-folder-color="{{ $folder->color }}">
-                        <i class="fa-solid fa-folder me-1 text-{{ $folder->color }}"></i>{{ $folder->name }}
+                    <?php $__empty_1 = true; $__currentLoopData = $folders ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $folder): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <a href="<?php echo e(route('user.certificates.index', ['folder' => $folder->id])); ?>" 
+                        class="btn btn-sm <?php echo e(request('folder') == $folder->id ? 'btn-primary' : 'btn-outline-secondary'); ?> folder-btn"
+                        data-folder-id="<?php echo e($folder->id); ?>" data-folder-name="<?php echo e($folder->name); ?>"
+                        data-folder-color="<?php echo e($folder->color); ?>">
+                        <i class="fa-solid fa-folder me-1 text-<?php echo e($folder->color); ?>"></i><?php echo e($folder->name); ?>
+
                     </a>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <span class="btn btn-sm btn-outline-secondary disabled">
                         <i class="fa-solid fa-folder-open me-1"></i>Нет папок
                     </span>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -36,11 +37,12 @@
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 mb-md-4 gap-2">
         <h1 class="fw-bold fs-4 fs-md-3 mb-0">
-            @if(request('folder') && isset($currentFolder))
-                {{ $currentFolder->name }}
-            @else
+            <?php if(request('folder') && isset($currentFolder)): ?>
+                <?php echo e($currentFolder->name); ?>
+
+            <?php else: ?>
                 Мои сертификаты
-            @endif
+            <?php endif; ?>
         </h1>
         
         <button type="button" class="btn btn-sm btn-outline-info" onclick="startUserCertificatesTour()">
@@ -49,41 +51,43 @@
     </div>
 
     <!-- Сообщения об ошибках/успешных операциях -->
-    @if (session('success'))
+    <?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-            {{ session('success') }}
+            <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?>
     
-    @if (session('error'))
+    <?php if(session('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-            {{ session('error') }}
+            <?php echo e(session('error')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?>
 
    
     <div class="row row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4  g-3">
-        @forelse ($certificates as $certificate)
+        <?php $__empty_1 = true; $__currentLoopData = $certificates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $certificate): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="col">
                 <div class="card border-0 rounded-4 shadow-sm h-100 certificate-card"
-                    data-certificate-id="{{ $certificate->id }}"
-                    data-public-url="{{ route('certificates.public', $certificate->uuid) }}"
-                    data-certificate-number="{{ $certificate->certificate_number }}">
+                    data-certificate-id="<?php echo e($certificate->id); ?>"
+                    data-public-url="<?php echo e(route('certificates.public', $certificate->uuid)); ?>"
+                    data-certificate-number="<?php echo e($certificate->certificate_number); ?>">
                     <!-- Используем загруженную обложку в качестве главного изображения карточки -->
                     <div class="certificate-cover-wrapper">
-                        <img src="{{ $certificate->cover_image_url }}" class="certificate-cover-image" alt="Обложка сертификата">
+                        <img src="<?php echo e($certificate->cover_image_url); ?>" class="certificate-cover-image" alt="Обложка сертификата">
                         <div class="certificate-status-badge">
-                            @if ($certificate->status == 'active')
+                            <?php if($certificate->status == 'active'): ?>
                                 <span class="badge bg-success">Активен</span>
-                            @elseif ($certificate->status == 'used')
+                            <?php elseif($certificate->status == 'used'): ?>
                                 <span class="badge bg-secondary">Использован</span>
-                            @elseif ($certificate->status == 'expired')
+                            <?php elseif($certificate->status == 'expired'): ?>
                                 <span class="badge bg-warning">Истек</span>
-                            @elseif ($certificate->status == 'canceled')
+                            <?php elseif($certificate->status == 'canceled'): ?>
                                 <span class="badge bg-danger">Отменен</span>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <!-- Кнопка добавления в папку -->
@@ -92,13 +96,14 @@
                                 <i class="fa-solid fa-folder-open"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                @foreach($folders ?? [] as $folder)
+                                <?php $__currentLoopData = $folders ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $folder): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <li>
-                                    <a class="dropdown-item" href="#" onclick="addToFolder({{ $certificate->id }}, {{ $folder->id }})">
-                                        <i class="fa-solid fa-folder me-1"></i> {{ $folder->name }}
+                                    <a class="dropdown-item" href="#" onclick="addToFolder(<?php echo e($certificate->id); ?>, <?php echo e($folder->id); ?>)">
+                                        <i class="fa-solid fa-folder me-1"></i> <?php echo e($folder->name); ?>
+
                                     </a>
                                 </li>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#createFolderModal">
@@ -111,12 +116,12 @@
                  
                         <!-- Действия с сертификатом -->
                       <div class="certificate-actions">
-                            <a href="{{ route('certificates.public', $certificate->uuid) }}" class="btn btn-primary btn-sm" target="_blank">
+                            <a href="<?php echo e(route('certificates.public', $certificate->uuid)); ?>" class="btn btn-primary btn-sm" target="_blank">
                                 <i class="fa-solid fa-external-link-alt me-1" style="margin:0 !important"></i>
                             </a>
                          
                             <button type="button" class="btn btn-outline-primary btn-sm" style="color:#fff; !important" 
-                                data-bs-toggle="modal" data-bs-target="#qrModal{{ $certificate->id }}">
+                                data-bs-toggle="modal" data-bs-target="#qrModal<?php echo e($certificate->id); ?>">
                                 <i class="fa-solid fa-qrcode me-1"></i>QR
                             </button>
                         </div>
@@ -124,7 +129,7 @@
                 </div>
                 
                 <!-- Модальное окно с QR-кодом -->
-                <div class="modal fade" id="qrModal{{ $certificate->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="qrModal<?php echo e($certificate->id); ?>" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-sm modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -132,13 +137,13 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body text-center">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode(route('certificates.public', $certificate->uuid)) }}" 
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<?php echo e(urlencode(route('certificates.public', $certificate->uuid))); ?>" 
                                     class="img-fluid mb-2" alt="QR Code">
-                                <p class="mb-0 small">Сертификат № {{ $certificate->certificate_number }}</p>
+                                <p class="mb-0 small">Сертификат № <?php echo e($certificate->certificate_number); ?></p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
-                                <button type="button" class="btn btn-primary btn-sm" onclick="downloadQRCode('{{ $certificate->certificate_number }}', this)">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="downloadQRCode('<?php echo e($certificate->certificate_number); ?>', this)">
                                     <i class="fa-solid fa-download me-1"></i>Скачать
                                 </button>
                             </div>
@@ -146,7 +151,7 @@
                     </div>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="col-12">
                 <div class="card border-0 rounded-4 shadow-sm">
                     <div class="card-body p-4 text-center">
@@ -155,29 +160,30 @@
                             <h5 class="fs-5 mb-2">У вас нет сертификатов</h5>
                             <p class="text-muted mb-0">Здесь будут отображаться полученные вами подарочные сертификаты</p>
                             
-                            @if(!Auth::user()->hasRole('predprinimatel'))
+                            <?php if(!Auth::user()->hasRole('predprinimatel')): ?>
                             <div class="alert alert-info mt-3 w-75">
                                 <i class="fa-solid fa-lightbulb me-2"></i>
                                 <strong>Совет:</strong> Вы также можете переключиться на режим предпринимателя для создания собственных сертификатов
-                                <form action="{{ route('role.switch') }}" method="POST" class="mt-2">
-                                    @csrf
+                                <form action="<?php echo e(route('role.switch')); ?>" method="POST" class="mt-2">
+                                    <?php echo csrf_field(); ?>
                                     <input type="hidden" name="role" value="predprinimatel">
                                     <button type="submit" class="btn btn-sm btn-outline-primary">
                                         <i class="fa-solid fa-briefcase me-2"></i>Стать предпринимателем
                                     </button>
                                 </form>
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
-        @endforelse
+        <?php endif; ?>
     </div>
     
     <!-- Пагинация -->
     <div class="mt-4 d-flex justify-content-center">
-        {{ $certificates->withQueryString()->links() }}
+        <?php echo e($certificates->withQueryString()->links()); ?>
+
     </div>
 </div>
 
@@ -189,8 +195,8 @@
                 <h5 class="modal-title" id="createFolderModalLabel">Создать новую папку</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="create-folder-form" action="{{ route('user.folders.store') }}" method="POST">
-                @csrf
+            <form id="create-folder-form" action="<?php echo e(route('user.folders.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="folder-name" class="form-label">Название папки</label>
@@ -235,8 +241,8 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <form id="delete-folder-form" action="" method="POST">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">
                         <i class="fa-solid fa-trash me-2"></i>Удалить папку
                     </button>
@@ -1662,7 +1668,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentFolder = urlParams.get('folder');
                     if (currentFolder === folderId) {
                         // Загружаем главную страницу через AJAX вместо перезагрузки
-                        loadPageContent("{{ route('user.certificates.index') }}");
+                        loadPageContent("<?php echo e(route('user.certificates.index')); ?>");
                     }
                 } else {
                     showToast(data.message || 'Ошибка при удалении папки', 'danger');
@@ -1762,4 +1768,6 @@ document.addEventListener('DOMContentLoaded', function() {
     animation: pulse 1.5s infinite;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.lk', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\OSPanel\domains\sert\resources\views/user/certificates/index.blade.php ENDPATH**/ ?>

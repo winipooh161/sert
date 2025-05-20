@@ -91,14 +91,8 @@ class Certificate extends Model
      */
     public function folders()
     {
-        // Явно указываем столбцы связующей таблицы
-        return $this->belongsToMany(
-            CertificateFolder::class, 
-            'certificate_folder', 
-            'certificate_id', 
-            'certificate_folder_id'
-        )
-        ->withTimestamps();
+        return $this->belongsToMany(Folder::class, 'certificate_folder', 'certificate_id', 'folder_id')
+            ->withTimestamps();
     }
 
     /**

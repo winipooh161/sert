@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
-use App\Models\CertificateFolder;
+use App\Models\Folder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,48 +36,26 @@ class CertificatesController extends Controller
                     $q->orWhere('recipient_email', $user->email);
                 }
             });
-        
+
         // Получаем папки пользователя
-        $folders = CertificateFolder::where('user_id', Auth::id())->get();
-        
+        $folders = Folder::where('user_id', Auth::id())->orderBy('name')->get();
+
         // Если выбрана папка, получаем только сертификаты из этой папки
         $currentFolder = null;
         if ($request->has('folder') && !empty($request->folder)) {
-            $currentFolder = CertificateFolder::where('id', $request->folder)
-                                            ->where('user_id', Auth::id())
-                                            ->first();
-            
+            $currentFolder = Folder::where('id', $request->folder)
+                              ->where('user_id', Auth::id())
+                              ->first();
+
             if ($currentFolder) {
                 $certificateIds = $currentFolder->certificates->pluck('id')->toArray();
                 $query->whereIn('id', $certificateIds);
             }
         }
-        
-        // Фильтр по статусу
-        if ($request->has('status') && !empty($request->status)) {
-            $query->where('status', $request->status);
-        }
-        
-        // Поиск по номеру
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where('certificate_number', 'like', "%{$search}%");
-        }
-        
-        // Получение результатов с пагинацией и сохранение параметров запроса
-        $certificates = $query->latest()->paginate(9)->withQueryString();
-        
-        // Дополнительная статистика
-        $activeCount = $query->where('status', 'active')->count();
-        $totalAmount = $query->where('status', 'active')->sum('amount');
-        
-        return view('user.certificates.index', compact(
-            'certificates',
-            'folders',
-            'currentFolder',
-            'activeCount',
-            'totalAmount'
-        ));
+
+        $certificates = $query->paginate(12);
+
+        return view('user.certificates.index', compact('certificates', 'folders', 'currentFolder'));
     }
 
     // Метод show удален, т.к. пользователи больше не могут видеть детали сертификата через LK

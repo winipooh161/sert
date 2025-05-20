@@ -986,4 +986,252 @@ iframe#certificatePreview {
         padding: 0.25rem 0.35rem !important;
         font-size: 0.7rem !important;
     }
+}* Указатель для карточек сертификатов, чтобы показать что они кликабельны */
+.certificate-card {
+    position: relative; /* Для правильного абсолютного позиционирования дочерних элементов */
+    cursor: pointer;
+}
+
+/* Визуальный эффект при нажатии на карточку */
+.certificate-card:active {
+    transform: scale(0.98);
+}
+
+/* Длительное нажатие - индикатор */
+.long-press-animation {
+    animation: pulse-long-press 1s infinite;
+}
+
+@keyframes pulse-long-press {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(var(--bs-primary-rgb), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0);
+    }
+}
+
+/* Эффекты при наведении на папки */
+.folder-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.folder-btn:hover {
+    transform: translateY(-2px);
+}
+
+.folder-btn:active {
+    transform: scale(0.95);
+}
+
+/* Стили для двойного клика */
+.folder-btn.double-clicked {
+    animation: folder-pulse 0.4s;
+}
+
+@keyframes folder-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.92); }
+    100% { transform: scale(1); }
+}
+
+/* Анимация в модальном окне удаления папки */
+.folder-animation-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.folder-animation-container .fa-folder-open {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.folder-animation-container .animation-icon {
+    position: absolute;
+    font-size: 1.5rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: trash-animation 2s infinite;
+}
+
+@keyframes trash-animation {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    25% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+    75% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+/* Улучшение визуального отображения текущей папки */
+.current-folder-actions {
+    padding: 10px 15px;
+    background: rgba(var(--bs-light-rgb), 0.7);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Индикатор для подсказки о двойном клике */
+.double-click-hint {
+    position: relative;
+    display: inline-block;
+}
+
+.double-click-hint::after {
+    content: "👆👆";
+    position: absolute;
+    font-size: 0.7em;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.7;
+}/* Дополнительные стили для улучшения адаптивности */
+@media (max-width: 767.98px) {
+    .form-control-sm, .form-select-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    .form-check-inline {
+        margin-right: 0.75rem;
+    }
+    
+    .fs-7 {
+        font-size: 0.85rem !important;
+    }
+    
+    .form-label.small {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .form-check-inline {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+        font-size: 0.75rem;
+    }
+    
+    .sticky-top {
+        position: relative !important;
+        top: 0 !important;
+    }
+}
+
+/* Стили для карточек эффектов */
+.effect-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.effect-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.effect-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+/* Анимации для предпросмотра эффектов */
+@keyframes float-emoji {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes float-confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+}/* Стили для скрытия бокового меню на этой странице */
+aside, .sidebar-nav, .navbar-toggler {
+    display: none !important;
+}
+
+/* Стили для карточек эффектов */
+.effect-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.effect-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.effect-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.particles-preview {
+    font-size: 1.5em;
+    line-height: 1;
+    margin: 10px 0;
+    letter-spacing: 0.2em;
+}
+
+/* Анимации для предпросмотра эффектов */
+@keyframes float-emoji {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes float-confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+}
+
+@keyframes float-snow {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    50% { transform: translateY(15px) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+}
+
+@keyframes float-fireworks {
+    0% { transform: scale(0.3) translateY(0); opacity: 1; }
+    50% { transform: scale(1) translateY(-30px); opacity: 0.8; }
+    100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
+}
+
+@keyframes float-bubbles {
+    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+    50% { transform: translateY(-20px) scale(1.1) rotate(10deg); opacity: 0.9; }
+    100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+}
+
+@keyframes float-leaves {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    50% { transform: translateY(10px) rotate(10deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes float-stars {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+    50% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    100% { transform: scale(1) rotate(90deg); opacity: 0.8; }
 }
