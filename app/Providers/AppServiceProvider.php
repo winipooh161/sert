@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Services\ImageService;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
+use App\Services\SmsService;
+use App\Services\ImageService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,10 +13,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Регистрируем сервис для работы с изображениями
-        $this->app->singleton(ImageService::class, function ($app) {
-            return new ImageService();
+        $this->app->singleton(SmsService::class, function ($app) {
+            return new SmsService();
         });
+        
+        // Регистрируем ImageService, если не зарегистрирован
+        if (!$this->app->bound(ImageService::class)) {
+            $this->app->singleton(ImageService::class, function ($app) {
+                return new ImageService();
+            });
+        }
     }
 
     /**

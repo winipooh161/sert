@@ -119,6 +119,84 @@ class ImageService
     }
     
     /**
+     * Создает и сохраняет изображение для шаблона сертификата
+     *
+     * @param UploadedFile $image Загруженный файл изображения
+     * @param string $folder Папка для сохранения (относительно public storage)
+     * @param int $width Максимальная ширина изображения
+     * @param int $height Максимальная высота изображения
+     * @return string Путь к сохраненному изображению
+     */
+    public function createTemplateImage(UploadedFile $image, string $folder = 'templates', int $width = 800, int $height = 600)
+    {
+        // Создаем директорию, если она не существует
+        $path = $folder;
+        if (!Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->makeDirectory($path);
+        }
+
+        // Генерируем уникальное имя файла
+        $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+        
+        // Обрабатываем изображение с помощью Intervention Image
+        $img = Image::make($image->getRealPath());
+        
+        // Изменяем размер изображения с сохранением пропорций
+        $img->resize($width, $height, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+        
+        // Оптимизируем качество изображения
+        $img->encode($image->getClientOriginalExtension(), 80);
+        
+        // Сохраняем обработанное изображение
+        $fullPath = $path . '/' . $filename;
+        Storage::disk('public')->put($fullPath, (string) $img->encode());
+        
+        return $fullPath;
+    }
+    
+    /**
+     * Создает временное изображение логотипа для предпросмотра
+     *
+     * @param UploadedFile $image
+     * @param string $folder
+     * @return string|null
+     */
+    public function createTempImage(UploadedFile $image, string $folder = 'temp')
+    {
+        try {
+            // Создаем директорию, если она не существует
+            $path = $folder;
+            if (!Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->makeDirectory($path);
+            }
+
+            // Генерируем уникальное имя файла с префиксом temp_
+            $filename = 'temp_' . time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            
+            // Обрабатываем изображение
+            $img = Image::make($image->getRealPath());
+            
+            // Оптимизируем размер для логотипа
+            $img->resize(300, 300, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            
+            // Сохраняем обработанное изображение
+            $fullPath = $path . '/' . $filename;
+            Storage::disk('public')->put($fullPath, (string) $img->encode());
+            
+            return $fullPath;
+        } catch (\Exception $e) {
+            \Log::error('Ошибка создания временного изображения: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
      * Получает расширение файла из MIME-типа
      *
      * @param string $mime MIME-тип файла

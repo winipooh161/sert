@@ -415,7 +415,7 @@ form .mb-3:last-child {
 /* Стили для различных устройств */
 .certificate-preview-container[data-current-device="desktop"] .certificate-preview-wrapper {
     width: 100%;
-    height: 100%;
+    height: 65vh;
     border-radius: 8px;
 }
 
@@ -1093,7 +1093,9 @@ iframe#certificatePreview {
     left: 50%;
     transform: translateX(-50%);
     opacity: 0.7;
-}/* Дополнительные стили для улучшения адаптивности */
+}
+
+/* Дополнительные стили для улучшения адаптивности */
 @media (max-width: 767.98px) {
     .form-control-sm, .form-select-sm {
         font-size: 0.875rem;
@@ -1153,85 +1155,197 @@ iframe#certificatePreview {
     box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
-/* Анимации для предпросмотра эффектов */
-@keyframes float-emoji {
-    0% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(180deg); }
-    100% { transform: translateY(0) rotate(360deg); }
+
+/* Стили для группировки сертификатов по датам */
+.date-group-heading {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    padding: 5px 0;
 }
 
-@keyframes float-confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
-}/* Стили для скрытия бокового меню на этой странице */
-aside, .sidebar-nav, .navbar-toggler {
-    display: none !important;
-}
-
-/* Стили для карточек эффектов */
-.effect-card {
+/* Улучшаем стили для итоговой карточки */
+.stats-card {
     transition: all 0.3s ease;
-    cursor: pointer;
-    border: 1px solid #dee2e6;
 }
 
-.effect-card:hover {
+.stats-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
 }
 
-.effect-card.selected {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+.stat-box {
+    transition: all 0.3s ease;
+    border-radius: 10px;
 }
 
-.particles-preview {
-    font-size: 1.5em;
-    line-height: 1;
-    margin: 10px 0;
-    letter-spacing: 0.2em;
+.stat-box:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}* Общие стили для всех таблиц данных на сайте */
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 1rem;
 }
 
-/* Анимации для предпросмотра эффектов */
-@keyframes float-emoji {
-    0% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(180deg); }
-    100% { transform: translateY(0) rotate(360deg); }
+/* Стили для заголовка таблицы */
+.data-table .table-head,
+.table .table-head {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
 }
 
-@keyframes float-confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+.data-table th,
+.table th {
+    font-weight: 600;
+    vertical-align: middle;
+    color: #495057;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    padding: 0.75rem 0.5rem;
 }
 
-@keyframes float-snow {
-    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
-    50% { transform: translateY(15px) rotate(5deg); opacity: 1; }
-    100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+/* Стили для тела таблицы */
+.data-table td,
+.table td {
+    vertical-align: middle;
+    padding: 0.625rem 0.5rem;
+    border-top: 1px solid #f0f0f0;
 }
 
-@keyframes float-fireworks {
-    0% { transform: scale(0.3) translateY(0); opacity: 1; }
-    50% { transform: scale(1) translateY(-30px); opacity: 0.8; }
-    100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
+/* Стили для чередующихся строк */
+.data-table tbody tr:nth-of-type(odd),
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
-@keyframes float-bubbles {
-    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
-    50% { transform: translateY(-20px) scale(1.1) rotate(10deg); opacity: 0.9; }
-    100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+/* Стили для наведения на строки */
+.data-table tbody tr:hover,
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.04);
 }
 
-@keyframes float-leaves {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    50% { transform: translateY(10px) rotate(10deg); opacity: 0.8; }
-    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+/* Стили для строк статусов */
+.data-table .badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
 }
 
-@keyframes float-stars {
-    0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-    50% { transform: scale(1.2) rotate(45deg); opacity: 1; }
-    100% { transform: scale(1) rotate(90deg); opacity: 0.8; }
+/* Стили для адаптивности таблиц */
+@media (max-width: 767.98px) {
+    .data-table th,
+    .data-table td,
+    .table th,
+    .table td {
+        padding: 0.5rem 0.35rem;
+        font-size: 0.85rem;
+    }
+    
+    .data-table .badge,
+    .table .badge {
+        font-size: 0.7rem;
+        padding: 0.25em 0.5em;
+    }
+}
+
+/* Стили для очень маленьких экранов */
+@media (max-width: 575.98px) {
+    .data-table th,
+    .data-table td,
+    .table th, 
+    .table td {
+        padding: 0.4rem 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Уменьшаем кнопки в таблице */
+    .data-table .btn-sm,
+    .table .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Убираем некоторые границы для компактности */
+    .data-table td,
+    .table td {
+        border-top: none;
+        border-bottom: 1px solid #f0f0f0;
+    }
+}
+
+/* Дополнительные стили для мобильных версий (сохраняем существующие) */
+@media (max-width: 575.98px) {
+    .badge {
+        padding: 0.25em 0.5em;
+        font-size: 0.7em;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .pagination {
+        font-size: 0.85rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Стиль для мобильных кнопок действий */
+.dropdown-toggle::after {
+    display: none;
+}
+
+/* Улучшенный стиль для пагинации */
+.pagination {
+    justify-content: center;
+}
+
+/* Стиль для маленьких круглых иконок в карточках */
+@media (max-width: 767.98px) {
+    .card .fa-certificate, 
+    .card .fa-check-circle,
+    .card .fa-coins {
+        font-size: 0.875rem;
+    }
+    
+    .card .rounded-circle {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .card .fa-certificate, 
+    .card .fa-check-circle,
+    .card .fa-coins {
+        font-size: 1.25rem;
+    }
+    
+    .card .rounded-circle {
+        width: 3rem;
+        height: 3rem;
+    }
+}
+
+/* Улучшение для карточек на мобильных */
+@media (max-width: 767.98px) {
+    .row.g-2 .card {
+        margin-bottom: 0 !important;
+    }
+}.navbar-toggler {
+    padding: 0 !important;
+    font-size: 1rem!important;
+    line-height: 1!important;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    transition: box-shadow 0.15s ease-in-out;
+    min-width: 48px;
+    min-height: 48px;
+}.sidebar-user.d-flex.align-items-center {
+    gap: 5px;
 }

@@ -138,7 +138,7 @@
     </div>
 
     <!-- Пагинация -->
-    <div class="d-flex justify-content-center mt-4">
+    <div class="d-flex justify-content-center mt-4 pagination">
         <?php echo e($animationEffects->links()); ?>
 
     </div>

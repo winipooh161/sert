@@ -54,8 +54,8 @@
     <div class="card border-0 rounded-4 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-sm mb-0">
-                    <thead class="bg-light">
+                <table class="table table-hover table-sm data-table mb-0">
+                    <thead class="table-head">
                         <tr>
                             <th class="py-2">Номер</th>
                             <th class="py-2">Получатель</th>
@@ -71,10 +71,14 @@
                             <tr>
                                 <td class="align-middle"><?php echo e($certificate->certificate_number); ?></td>
                                 <td class="align-middle"><?php echo e($certificate->recipient_name); ?></td>
-                                <td class="align-middle d-none d-md-table-cell"><?php echo e($certificate->template->name); ?></td>
+                                <td class="align-middle d-none d-md-table-cell"><?php echo e($certificate->template ? $certificate->template->name : 'Шаблон удален'); ?></td>
                                 <td class="align-middle"><?php echo e(number_format($certificate->amount, 0, '.', ' ')); ?> ₽</td>
                                 <td class="align-middle d-none d-lg-table-cell">
-                                    <span class="small"><?php echo e($certificate->valid_from->format('d.m.Y')); ?> - <?php echo e($certificate->valid_until->format('d.m.Y')); ?></span>
+                                    <span class="small">
+                                        <?php echo e(is_string($certificate->valid_from) ? $certificate->valid_from : $certificate->valid_from->format('d.m.Y')); ?> - 
+                                        <?php echo e(is_string($certificate->valid_until) ? $certificate->valid_until : $certificate->valid_until->format('d.m.Y')); ?>
+
+                                    </span>
                                 </td>
                                 <td class="align-middle">
                                     <?php if($certificate->status == 'active'): ?>
@@ -93,7 +97,7 @@
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
                                         <?php if($certificate->status == 'active'): ?>
-                                        <button type="button" class="btn btn-sm btn-outline-info d-none d-sm-inline-block" title="Копировать ссылку" 
+                                        <button type="button" class="btn btn-sm btn-outline-info d-sm-inline-block" title="Копировать ссылку" 
                                                 onclick="copyPublicUrl('<?php echo e(route('certificates.public', $certificate->uuid)); ?>', '<?php echo e($certificate->certificate_number); ?>')">
                                             <i class="fa-solid fa-copy"></i>
                                         </button>
@@ -167,53 +171,12 @@
     </div>
     
     <!-- Пагинация -->
-    <div class="mt-3 d-flex justify-content-center justify-content-md-start">
+    <div class="mt-3 d-flex justify-content-center justify-content-md-start pagination">
         <?php echo e($certificates->withQueryString()->links()); ?>
 
     </div>
 
-    <?php if(count($certificates) > 0): ?>
-    <!-- Краткая статистика -->
-    <div class="row g-2 g-md-4 mt-3 mt-md-4">
-        <div class="col-6 col-md-4">
-            <div class="card border-0 rounded-4 shadow-sm text-center h-100">
-                <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-center">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 p-2 p-md-3 mb-2 mb-md-3 mx-auto">
-                        <i class="fa-solid fa-certificate text-primary"></i>
-                    </div>
-                    <h3 class="fs-5 fs-md-3"><?php echo e($certificates->total()); ?></h3>
-                    <p class="text-muted mb-0 small">Всего сертификатов</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-6 col-md-4">
-            <div class="card border-0 rounded-4 shadow-sm text-center h-100">
-                <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-center">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 p-2 p-md-3 mb-2 mb-md-3 mx-auto">
-                        <i class="fa-solid fa-check-circle text-success"></i>
-                    </div>
-                    <h3 class="fs-5 fs-md-3"><?php echo e($activeCount ?? 0); ?></h3>
-                    <p class="text-muted mb-0 small">Активных сертификатов</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-12 col-md-4 mt-2 mt-md-0">
-            <div class="card border-0 rounded-4 shadow-sm text-center h-100">
-                <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-center">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 p-2 p-md-3 mb-2 mb-md-3 mx-auto">
-                        <i class="fa-solid fa-coins text-warning"></i>
-                    </div>
-                    <h3 class="fs-5 fs-md-3"><?php echo e(number_format($totalAmount ?? 0, 0, '.', ' ')); ?> ₽</h3>
-                    <p class="text-muted mb-0 small">Общая сумма сертификатов</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-</div>
-
+ 
 <!-- Toast-уведомление для подтверждения копирования -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
     <div id="copyToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -287,75 +250,7 @@ function fallbackCopyTextToClipboard(text, certNumber) {
 </script>
 
 <style>
-/* Адаптивные стили для таблицы */
-@media (max-width: 575.98px) {
-    .table th, .table td {
-        padding: 0.5rem 0.25rem !important;
-        font-size: 0.85rem;
-    }
-    
-    .badge {
-        padding: 0.25em 0.5em;
-        font-size: 0.7em;
-    }
-    
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-    
-    .pagination {
-        font-size: 0.85rem;
-    }
-    
-    .pagination .page-link {
-        padding: 0.25rem 0.5rem;
-    }
-}
-
-/* Стиль для мобильных кнопок действий */
-.dropdown-toggle::after {
-    display: none;
-}
-
-/* Улучшенный стиль для пагинации */
-.pagination {
-    justify-content: center;
-}
-
-/* Стиль для маленьких круглых иконок в карточках */
-@media (max-width: 767.98px) {
-    .card .fa-certificate, 
-    .card .fa-check-circle,
-    .card .fa-coins {
-        font-size: 0.875rem;
-    }
-    
-    .card .rounded-circle {
-        width: 2.25rem;
-        height: 2.25rem;
-    }
-}
-
-@media (min-width: 768px) {
-    .card .fa-certificate, 
-    .card .fa-check-circle,
-    .card .fa-coins {
-        font-size: 1.25rem;
-    }
-    
-    .card .rounded-circle {
-        width: 3rem;
-        height: 3rem;
-    }
-}
-
-/* Улучшение для карточек на мобильных */
-@media (max-width: 767.98px) {
-    .row.g-2 .card {
-        margin-bottom: 0 !important;
-    }
-}
+/
 </style>
 <?php $__env->stopSection(); ?>
 

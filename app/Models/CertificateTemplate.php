@@ -68,7 +68,11 @@ class CertificateTemplate extends Model
      */
     public function getTemplateFilePathAttribute()
     {
-        return public_path($this->template_path);
+        $path = $this->template_path;
+        if (!str_ends_with($path, '.php')) {
+            $path = str_replace('.html', '.php', $path);
+        }
+        return public_path($path);
     }
 
     /**

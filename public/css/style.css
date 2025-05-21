@@ -11,7 +11,7 @@ body, html {
         .main-container {
             width: 100%;
             height: 100vh;
-            overflow: hidden;
+            /* overflow: hidden; */
             position: relative;
         }
         
@@ -253,7 +253,7 @@ body, html {
         .admin-qr-toggle {
             display: none;
             position: fixed;
-            bottom: 10px;
+            bottom: 20px;
             right: 10px;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
@@ -318,7 +318,7 @@ body, html {
         }
         
         .qr-fullscreen-content p {
-            color: white;
+            color: rgb(0, 0, 0);
             font-size: 16px;
             margin: 15px 0;
         }
@@ -328,8 +328,8 @@ body, html {
             top: 20px;
             right: 20px;
             background-color: transparent;
-            border: 2px solid white;
-            color: white;
+            border: 2px solid rgb(0, 0, 0);
+            color: rgb(0, 0, 0);
             font-size: 20px;
             width: 40px;
             height: 40px;
@@ -701,4 +701,212 @@ body, html {
                 height: 40px;
                 font-size: 1rem;
             }
-        }
+        }    /* Базовые стили для эффектов анимации */
+    .animation-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        overflow: hidden;
+        /* Плавное появление/исчезновение контейнера анимации */
+        opacity: 0;
+        transition: opacity 0.8s ease;
+    }
+    
+    .animation-container.visible {
+        opacity: 1;
+    }
+    
+    /* Общие стили для частиц анимации */
+    .animation-particle {
+        position: absolute;
+        user-select: none;
+        pointer-events: none;
+        /* Плавное появление каждой частицы */
+        opacity: 0;
+        animation-fill-mode: both;
+    }
+    
+    /* Стили для плавного появления и исчезновения частиц */
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: scale(0.8); }
+        10% { opacity: 0.9; transform: scale(1); }
+        80% { opacity: 0.9; }
+        100% { opacity: 0; }
+    }
+    
+    /* Анимация для эмодзи */
+    @keyframes float-emoji {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
+    }
+    
+    /* Анимация для конфетти */
+    @keyframes float-confetti {
+        0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+    
+    /* Анимация для снега */
+    @keyframes float-snow {
+        0% { transform: translateY(-10px); opacity: 0; }
+        10% { opacity: 0.8; }
+        100% { transform: translateY(100vh) translateX(20px); opacity: 0; }
+    }
+    
+    /* Анимация для фейерверков */
+    @keyframes float-fireworks {
+        0% { transform: translate(0, 0) scale(0.1); opacity: 0; }
+        10% { opacity: 1; transform: scale(1); }
+        50% { opacity: 1; }
+        100% { transform: translate(var(--x), var(--y)) scale(0.1); opacity: 0; }
+    }
+    
+    /* Анимация для пузырей */
+    @keyframes float-bubbles {
+        0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        10% { opacity: 0.8; }
+        100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+    }
+    
+    /* Анимация для листьев */
+    @keyframes float-leaves {
+        0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.9; }
+        100% { transform: translateY(100vh) rotate(360deg) translateX(var(--wind)); opacity: 0; }
+    }
+    
+    /* Анимация для звезд */
+    @keyframes float-stars {
+        0% { transform: translateY(0) scale(0.3); opacity: 0; }
+        10% { opacity: 1; }
+        70% { opacity: 1; transform: scale(1); }
+        100% { transform: translateY(-50px) scale(0.3); opacity: 0; }
+    }
+    
+    /* Применение анимаций к типам частиц */
+    .particle-emoji {
+        animation: float-emoji 4s ease-in-out forwards;
+    }
+    
+    .particle-confetti {
+        animation: float-confetti 4s ease-in-out forwards;
+    }
+    
+    .particle-snow {
+        animation: float-snow 8s linear forwards;
+    }
+    
+    .particle-fireworks {
+        animation: float-fireworks 2s ease-out forwards;
+    }
+    
+    .particle-bubbles {
+        animation: float-bubbles 6s ease-in-out forwards;
+    }
+    
+    .particle-leaves {
+        animation: float-leaves 7s ease-in-out forwards;
+    }
+    
+    .particle-stars {
+        animation: float-stars 3s ease-in-out forwards;
+    }
+    
+    /* Различные задержки для частиц */
+    .delay-0 { animation-delay: 0s; }
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+    .delay-4 { animation-delay: 0.8s; }
+    .delay-5 { animation-delay: 1s; }
+    
+    /* Стили для модального окна с QR-кодом */
+    .qr-fullscreen-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    
+    .qr-fullscreen-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .qr-fullscreen-content {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: transform 0.4s ease, opacity 0.3s ease;
+    }
+    
+    .qr-fullscreen-overlay.active .qr-fullscreen-content {
+        transform: scale(1);
+        opacity: 1;
+        transition-delay: 0.1s;
+    }
+    
+    .qr-close-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: rgb(0, 0, 0);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
+    }
+    
+    .qr-fullscreen-overlay.active .qr-close-button {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.2s;
+    }
+    
+    .qr-close-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    #qrFullscreenImage {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    
+    iframe#certificate-frame {
+        height: 100vh;
+        position: relative;
+        width: 100%;
+        z-index: 2;
+        border: none;
+        display: block;
+    }

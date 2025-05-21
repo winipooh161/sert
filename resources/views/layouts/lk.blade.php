@@ -99,6 +99,32 @@
         #pwa-install-steps li {
             margin-bottom: 5px;
         }
+
+        .navbar-toggler {
+            padding: 0.5rem;
+            font-size: 1.25rem;
+            line-height: 1;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+            transition: box-shadow 0.15s ease-in-out;
+            min-width: 48px; /* Добавляем минимальную ширину для лучшего попадания на мобильных устройствах */
+            min-height: 48px; /* Добавляем минимальную высоту */
+        }
+        .pagination svg {
+width: 35px;
+height: 35px;
+}
+        .navbar-toggler-icon {
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            vertical-align: middle;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100%;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
     </style>
 </head>
 <body>
@@ -106,45 +132,50 @@
         <!-- ===================== МОБИЛЬНАЯ ШАПКА ===================== -->
         <header class="navbar navbar-expand-lg sticky-top bg-white d-lg-none">
             <div class="container-fluid">
-               <div class="sidebar-user d-flex align-items-center ">
-                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="avatar-wrapper rounded-circle overflow-hidden flex-shrink-0" style="">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-100 h-100 object-fit-cover">
-                    @else
-                        <div class="w-100 h-100 bg-primary text-white d-flex align-items-center justify-content-center">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                <div class="d-flex align-items-center">
+                    <!-- Исправленная кнопка бургера - добавлены явные стили и обертка -->
+                    <div class="me-2">
+                        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Открыть меню">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Блок пользователя -->
+                    <div class="sidebar-user d-flex align-items-center">
+                        <div class="avatar-wrapper rounded-circle overflow-hidden flex-shrink-0" style="">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-100 h-100 object-fit-cover">
+                            @else
+                                <div class="w-100 h-100 bg-primary text-white d-flex align-items-center justify-content-center">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                        <div class="user-info overflow-hidden">
+                            <h6 class="mb-0 sidebar-user-name text-truncate">{{ Auth::user()->name }}</h6>
+                        </div>
+                    </div>
                 </div>
-                <div class="user-info overflow-hidden">
-                    <h6 class="mb-0 sidebar-user-name text-truncate">{{ Auth::user()->name }}</h6>
-                   
-                </div>
-            </div>
                 
-                <!-- Кнопка переключения бокового меню -->
-               <!-- Кнопка быстрого создания сертификата -->
-            @if(Auth::user()->hasRole('predprinimatel') && session('active_role') != 'predprinimatel')
-            <div class="ms-auto">
-                <form action="{{ route('role.switch') }}" method="POST" id="quickCreateForm">
-                    @csrf
-                    <input type="hidden" name="role" value="predprinimatel">
-                    <input type="hidden" name="redirect" value="{{ route('entrepreneur.certificates.select-template') }}">
-                    <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
+                <!-- Кнопка быстрого создания сертификата -->
+                @if(Auth::user()->hasRole('predprinimatel') && session('active_role') != 'predprinimatel')
+                <div class="ms-auto" style="padding-right: 10px">
+                    <form action="{{ route('role.switch') }}" method="POST" id="quickCreateForm">
+                        @csrf
+                        <input type="hidden" name="role" value="predprinimatel">
+                        <input type="hidden" name="redirect" value="{{ route('entrepreneur.certificates.select-template') }}">
+                        <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
+                            <i class="fa-solid fa-plus fs-5"></i>
+                        </button>
+                    </form>
+                </div>
+                @elseif(Auth::user()->hasRole('predprinimatel'))
+                <div class="ms-auto" style="padding-right: 10px">
+                    <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
                         <i class="fa-solid fa-plus fs-5"></i>
-                    </button>
-                </form>
-            </div>
-            @elseif(Auth::user()->hasRole('predprinimatel'))
-            <div class="ms-auto">
-                <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;" title="Создать сертификат">
-                    <i class="fa-solid fa-plus fs-5"></i>
-                </a>
-            </div>
-            @endif
+                    </a>
+                </div>
+                @endif
             </div>
         </header>
 

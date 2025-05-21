@@ -10,6 +10,10 @@ class Certificate extends Model
 {
     use HasFactory;
 
+    // Явно указываем использование автоинкремента
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     protected $fillable = [
         'certificate_number',
         'uuid',
@@ -30,12 +34,11 @@ class Certificate extends Model
         'used_at'
     ];
 
-    protected $casts = [
-        'custom_fields' => 'array',
-        'valid_from' => 'date',
-        'valid_until' => 'date',
-        'used_at' => 'datetime',
-        'amount' => 'decimal:2',
+    // Даты для автоматического преобразования
+    protected $dates = [
+        'valid_from',
+        'valid_until',
+        'used_at',
     ];
 
     /**
@@ -45,11 +48,9 @@ class Certificate extends Model
     {
         parent::boot();
 
+        // Генерируем UUID при создании
         static::creating(function ($certificate) {
-            // Автоматически генерируем UUID при создании сертификата, если его нет
-            if (!$certificate->uuid) {
-                $certificate->uuid = (string) Str::uuid();
-            }
+            $certificate->uuid = (string) Str::uuid();
         });
     }
 
@@ -101,5 +102,25 @@ class Certificate extends Model
     public function animationEffect()
     {
         return $this->belongsTo(AnimationEffect::class);
+    }
+
+    /**
+     * Форматирует дату с проверкой типа
+     *
+     * @param mixed $date Дата для форматирования
+     * @param string $format Формат вывода
+     * @return string Отформатированная дата
+     */
+    public function formatDate($date, $format = 'd.m.Y')
+    {
+        if (is_string($date)) {
+            return $date;
+        } elseif ($date instanceof \Carbon\Carbon) {
+            return $date->format($format);
+        } elseif (is_null($date)) {
+            return '---';
+        } else {
+            return (string) $date;
+        }
     }
 }

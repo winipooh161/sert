@@ -114,6 +114,12 @@
                                 <span class="sidebar-text">Анимационные эффекты</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo e(Route::is('admin.telegram.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.telegram.index')); ?>">
+                                <i class="fa-brands fa-telegram sidebar-icon"></i>
+                                <span class="sidebar-text">Telegram бот</span>
+                            </a>
+                        </li>
                     <?php endif; ?>
                     
                     <?php

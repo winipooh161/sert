@@ -78,7 +78,7 @@
     </div>
     
     <!-- Пагинация -->
-    <div class="mt-4">
+    <div class="mt-4 pagination">
         {{ $templates->links() }}
     </div>
 </div>

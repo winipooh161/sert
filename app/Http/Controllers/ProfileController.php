@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User; // Добавляем импорт модели User
 use App\Services\ImageService;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
     protected $imageService;
+    protected $smsService;
     
-    public function __construct(ImageService $imageService)
+    public function __construct(ImageService $imageService, SmsService $smsService)
     {
         $this->imageService = $imageService;
+        $this->smsService = $smsService;
     }
     
     /**
@@ -132,5 +138,128 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         return view('profile.settings', compact('user'));
+    }
+
+    /**
+     * Инициировать смену номера телефона
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function initiatePhoneChange(Request $request)
+    {
+        Log::info('Начало initiatePhoneChange, данные запроса:', $request->all());
+        
+        try {
+            $phone = $request->input('phone');
+            
+            if (empty($phone)) {
+                return response()->json(['success' => false, 'message' => 'Номер телефона не указан'], 400);
+            }
+            
+            // Форматирование телефона в стандартный вид
+            $phone = preg_replace('/\D/', '', $phone); // Очищаем от всех нецифровых символов
+            
+            // Нормализуем номер телефона для России
+            if (strlen($phone) === 10) {
+                // Добавляем код страны если передан номер без кода (10 цифр)
+                $phone = '7' . $phone;
+            } else if (strlen($phone) === 11) {
+                // Если первая цифра 8, заменяем на 7 (код России)
+                if (substr($phone, 0, 1) === '8') {
+                    $phone = '7' . substr($phone, 1);
+                }
+            }
+            
+            // Проверяем корректность номера после нормализации
+            if (strlen($phone) !== 11 || substr($phone, 0, 1) !== '7') {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Некорректный формат номера телефона. Используйте российский формат.'
+                ], 400);
+            }
+            
+            Log::info("Нормализованный номер телефона: {$phone}");
+            
+            $user = Auth::user();
+            
+            // Проверка на уникальность телефона
+            if ($phone !== preg_replace('/\D/', '', $user->phone) && 
+                User::where('phone', 'LIKE', '%' . substr($phone, -10) . '%')->where('id', '!=', $user->id)->exists()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Этот номер телефона уже используется другим пользователем'
+                ], 400);
+            }
+            
+            // Форматируем телефон для отображения
+            $formattedPhone = '+' . substr($phone, 0, 1) . ' (' . substr($phone, 1, 3) . ') ' . 
+                              substr($phone, 4, 3) . '-' . substr($phone, 7, 2) . '-' . substr($phone, 9, 2);
+            
+            $code = sprintf('%04d', rand(0, 9999)); // Генерация 4-значного кода
+            
+            Log::info("Сгенерирован код: {$code} для номера: {$formattedPhone}");
+            
+            // Сохраняем код и данные для верификации
+            $user->phone_verification_code = $code;
+            $user->phone_verification_expires_at = now()->addMinutes(15);
+            $user->phone_pending_change = $formattedPhone;
+            $user->save();
+            
+            // Для отладки просто выводим код в лог
+            Log::info("Код для телефона {$formattedPhone}: {$code}");
+            
+            // В режиме разработки пропускаем реальную отправку SMS
+            return response()->json([
+                'success' => true, 
+                'message' => 'Код подтверждения отправлен на указанный номер',
+                'debug_code' => config('app.debug') ? $code : null // Только для режима отладки
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error("Исключение в initiatePhoneChange: " . $e->getMessage());
+            Log::error("Стек вызовов: " . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false, 
+                'message' => 'Произошла ошибка сервера: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Подтвердить смену номера телефона
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyPhoneChange(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user->phone_verification_code || !$user->phone_pending_change || 
+            !$user->phone_verification_expires_at || $user->phone_verification_expires_at->isPast()) {
+            return response()->json(['success' => false, 'message' => 'Срок действия кода истек или запрос на смену номера не был инициирован.'], 400);
+        }
+        
+        $enteredCode = $request->input('code1') . $request->input('code2') . 
+                       $request->input('code3') . $request->input('code4');
+        
+        if ($enteredCode != $user->phone_verification_code) {
+            return response()->json(['success' => false, 'message' => 'Неверный код подтверждения.'], 400);
+        }
+        
+        // Код подтвержден, меняем номер телефона
+        $user->phone = $user->phone_pending_change;
+        $user->phone_verification_code = null;
+        $user->phone_verification_expires_at = null;
+        $user->phone_pending_change = null;
+        $user->save();
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'Номер телефона успешно изменен.',
+            'phone' => $user->phone
+        ]);
     }
 }

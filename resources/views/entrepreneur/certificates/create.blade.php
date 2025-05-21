@@ -16,823 +16,175 @@
     <div class="editor-body">
         <div class="container-fluid">
             <div class="row">
-                <!-- Форма редактирования сертификата - колонка будет полной шириной на мобильных -->
-                <div class="col-lg-3 order-2 order-lg-1 mt-3 mt-lg-0">
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-transparent border-0 pt-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="fw-bold mb-0 fs-6">Параметры сертификата</h5>
-                                <span class="badge bg-primary-subtle text-primary">{{ $template->name }}</span>
-                            </div>
-                            
-                            <!-- Добавляем систему вкладок -->
-                            <ul class="nav nav-tabs card-header-tabs" id="certificateTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-tab-content" 
-                                            type="button" role="tab" aria-controls="main-tab-content" aria-selected="true">
-                                        <i class="fa-solid fa-info-circle me-1"></i><span class="d-none d-md-inline">Основное</span>
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-tab-content" 
-                                            type="button" role="tab" aria-controls="visual-tab-content" aria-selected="false">
-                                        <i class="fa-solid fa-image me-1"></i><span class="d-none d-md-inline">Визуал</span>
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-tab-content" 
-                                            type="button" role="tab" aria-controls="advanced-tab-content" aria-selected="false">
-                                        <i class="fa-solid fa-sliders me-1"></i><span class="d-none d-md-inline">Ещё</span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="{{ route('entrepreneur.certificates.store', $template) }}" id="certificateForm" enctype="multipart/form-data">
-                                @csrf
-                                
-                                <!-- Контент вкладок -->
-                                <div class="tab-content" id="certificateTabsContent">
-                                    <!-- Вкладка с основной информацией -->
-                                    <div class="tab-pane fade show active" id="main-tab-content" role="tabpanel" aria-labelledby="main-tab">
-                                        <!-- Основные параметры сертификата -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="amount" class="form-label small fw-bold">Номинал сертификата *</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control form-control-sm @error('amount') is-invalid @enderror" 
-                                                    id="amount" name="amount" value="{{ old('amount', 3000) }}" min="100" step="100" required>
-                                                <span class="input-group-text small">₽</span>
-                                            </div>
-                                            @error('amount')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Введите сумму номинала сертификата</div>
-                                        </div>
-                                        
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="valid_until" class="form-label small fw-bold">Срок действия *</label>
-                                            <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
-                                                id="valid_until" name="valid_until" 
-                                                value="{{ old('valid_until', now()->addMonths(3)->format('Y-m-d')) }}" 
-                                                min="{{ now()->format('Y-m-d') }}" required>
-                                            @error('valid_until')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Сертификат будет действителен до указанной даты</div>
-                                        </div>
-                                        
-                                        <input type="hidden" name="valid_from" id="valid_from" value="{{ now()->format('Y-m-d') }}">
-                                        
-                                        <!-- Информация о получателе -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="recipient_name" class="form-label small fw-bold">Имя получателя *</label>
-                                            <input type="text" class="form-control form-control-sm @error('recipient_name') is-invalid @enderror" 
-                                                id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" required>
-                                            @error('recipient_name')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Укажите имя человека, который получит сертификат</div>
-                                        </div>
-                                        
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="recipient_phone" class="form-label small fw-bold">Телефон получателя *</label>
-                                            <input type="tel" class="form-control maskphone form-control-sm @error('recipient_phone') is-invalid @enderror" 
-                                                id="recipient_phone" name="recipient_phone" value="{{ old('recipient_phone') }}" required>
-                                            @error('recipient_phone')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Номер телефона для идентификации получателя</div>
-                                        </div>
-                                        
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="recipient_email" class="form-label small fw-bold">Email получателя</label>
-                                            <input type="email" class="form-control form-control-sm @error('recipient_email') is-invalid @enderror" 
-                                                id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}">
-                                            @error('recipient_email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Необязательно. Для отправки сертификата по email</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Вкладка с визуальными настройками -->
-                                    <div class="tab-pane fade" id="visual-tab-content" role="tabpanel" aria-labelledby="visual-tab">
-                                        <!-- Обложка сертификата -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="cover_image" class="form-label small fw-bold">Обложка сертификата *</label>
-                                            <input type="file" class="form-control form-control-sm @error('cover_image') is-invalid @enderror" 
-                                                id="cover_image" name="cover_image" accept="image/*" required>
-                                            @error('cover_image')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Загрузите изображение для карточки сертификата. Рекомендуемый размер: 500x300px</div>
-                                            
-                                            <div id="cover_image_preview" class="mt-2 text-center"></div>
-                                        </div>
-                                        
-                                        <!-- Логотип компании -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="logo" class="form-label small fw-bold">Логотип компании</label>
-                                            <div class="mb-2">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_default" value="default" checked>
-                                                    <label class="form-check-label small" for="logo_default">
-                                                        Использовать из профиля
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_custom" value="custom">
-                                                    <label class="form-check-label small" for="logo_custom">
-                                                        Загрузить новый
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="logo_type" id="logo_none" value="none">
-                                                    <label class="form-check-label small" for="logo_none">
-                                                        Не использовать логотип
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            
-                                            <div id="default_logo_preview" class="mb-2 text-center p-2 border rounded">
-                                                <img src="{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}" 
-                                                    class="img-thumbnail" style="max-height: 60px;" alt="Текущий логотип">
-                                                <div class="small text-muted mt-1 fs-7">Текущий логотип</div>
-                                            </div>
-                                            
-                                            <div id="custom_logo_container" class="d-none">
-                                                <input type="file" class="form-control form-control-sm @error('custom_logo') is-invalid @enderror" 
-                                                    id="custom_logo" name="custom_logo" accept="image/*">
-                                                <div class="form-text small">Рекомендуемый размер: 300x100px, PNG или JPG</div>
-                                                
-                                                <div id="custom_logo_preview" class="mt-2 text-center"></div>
-                                            </div>
-                                            
-                                            @error('custom_logo')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Вкладка с дополнительными настройками -->
-                                    <div class="tab-pane fade" id="advanced-tab-content" role="tabpanel" aria-labelledby="advanced-tab">
-                                        <!-- Сообщение -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="message" class="form-label small fw-bold">Сообщение или пожелание</label>
-                                            <textarea class="form-control form-control-sm @error('message') is-invalid @enderror" 
-                                                id="message" name="message" rows="3">{{ old('message') }}</textarea>
-                                            @error('message')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <div class="form-text small">Добавьте персональное сообщение или пожелание для получателя</div>
-                                        </div>
-                                        
-                                        <!-- Добавляем выбор анимационного эффекта -->
-                                        <div class="mb-2 mb-sm-3">
-                                            <label for="animation_effect_id" class="form-label small fw-bold">Анимационный эффект</label>
-                                            <div class="input-group">
-                                                <input type="hidden" name="animation_effect_id" id="animation_effect_id" value="{{ old('animation_effect_id') }}">
-                                                <input type="text" class="form-control form-control-sm" id="selected_effect_name" placeholder="Не выбран" readonly>
-                                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#animationEffectsModal">
-                                                    <i class="fa-solid fa-wand-sparkles me-1"></i>Выбрать
-                                                </button>
-                                            </div>
-                                            <div class="form-text small">Выберите анимационный эффект, который будет отображаться при просмотре сертификата</div>
-                                        </div>
-                                        
-                                        <!-- Место для дополнительных настроек -->
-                                        <div class="alert alert-info py-2 small">
-                                            <i class="fa-solid fa-info-circle me-1"></i>
-                                            Совет: вы сможете распечатать сертификат после его создания
-                                        </div>
-                                    </div>
-                                </div>
+                <!-- Визуальный предпросмотр сертификата - на мобильных перемещаем в начало -->
+                <div class="col-lg-9 order-lg-1 order-2">
+                    @include('entrepreneur.certificates.partials.certificate_preview', ['template' => $template])
+                </div>
+              
+                <!-- Форма редактирования сертификата - десктопная версия -->
+                <div class="col-lg-3 order-1 order-lg-2 mt-3 mt-lg-0 d-none d-lg-block">
+                    @include('entrepreneur.certificates.partials.certificate_form', ['template' => $template])
+                </div>
+                
+                <!-- Мобильная версия в формате квиза - показывается только на мобильных -->
+                <div class="col-12 order-1 d-block d-lg-none mt-3">
+                    @include('entrepreneur.certificates.partials.certificate_quiz', ['template' => $template])
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                <!-- Кнопки управления формой -->
-                                <div class="d-grid gap-1 gap-sm-2 mt-3 pt-2 border-top">
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        <i class="fa-solid fa-plus me-1 me-sm-2"></i>Создать сертификат
-                                    </button>
-                                    <a href="{{ route('entrepreneur.certificates.select-template') }}" class="btn btn-outline-secondary btn-sm">
-                                        Отмена
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Визуальный предпросмотр сертификата - колонка первая на мобильных -->
-                <div class="col-lg-9 order-1 order-lg-2">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-header bg-transparent border-0 pt-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
-                            <div class="d-flex align-items-center mb-2 mb-sm-0">
-                                <h5 class="fw-bold mb-0 me-2 fs-6">Предпросмотр</h5>
-                                <span class="badge bg-primary-subtle text-primary small">{{ $template->name }}</span>
-                            </div>
-                            <div class="device-toggle btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary active" data-device="desktop">
-                                    <i class="fa-solid fa-desktop"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-device="tablet">
-                                    <i class="fa-solid fa-tablet-alt"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-device="mobile">
-                                    <i class="fa-solid fa-mobile-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body p-2 p-sm-3">
-                            <div class="alert alert-info mb-2 mb-sm-3 py-2 small">
-                                <i class="fa-solid fa-info-circle me-1"></i>
-                                Заполните форму слева, чтобы увидеть изменения в сертификате
-                            </div>
-                            <div class="certificate-preview-container" data-current-device="desktop">
-                                <div class="certificate-preview-wrapper device-frame">
-                                    <iframe id="certificatePreview" src="{{ route('template.preview', $template) }}" class="certificate-preview" frameborder="0" loading="lazy"></iframe>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 text-center">
-                            <div class="btn-toolbar justify-content-center">
-                                <div class="btn-group me-2">
-                                    <button type="button" class="btn btn-sm btn-primary" id="zoomInButton">
-                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-primary" id="zoomOutButton">
-                                        <i class="fa-solid fa-magnifying-glass-minus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetZoomButton">
-                                        <i class="fa-solid fa-arrows-to-circle"></i>
-                                    </button>
-                                </div>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="rotateViewButton">
-                                        <i class="fa-solid fa-rotate"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- Модальное окно выбора анимационных эффектов -->
-<div class="modal fade" id="animationEffectsModal" tabindex="-1" aria-labelledby="animationEffectsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="animationEffectsModalLabel">Выбор анимационного эффекта</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row g-3" id="effectsList">
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Загрузка...</span>
-                        </div>
-                        <p class="mt-2">Загрузка доступных эффектов...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-sm btn-primary" id="selectEffectButton" disabled data-bs-dismiss="modal">Выбрать эффект</button>
-            </div>
-        </div>
-    </div>
-</div>
+@include('entrepreneur.certificates.partials.animation_effects_modal')
+
+<!-- Стили для страницы -->
+@push('styles')
+    @include('entrepreneur.certificates.partials.certificate_styles')
+@endpush
+
+<!-- Скрипты для страницы -->
+@push('scripts')
+    @include('entrepreneur.certificates.partials.certificate_scripts')
+@endpush
+
+<!-- Добавляем скрипт для подготовки форм перед отправкой -->
+@push('scripts')
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Маска для телефона (существующий код)
-    var inputs = document.querySelectorAll("input.maskphone");
-    for (var i = 0; i < inputs.length; i++) {
-        var input = inputs[i];
-        input.addEventListener("input", mask);
-        input.addEventListener("focus", mask);
-        input.addEventListener("blur", mask);
-    }
-    function mask(event) {
-        var blank = "+_ (___) ___-__-__";
-        var i = 0;
-        var val = this.value.replace(/\D/g, "").replace(/^8/, "7").replace(/^9/, "79");
-        this.value = blank.replace(/./g, function (char) {
-            if (/[_\d]/.test(char) && i < val.length) return val.charAt(i++);
-            return i >= val.length ? "" : char;
-        });
-        if (event.type == "blur") {
-            if (this.value.length == 2) this.value = "";
-        } else {
-            setCursorPosition(this, this.value.length);
+document.addEventListener('DOMContentLoaded', function() {
+    // Определение мобильного устройства
+    const isMobile = window.innerWidth < 992;
+
+    // Безопасная функция для добавления обработчика событий
+    function safeAddEventListener(elementId, eventType, handler) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener(eventType, handler);
         }
     }
-    function setCursorPosition(elem, pos) {
-        elem.focus();
-        if (elem.setSelectionRange) {
-            elem.setSelectionRange(pos, pos);
-            return;
-        }
-        if (elem.createTextRange) {
-            var range = elem.createTextRange();
-            range.collapse(true);
-            range.moveEnd("character", pos);
-            range.moveStart("character", pos);
-            range.select();
-            return;
-        }
-    }
-    
-    // Инициализируем вкладки
-    const tabButtons = document.querySelectorAll('#certificateTabs .nav-link');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // При переключении вкладок обновляем предпросмотр для отображения актуальных данных
-            setTimeout(updatePreview, 50);
-        });
-    });
-    
-    // Элементы DOM для предпросмотра
-    const previewFrame = document.getElementById('certificatePreview');
-    const formInputs = document.querySelectorAll('#certificateForm input, #certificateForm textarea');
-    const previewContainer = document.querySelector('.certificate-preview-container');
-    let scale = 1;
-    let logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
-    
-    // Переключение типа логотипа
-    const logoDefault = document.getElementById('logo_default');
-    const logoCustom = document.getElementById('logo_custom');
-    const logoNone = document.getElementById('logo_none');
-    const defaultLogoPreview = document.getElementById('default_logo_preview');
-    const customLogoContainer = document.getElementById('custom_logo_container');
-    const customLogoInput = document.getElementById('custom_logo');
-    const customLogoPreview = document.getElementById('custom_logo_preview');
-    
-    logoDefault.addEventListener('change', function() {
-        if (this.checked) {
-            defaultLogoPreview.classList.remove('d-none');
-            customLogoContainer.classList.add('d-none');
-            logoUrl = '{{ Auth::user()->company_logo ? asset('storage/' . Auth::user()->company_logo) : asset('images/default-logo.png') }}';
-            console.log("Установлен логотип по умолчанию:", logoUrl);
-            updatePreview();
-        }
-    });
-    
-    logoCustom.addEventListener('change', function() {
-        if (this.checked) {
-            defaultLogoPreview.classList.add('d-none');
-            customLogoContainer.classList.remove('d-none');
-            // Если уже есть загруженный пользовательский логотип
-            if (customLogoPreview.querySelector('img')) {
-                logoUrl = customLogoPreview.querySelector('img').src;
-                console.log("Установлен пользовательский логотип:", logoUrl);
-                updatePreview();
-            }
-        }
-    });
-    
-    // Предпросмотр загруженного логотипа
-    customLogoInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const tempLogoUrl = e.target.result;
-                
-                customLogoPreview.innerHTML = `
-                    <img src="${tempLogoUrl}" class="img-thumbnail" style="max-height: 60px;" alt="Загруженный логотип">
-                    <div class="small text-muted mt-1">Новый логотип</div>
-                `;
-                
-                // Сразу обновляем логотип в предпросмотре с временным локальным URL
-                logoUrl = tempLogoUrl;
-                updatePreview();
-                
-                // Отправляем файл на сервер для временного хранения
-                const formData = new FormData();
-                formData.append('logo', customLogoInput.files[0]);
-                formData.append('_token', '{{ csrf_token() }}');
-                
-                console.log("Отправка логотипа на сервер...");
-                
-                fetch('{{ route('entrepreneur.certificates.temp-logo') }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Сохраняем URL логотипа с сервера
-                        logoUrl = data.logo_url;
-                        console.log("Логотип успешно загружен на сервер:", logoUrl);
-                        // Обновляем превью с серверным URL логотипа
-                        updatePreview();
-                    } else {
-                        console.error('Ошибка загрузки логотипа:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Произошла ошибка:', error);
+
+    // Добавляем обработчики на обе формы
+    safeAddEventListener('desktopCertificateForm', 'submit', function(e) {
+        // При отправке десктопной формы отключаем required у полей мобильной формы
+        if (!isMobile) {
+            const mobileForm = document.getElementById('mobileCertificateForm');
+            if (mobileForm) {
+                const mobileRequiredFields = mobileForm.querySelectorAll('[required]');
+                mobileRequiredFields.forEach(field => {
+                    field.removeAttribute('required');
                 });
             }
-            
-            reader.readAsDataURL(this.files[0]);
         }
     });
     
-    // Улучшенная функция обновления предпросмотра
-    const updatePreview = () => {
-        // Получаем значения из полей формы
-        const recipientName = document.getElementById('recipient_name').value || 'Имя получателя';
-        const amount = document.getElementById('amount').value || '3000';
-        const message = document.getElementById('message').value || '';
-        
-        // Устанавливаем текущую дату и срок действия
-        const validFrom = document.getElementById('valid_from').value 
-            ? new Date(document.getElementById('valid_from').value).toLocaleDateString('ru-RU')
-            : new Date().toLocaleDateString('ru-RU');
-            
-        const validUntil = document.getElementById('valid_until').value 
-            ? new Date(document.getElementById('valid_until').value).toLocaleDateString('ru-RU')
-            : new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString('ru-RU');
-        
-        // Компания
-        const companyName = '{{ Auth::user()->company ?? config('app.name') }}';
-        
-        // Создаем параметры для запроса - БЕЗ логотипа
-        const params = new URLSearchParams({
-            recipient_name: recipientName,
-            amount: `${Number(amount).toLocaleString('ru-RU')} ₽`,
-            valid_from: validFrom,
-            valid_until: validUntil,
-            message: message,
-            certificate_number: 'CERT-PREVIEW',
-            company_name: companyName
-        });
-        
-        // Обновляем iframe с новыми параметрами
-        const iframeSrc = `{{ route('template.preview', $template) }}?${params.toString()}`;
-        
-        // Проверяем, нужно ли обновлять iframe
-        if (previewFrame.src.split('?')[0] === iframeSrc.split('?')[0]) {
-            // Только обновляем параметры для существующего iframe
-            previewFrame.src = iframeSrc;
-        } else {
-            // Полностью меняем src, если изменился базовый URL
-            previewFrame.src = iframeSrc;
+    safeAddEventListener('mobileCertificateForm', 'submit', function(e) {
+        // При отправке мобильной формы отключаем required у полей десктопной формы
+        if (isMobile) {
+            const desktopForm = document.getElementById('desktopCertificateForm');
+            if (desktopForm) {
+                const desktopRequiredFields = desktopForm.querySelectorAll('[required]');
+                desktopRequiredFields.forEach(field => {
+                    field.removeAttribute('required');
+                });
+            }
         }
-        
-        // После загрузки iframe отправляем логотип через postMessage
-        previewFrame.onload = function() {
-            // Оптимизированная отправка логотипа
-            setTimeout(() => {
-                try {
-                    previewFrame.contentWindow.postMessage({
-                        type: 'update_logo',
-                        logo_url: logoUrl
+    });
+    
+    // Исправление для iframe и ошибки "companyLogoElements.includes is not a function"
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'logo_elements_check') {
+            // Отправляем безопасную версию обработчика обратно в iframe
+            try {
+                const iframe = document.getElementById('certificatePreview');
+                if (iframe && iframe.contentWindow === event.source) {
+                    iframe.contentWindow.postMessage({
+                        type: 'logo_elements_fix',
+                        message: 'Используйте Array.from для NodeList'
                     }, '*');
-                } catch (error) {
-                    console.error("Ошибка при отправке сообщения в iframe:", error);
                 }
-            }, 300);
-        };
-    };
-    
-    // Устанавливаем обработчики событий для полей ввода с троттлингом
-    let updateTimeout;
-    formInputs.forEach(input => {
-        ['input', 'change', 'keyup', 'paste'].forEach(eventType => {
-            input.addEventListener(eventType, function() {
-                if (input.id !== 'custom_logo') {
-                    clearTimeout(updateTimeout);
-                    updateTimeout = setTimeout(updatePreview, 300); // Задержка для улучшения производительности
-                }
-            });
-        });
-    });
-    
-    // Управление масштабом предпросмотра с адаптивным шагом
-    document.getElementById('zoomInButton').addEventListener('click', function() {
-        const zoomStep = window.innerWidth < 768 ? 1.05 : 1.1;
-        scale *= zoomStep;
-        previewFrame.style.transform = `scale(${scale})`;
-    });
-    
-    document.getElementById('zoomOutButton').addEventListener('click', function() {
-        const zoomStep = window.innerWidth < 768 ? 0.95 : 0.9;
-        scale *= zoomStep;
-        previewFrame.style.transform = `scale(${scale})`;
-    });
-    
-    document.getElementById('resetZoomButton').addEventListener('click', function() {
-        scale = 1;
-        previewFrame.style.transform = 'scale(1)';
-    });
-    
-    // Переключение между устройствами с учетом размера экрана
-    const deviceButtons = document.querySelectorAll('.device-toggle button');
-    deviceButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            deviceButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            const device = this.getAttribute('data-device');
-            previewContainer.setAttribute('data-current-device', device);
-            
-            // Автоматически сбрасываем масштаб при переключении устройства
-            scale = 1;
-            previewFrame.style.transform = 'scale(1)';
-            
-            // Для мобильных устройств, если выбран desktop, переключаем на tablet
-            if (window.innerWidth < 576 && device === 'desktop') {
-                setTimeout(() => {
-                    const tabletButton = document.querySelector('[data-device="tablet"]');
-                    if (tabletButton) tabletButton.click();
-                }, 100);
+            } catch (error) {
+                console.error('Ошибка при обработке сообщения от iframe:', error);
             }
-        });
-    });
-    
-    // Поворот устройства с улучшенной адаптивностью
-    document.getElementById('rotateViewButton').addEventListener('click', function() {
-        const currentDevice = previewContainer.getAttribute('data-current-device');
-        if (currentDevice !== 'desktop') {
-            previewContainer.classList.toggle('landscape');
-            // Сбрасываем масштаб при повороте
-            scale = 1;
-            previewFrame.style.transform = 'scale(1)';
-        }
-    });
-    
-    // Добавляем обработчик для опции "Не использовать логотип"
-    logoNone.addEventListener('change', function() {
-        if (this.checked) {
-            defaultLogoPreview.classList.add('d-none');
-            customLogoContainer.classList.add('d-none');
-            logoUrl = 'none';
-            updatePreview();
-        }
-    });
-    
-    // Адаптивные настройки при изменении размера окна
-    window.addEventListener('resize', function() {
-        // Для мобильных устройств принудительно выбираем tablet или mobile
-        if (window.innerWidth < 576) {
-            const currentDevice = previewContainer.getAttribute('data-current-device');
-            if (currentDevice === 'desktop') {
-                const tabletButton = document.querySelector('[data-device="tablet"]');
-                if (tabletButton) tabletButton.click();
+        } else if (event.data && event.data.type === 'iframe_ready') {
+            // Iframe загружен и исправления применены
+            console.log('Iframe ready:', event.data.message);
+            
+            // Обновляем предпросмотр, так как iframe полностью готов
+            if (window.updatePreview && typeof window.updatePreview === 'function') {
+                window.updatePreview();
             }
         }
     });
     
-    // Предпросмотр изображения обложки сертификата
-    const coverImageInput = document.getElementById('cover_image');
-    const coverImagePreview = document.getElementById('cover_image_preview');
-    
-    coverImageInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                coverImagePreview.innerHTML = `
-                    <div class="card shadow-sm">
-                        <div class="card-body p-2">
-                            <h6 class="card-title small mb-2">Предпросмотр обложки</h6>
-                            <img src="${e.target.result}" class="img-fluid rounded mb-2" style="max-height: 200px;" alt="Предпросмотр обложки">
-                            <p class="text-muted mb-0 small">Так обложка будет выглядеть в карточке сертификата</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-    
-    // Инициализация предпросмотра
-    updatePreview();
-    
-    // Загрузка и обработка анимационных эффектов
-    const effectsList = document.getElementById('effectsList');
-    const selectEffectButton = document.getElementById('selectEffectButton');
-    const animationEffectIdInput = document.getElementById('animation_effect_id');
-    const selectedEffectNameInput = document.getElementById('selected_effect_name');
-    let selectedEffectId = null;
-    let effects = [];
-    
-    // Функция для загрузки списка эффектов
-    function loadAnimationEffects() {
-        fetch('{{ route("animation-effects.get") }}')
-            .then(response => response.json())
-            .then(data => {
-                effects = data;
-                renderEffectsList(data);
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке эффектов:', error);
-                effectsList.innerHTML = `
-                    <div class="col-12 text-center py-4">
-                        <i class="fa-solid fa-exclamation-triangle text-warning fs-1 mb-3"></i>
-                        <p>Не удалось загрузить анимационные эффекты</p>
-                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadAnimationEffects()">
-                            <i class="fa-solid fa-refresh me-1"></i>Попробовать снова
-                        </button>
-                    </div>
-                `;
-            });
-    }
-    
-    // Функция для отображения списка эффектов
-    function renderEffectsList(effects) {
-        if (!effects || effects.length === 0) {
-            effectsList.innerHTML = `
-                <div class="col-12 text-center py-4">
-                    <i class="fa-solid fa-ghost text-muted fs-1 mb-3"></i>
-                    <p>Анимационные эффекты не найдены</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Создаем карточку для отсутствия эффекта
-        let effectsHtml = `
-            <div class="col-sm-6 col-lg-4">
-                <div class="card h-100 effect-card ${!selectedEffectId ? 'selected' : ''}" data-effect-id="">
-                    <div class="card-body text-center">
-                        <h6 class="card-title">Без эффекта</h6>
-                        <p class="card-text text-muted small">Сертификат без анимации</p>
-                    </div>
-                    <div class="card-footer bg-transparent text-center">
-                        <button type="button" class="btn btn-sm ${!selectedEffectId ? 'btn-primary' : 'btn-outline-primary'}" onclick="previewEffect(null)">
-                            Выбрать
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Добавляем карточки для каждого эффекта
-        effects.forEach(effect => {
-            const isSelected = selectedEffectId === effect.id;
-            const particlesPreview = Array.isArray(effect.particles) && effect.particles.length > 0
-                ? effect.particles.slice(0, 5).join(' ')
-                : '✨';
-            
-            effectsHtml += `
-                <div class="col-sm-6 col-lg-4">
-                    <div class="card h-100 effect-card ${isSelected ? 'selected' : ''}" data-effect-id="${effect.id}">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">${effect.name}</h6>
-                            <p class="particles-preview">${particlesPreview}</p>
-                            <p class="card-text text-muted small">${effect.description || 'Анимационный эффект'}</p>
-                            <div class="badge bg-secondary-subtle text-secondary small mb-1">${getEffectTypeName(effect.type)}</div>
-                        </div>
-                        <div class="card-footer bg-transparent text-center">
-                            <button type="button" class="btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-primary'}" onclick="previewEffect(${effect.id})">
-                                ${isSelected ? 'Выбрано' : 'Выбрать'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        effectsList.innerHTML = effectsHtml;
-        
-        // Глобальная функция для предпросмотра эффекта
-        window.previewEffect = function(effectId) {
-            // Снимаем выделение со всех карточек
-            document.querySelectorAll('.effect-card').forEach(card => {
-                card.classList.remove('selected');
-                const button = card.querySelector('.btn');
-                button.classList.replace('btn-primary', 'btn-outline-primary');
-                button.textContent = 'Выбрать';
-            });
-            
-            // Выделяем выбранную карточку
-            if (effectId !== null) {
-                const selectedCard = document.querySelector(`.effect-card[data-effect-id="${effectId}"]`);
-                if (selectedCard) {
-                    selectedCard.classList.add('selected');
-                    const button = selectedCard.querySelector('.btn');
-                    button.classList.replace('btn-outline-primary', 'btn-primary');
-                    button.textContent = 'Выбрано';
-                }
-            } else {
-                // Если выбрано "Без эффекта"
-                const noEffectCard = document.querySelector('.effect-card[data-effect-id=""]');
-                if (noEffectCard) {
-                    noEffectCard.classList.add('selected');
-                    const button = noEffectCard.querySelector('.btn');
-                    button.classList.replace('btn-outline-primary', 'btn-primary');
-                }
-            }
-            
-            // Сохраняем выбранный эффект
-            selectedEffectId = effectId;
-            selectEffectButton.disabled = false;
-            
-            // Активируем временный предпросмотр эффекта, если он выбран
-            if (effectId !== null) {
-                const effect = effects.find(e => e.id === effectId);
-                if (effect) {
-                    showEffectPreview(effect);
-                }
-            }
-        };
-    }
-    
-    // Получение названия типа эффекта
-    function getEffectTypeName(type) {
-        const types = {
-            'emoji': 'Эмодзи',
-            'confetti': 'Конфетти',
-            'snow': 'Снег',
-            'fireworks': 'Фейерверк',
-            'bubbles': 'Пузыри',
-            'leaves': 'Листья',
-            'stars': 'Звёзды'
-        };
-        return types[type] || type;
-    }
-    
-    // Предпросмотр эффекта в модальном окне
-    function showEffectPreview(effect) {
-        // Создаем временный контейнер для предпросмотра эффекта
-        const previewContainer = document.createElement('div');
-        previewContainer.className = 'effect-preview-container';
-        previewContainer.style.position = 'absolute';
-        previewContainer.style.top = '0';
-        previewContainer.style.left = '0';
-        previewContainer.style.width = '100%';
-        previewContainer.style.height = '100%';
-        previewContainer.style.pointerEvents = 'none';
-        previewContainer.style.zIndex = '1050';
-        document.body.appendChild(previewContainer);
-        
-        // Создаем частицы для эффекта
-        const particleCount = Math.min(effect.quantity || 30, 30);
-        const particles = Array.isArray(effect.particles) ? effect.particles : ['✨'];
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            
-            // Случайное расположение
-            particle.style.position = 'absolute';
-            particle.style.left = `${Math.random() * 90 + 5}%`;
-            particle.style.top = `${Math.random() * 50 + 25}%`;
-            
-            // Случайный размер
-            const size = Math.floor(Math.random() * 16) + 16;
-            particle.style.fontSize = `${size}px`;
-            
-            // Случайная задержка анимации
-            const delay = Math.random() * 2;
-            particle.style.animationDelay = `${delay}s`;
-            
-            // Анимация
-            particle.style.animation = `float-${effect.type} 3s ease-in-out infinite`;
-            
-            // Содержимое частицы
-            const particleText = particles[Math.floor(Math.random() * particles.length)];
-            particle.textContent = particleText;
-            
-            // Добавляем частицу в контейнер
-            previewContainer.appendChild(particle);
-        }
-        
-        // Удаляем предпросмотр через несколько секунд
+    // Инициализация форм при загрузке страницы
+    window.addEventListener('load', function() {
+        // Запускаем обновление предпросмотра после полной загрузки страницы
         setTimeout(() => {
-            if (previewContainer.parentNode) {
-                previewContainer.parentNode.removeChild(previewContainer);
+            if (window.updatePreview && typeof window.updatePreview === 'function') {
+                window.updatePreview();
             }
-        }, 2000);
-    }
-    
-    // Применение выбранного эффекта
-    selectEffectButton.addEventListener('click', function() {
-        animationEffectIdInput.value = selectedEffectId || '';
-        
-        if (selectedEffectId) {
-            const selectedEffect = effects.find(effect => effect.id === selectedEffectId);
-            selectedEffectNameInput.value = selectedEffect ? selectedEffect.name : 'Выбранный эффект';
-        } else {
-            selectedEffectNameInput.value = 'Без эффекта';
-        }
+            
+            // Обеспечиваем синхронизацию между предпросмотрами на разных устройствах
+            const desktopPreview = document.getElementById('desktopCertificatePreview');
+            const mobilePreview = document.getElementById('certificatePreview');
+            
+            if (desktopPreview && mobilePreview) {
+                // Синхронизируем src между iframe предпросмотров
+                mobilePreview.addEventListener('load', function() {
+                    if (desktopPreview.src !== this.src) {
+                        desktopPreview.src = this.src;
+                    }
+                });
+                
+                desktopPreview.addEventListener('load', function() {
+                    if (mobilePreview.src !== this.src) {
+                        mobilePreview.src = this.src;
+                    }
+                });
+            }
+        }, 500);
     });
     
-    // Инициализация при открытии модального окна
-    document.getElementById('animationEffectsModal').addEventListener('show.bs.modal', function () {
-        // Если список эффектов еще не загружен
-        if (effects.length === 0) {
-            loadAnimationEffects();
-        }
+    // Добавляем обработчики для всех полей формы, чтобы сразу обновлять предпросмотр
+    const allFormInputs = document.querySelectorAll('#desktopCertificateForm input, #desktopCertificateForm select, #desktopCertificateForm textarea, #mobileCertificateForm input, #mobileCertificateForm select, #mobileCertificateForm textarea');
+    
+    allFormInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            console.log(`Поле ${this.name} изменено: ${this.value}`);
+            
+            // Синхронизируем данные между формами
+            const otherForm = this.closest('form').id === 'desktopCertificateForm' 
+                ? document.getElementById('mobileCertificateForm')
+                : document.getElementById('desktopCertificateForm');
+            
+            if (otherForm) {
+                const correspondingInput = otherForm.querySelector(`[name="${this.name}"]`);
+                if (correspondingInput && correspondingInput !== this) {
+                    if (this.type === 'checkbox' || this.type === 'radio') {
+                        correspondingInput.checked = this.checked;
+                    } else if (this.type !== 'file') { // Не синхронизируем файлы
+                        correspondingInput.value = this.value;
+                    }
+                }
+            }
+            
+            // Принудительно вызываем обновление предпросмотра
+            if (window.updatePreview && typeof window.updatePreview === 'function') {
+                window.updatePreview();
+            }
+        });
+    });
+    
+    // Запускаем обновление предпросмотра при загрузке страницы
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            if (window.updatePreview && typeof window.updatePreview === 'function') {
+                console.log('Обновление предпросмотра при загрузке страницы...');
+                window.updatePreview();
+            }
+        }, 500);
     });
 });
 </script>
-<style>
-
-</style>
+@endpush
 @endsection

@@ -68,6 +68,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
+            'avatar' => 'avatars/default.png', // Стандартная аватарка для всех новых пользователей
         ]);
 
         // Назначение роли "предприниматель" новому пользователю

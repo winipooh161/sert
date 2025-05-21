@@ -99,7 +99,7 @@
                         <h4 class="mb-3">Файл шаблона</h4>
                         
                         <div class="mb-3">
-                            <label for="template_path" class="form-label">Выберите HTML файл шаблона *</label>
+                            <label for="template_path" class="form-label">Выберите PHP файл шаблона *</label>
                             <select class="form-select select2-template-picker @error('template_path') is-invalid @enderror" 
                                 id="template_path" name="template_path" required
                                 data-placeholder="Поиск шаблона..." data-allow-clear="true">
@@ -123,7 +123,7 @@
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                             <div class="form-text">
-                                HTML файлы шаблонов должны находиться в директории /public/templates/ или ее подпапках
+                                PHP файлы шаблонов должны находиться в директории /public/templates/ или ее подпапках
                             </div>
                         </div>
                         

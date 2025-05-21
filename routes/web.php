@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\TemplatesController;
-use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Entrepreneur\CertificatesController;
 use App\Http\Controllers\Entrepreneur\DashboardController as EntrepreneurDashboardController;
 use App\Http\Controllers\Entrepreneur\AnalyticsController;
@@ -17,6 +15,9 @@ use Illuminate\Support\Facades\Auth;
 | Web Routes
 |--------------------------------------------------------------------------
 */
+
+// Подключение маршрутов администратора
+require __DIR__.'/admin.php';
 
 Route::get('/', function () {
     // Проверяем авторизацию пользователя
@@ -63,45 +64,8 @@ Route::get('/home', function () {
     return redirect('/');
 })->name('home');
 
-// Маршруты для администратора
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('users', UsersController::class);
-    Route::resource('templates', TemplatesController::class);
-    
-    // Маршрут для переключения активности шаблона
-    Route::post('/templates/{template}/toggle-active', [TemplatesController::class, 'toggleActive'])
-        ->name('templates.toggle-active');
-    
-    // Для отладки: явно прописываем роут для создания шаблона
-    Route::post('/templates', [TemplatesController::class, 'store'])->name('templates.store');
-});
-
-// Маршруты для анимационных эффектов (админка)
-Route::prefix('admin/animation-effects')->name('admin.animation-effects.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'store'])->name('store');
-    Route::get('/{animationEffect}/edit', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'edit'])->name('edit');
-    Route::put('/{animationEffect}', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'update'])->name('update');
-    Route::delete('/{animationEffect}', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'destroy'])->name('destroy');
-    Route::post('/{animationEffect}/toggle-status', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'toggleStatus'])->name('toggle-status');
-    Route::get('/{animationEffect}/preview', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'preview'])->name('preview');
-});
-
 // Публичный API для получения анимационных эффектов
 Route::get('/api/animation-effects', [App\Http\Controllers\Admin\AnimationEffectsController::class, 'getEffects'])->name('animation-effects.get');
-
-// Админ - категории шаблонов
-Route::prefix('admin/template-categories')->name('admin.template-categories.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'store'])->name('store');
-    Route::get('/{templateCategory}/edit', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'edit'])->name('edit');
-    Route::put('/{templateCategory}', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'update'])->name('update');
-    Route::delete('/{templateCategory}', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'destroy'])->name('destroy');
-    Route::post('/{templateCategory}/toggle-active', [App\Http\Controllers\Admin\TemplateCategoriesController::class, 'toggleActive'])->name('toggle-active');
-});
 
 // Маршруты для предпринимателя 
 Route::prefix('entrepreneur')->name('entrepreneur.')->middleware(['auth', 'role:predprinimatel'])->group(function () {
@@ -179,25 +143,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/role/switch', [App\Http\Controllers\RoleSwitcherController::class, 'switchRole'])->name('role.switch');
 });
 
-// Дополнительно: создаем отдельную группу маршрутов для сертификатов админа
-Route::prefix('admin/certificates')->name('admin.certificates.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', [CertificatesController::class, 'index'])->name('index');
-    Route::get('/select-template', [CertificatesController::class, 'selectTemplate'])
-        ->name('select-template');
-    Route::get('/create/{template}', [CertificatesController::class, 'create'])
-        ->name('create');
-    Route::post('/{template}', [CertificatesController::class, 'store'])
-        ->name('store');
-    Route::get('/{certificate}', [CertificatesController::class, 'show'])
-        ->name('show');
-    Route::get('/{certificate}/edit', [CertificatesController::class, 'edit'])
-        ->name('edit');
-    Route::put('/{certificate}', [CertificatesController::class, 'update'])
-        ->name('update');
-    Route::delete('/{certificate}', [CertificatesController::class, 'destroy'])
-        ->name('destroy');
-    Route::post('/{certificate}/send-email', [CertificatesController::class, 'sendEmail'])
-        ->name('send-email');
+// Маршруты для верификации телефона
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::post('/profile/phone/initiate', [App\Http\Controllers\ProfileController::class, 'initiatePhoneChange'])
+        ->name('profile.phone.initiate');
+    
+    Route::post('/profile/phone/verify', [App\Http\Controllers\ProfileController::class, 'verifyPhoneChange'])
+        ->name('profile.phone.verify');
 });
 
 // Маршруты для обычного пользователя
@@ -267,6 +219,24 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     
     // Удаление сертификата из папки
     Route::delete('/certificates/{certificate}/remove-from-folder/{folder}', [App\Http\Controllers\FolderController::class, 'removeCertificateFromFolder'])->name('certificates.remove-from-folder');
+});
+
+// Маршруты для Telegram бота
+Route::prefix('telegram')->name('telegram.')->group(function () {
+    Route::post('/webhook', [App\Http\Controllers\TelegramBotController::class, 'webhook'])
+        ->name('webhook');
+    Route::get('/set-webhook', [App\Http\Controllers\TelegramBotController::class, 'setWebhook'])
+        ->name('setWebhook');
+    Route::get('/get-me', [App\Http\Controllers\TelegramBotController::class, 'getMe'])
+        ->name('getMe');
+    Route::get('/get-webhook-info', [App\Http\Controllers\TelegramBotController::class, 'getWebhookInfo'])
+        ->name('getWebhookInfo');
+    Route::get('/delete-webhook', [App\Http\Controllers\TelegramBotController::class, 'deleteWebhook'])
+        ->name('deleteWebhook');
+    Route::get('/send-keyboard/{chatId}', [App\Http\Controllers\TelegramBotController::class, 'sendKeyboard'])
+        ->name('sendKeyboard');
+    Route::get('/send-test/{chatId}', [App\Http\Controllers\TelegramBotController::class, 'sendTestMessage'])
+        ->name('sendTestMessage');
 });
 
 if (app()->environment('production')) {

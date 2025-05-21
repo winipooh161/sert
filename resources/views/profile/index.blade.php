@@ -2,9 +2,7 @@
 
 @section('content')
 <div class="container-fluid ">
-    @component('components.breadcrumb')
-        @slot('items', [['title' => 'Профиль', 'url' => '#']])
-    @endcomponent
+  
 
     @component('components.page-header')
         @slot('title', 'Мой профиль')
@@ -71,10 +69,15 @@
                                 
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control @error('phone') is-invalid maskphone @enderror" id="phone" name="phone" value="{{ Auth::user()->phone ?? '' }}">
-                                    @error('phone')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <div class="input-group">
+                                        <input type="tel" class="form-control @error('phone') is-invalid @enderror maskphone" id="phone" name="phone" value="{{ Auth::user()->phone ?? '' }}">
+                                        <button type="button" class="btn btn-outline-primary" id="changePhoneBtn">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        @error('phone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                                 
                                 <div class="col-md-6">
@@ -235,6 +238,44 @@
 </div>
 
 
+<!-- Модальное окно подтверждения номера телефона -->
+<div class="modal fade" id="phoneVerificationModal" tabindex="-1" aria-labelledby="phoneVerificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="phoneVerificationModalLabel">Подтверждение номера телефона</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-mobile-screen fa-3x text-primary mb-3"></i>
+                    <p>На указанный номер телефона <strong id="verificationPhone"></strong> отправлен код подтверждения.</p>
+                    <p>Введите полученный 4-значный код:</p>
+                </div>
+                
+                <div class="verification-code-inputs d-flex justify-content-center gap-2 mb-4">
+                    <input type="text" class="form-control text-center verification-code-input" maxlength="1" id="code1" pattern="[0-9]">
+                    <input type="text" class="form-control text-center verification-code-input" maxlength="1" id="code2" pattern="[0-9]">
+                    <input type="text" class="form-control text-center verification-code-input" maxlength="1" id="code3" pattern="[0-9]">
+                    <input type="text" class="form-control text-center verification-code-input" maxlength="1" id="code4" pattern="[0-9]">
+                </div>
+                
+                <div class="alert alert-danger d-none" id="verificationError"></div>
+                <div class="alert alert-success d-none" id="verificationSuccess"></div>
+                
+                <div class="text-center">
+                    <p class="text-muted">Не получили код? <a href="#" id="resendCode">Отправить повторно</a></p>
+                    <div id="countdown" class="text-muted small"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="verifyCodeBtn" disabled>Подтвердить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     
 document.addEventListener("DOMContentLoaded", function () {
@@ -320,7 +361,257 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
+    
+    // ИСПРАВЛЕНИЕ: убираем вложенный обработчик DOMContentLoaded и исправляем функцию инициации
+    const phoneInput = document.getElementById('phone');
+    const changePhoneBtn = document.getElementById('changePhoneBtn');
+    
+    if (changePhoneBtn && phoneInput) {
+        console.log("Кнопка смены телефона найдена");
+        changePhoneBtn.addEventListener('click', function() {
+            console.log("Кнопка смены телефона нажата");
+            let newPhone = phoneInput.value.trim();
+            if (newPhone) {
+                console.log("Начинаем верификацию для номера: " + newPhone);
+                initiatePhoneVerification(newPhone);
+            } else {
+                alert('Пожалуйста, введите номер телефона');
+                phoneInput.focus();
+            }
+        });
+    } else {
+        console.error("Не найдена кнопка смены телефона или поле ввода телефона");
+    }
+    
+    // Обработчик ошибок для fetch запросов
+    function handleFetchError(response) {
+        if (!response.ok) {
+            if (response.status === 422) {
+                // Ошибки валидации
+                return response.json().then(data => {
+                    throw new Error(Object.values(data.errors).flat().join('\n'));
+                });
+            } else if (response.status === 400) {
+                // Бизнес-ошибки с сообщением
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Ошибка в запросе');
+                });
+            } else {
+                throw new Error('Ошибка сервера: ' + response.status);
+            }
+        }
+        return response.json();
+    }
+    
+    // Функция инициирования верификации телефона
+    function initiatePhoneVerification(phone) {
+        console.log("Инициируем верификацию для номера: " + phone);
+        
+        // Очищаем номер телефона от всех нецифровых символов
+        const cleanPhone = phone.replace(/\D/g, '');
+        
+        // Показываем индикатор загрузки
+        const changePhoneBtn = document.getElementById('changePhoneBtn');
+        const originalContent = changePhoneBtn.innerHTML;
+        changePhoneBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        changePhoneBtn.disabled = true;
+        
+        fetch('{{ route("profile.phone.initiate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ phone: cleanPhone })
+        })
+        .then(response => {
+            console.log("Получен статус ответа:", response.status);
+            return handleFetchError(response);
+        })
+        .then(data => {
+            console.log("Данные от сервера:", data);
+            
+            // Восстанавливаем состояние кнопки
+            changePhoneBtn.innerHTML = originalContent;
+            changePhoneBtn.disabled = false;
+            
+            if (data.success) {
+                document.getElementById('verificationPhone').textContent = phone;
+                
+                // Для режима отладки можно показать код в консоли
+                if (data.debug_code) {
+                    console.log("Отладочный код: " + data.debug_code);
+                }
+                
+                // Сбрасываем состояние модального окна
+                document.getElementById('verificationError').classList.add('d-none');
+                document.getElementById('verificationSuccess').classList.add('d-none');
+                
+                // Очищаем поля ввода
+                document.querySelectorAll('.verification-code-input').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Показываем модальное окно
+                const modal = new bootstrap.Modal(document.getElementById('phoneVerificationModal'));
+                modal.show();
+                
+                // Устанавливаем фокус на первое поле ввода
+                setTimeout(() => {
+                    document.getElementById('code1').focus();
+                }, 500);
+                
+                // Запускаем обратный отсчет
+                startCountdown(60);
+            } else {
+                alert(data.message || 'Произошла ошибка при отправке кода.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            
+            // Восстанавливаем состояние кнопки
+            changePhoneBtn.innerHTML = originalContent;
+            changePhoneBtn.disabled = false;
+            
+            alert('Ошибка: ' + error.message);
+        });
+    }
+    
+    // Обработка ввода кода
+    document.querySelectorAll('.verification-code-input').forEach(input => {
+        input.addEventListener('input', function(e) {
+            // Проверяем, что вводятся только цифры
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Переходим к следующему полю автоматически
+            if (this.value.length === 1) {
+                const nextInput = this.nextElementSibling;
+                if (nextInput && nextInput.classList.contains('verification-code-input')) {
+                    nextInput.focus();
+                }
+            }
+            
+            // Активируем кнопку, если все поля заполнены
+            checkVerificationInputs();
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            // При нажатии Backspace возвращаемся к предыдущему полю
+            if (e.key === 'Backspace' && this.value.length === 0) {
+                const prevInput = this.previousElementSibling;
+                if (prevInput && prevInput.classList.contains('verification-code-input')) {
+                    prevInput.focus();
+                }
+            }
+        });
+    });
+    
+    // Проверка заполнения всех полей кода
+    function checkVerificationInputs() {
+        const allFilled = Array.from(document.querySelectorAll('.verification-code-input'))
+            .every(input => input.value.length === 1);
+        
+        document.getElementById('verifyCodeBtn').disabled = !allFilled;
+    }
+    
+    // Обработчик нажатия кнопки подтверждения кода
+    document.getElementById('verifyCodeBtn').addEventListener('click', function() {
+        const code1 = document.getElementById('code1').value;
+        const code2 = document.getElementById('code2').value;
+        const code3 = document.getElementById('code3').value;
+        const code4 = document.getElementById('code4').value;
+        
+        // Проверка заполненности всех полей
+        if (!code1 || !code2 || !code3 || !code4) {
+            document.getElementById('verificationError').textContent = 'Введите все цифры кода.';
+            document.getElementById('verificationError').classList.remove('d-none');
+            return;
+        }
+        
+        // Отправка запроса на подтверждение кода
+        fetch('{{ route("profile.phone.verify") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                code1: code1,
+                code2: code2,
+                code3: code3,
+                code4: code4
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('verificationSuccess').textContent = data.message;
+                document.getElementById('verificationSuccess').classList.remove('d-none');
+                document.getElementById('verificationError').classList.add('d-none');
+                
+                // Обновляем значение поля телефона
+                if (phoneInput) {
+                    phoneInput.value = data.phone;
+                }
+                
+                // Деактивируем кнопку подтверждения
+                document.getElementById('verifyCodeBtn').disabled = true;
+                
+                // Закрываем модальное окно через 2 секунды
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('phoneVerificationModal')).hide();
+                }, 2000);
+            } else {
+                document.getElementById('verificationError').textContent = data.message;
+                document.getElementById('verificationError').classList.remove('d-none');
+                document.getElementById('verificationSuccess').classList.add('d-none');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            document.getElementById('verificationError').textContent = 'Произошла ошибка при отправке запроса.';
+            document.getElementById('verificationError').classList.remove('d-none');
+        });
+    });
+    
+    // Обработчик повторной отправки кода
+    document.getElementById('resendCode').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (this.classList.contains('disabled')) {
+            return;
+        }
+        
+        // Повторно отправляем запрос на инициацию верификации
+        const phone = document.getElementById('verificationPhone').textContent;
+        initiatePhoneVerification(phone);
+    });
+    
+    // Функция обратного отсчета для повторной отправки кода
+    function startCountdown(seconds) {
+        const resendLink = document.getElementById('resendCode');
+        const countdownEl = document.getElementById('countdown');
+        
+        resendLink.classList.add('disabled');
+        countdownEl.textContent = `Повторная отправка возможна через ${seconds} секунд`;
+        
+        let remainingSeconds = seconds;
+        const countdownInterval = setInterval(() => {
+            remainingSeconds--;
+            
+            if (remainingSeconds <= 0) {
+                clearInterval(countdownInterval);
+                resendLink.classList.remove('disabled');
+                countdownEl.textContent = '';
+                return;
+            }
+            
+            countdownEl.textContent = `Повторная отправка возможна через ${remainingSeconds} секунд`;
+        }, 1000);
+    }
+});  
 </script>
 
 <style>
@@ -345,6 +636,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .toggle-password {
     cursor: pointer;
+}
+
+.verification-code-inputs .verification-code-input {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 @media (max-width: 767.98px) {

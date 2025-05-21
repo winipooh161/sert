@@ -86,7 +86,7 @@
                                 <div class="col-sm-6">
                                     <label for="valid_from" class="form-label small">Действителен с *</label>
                                     <input type="date" class="form-control form-control-sm @error('valid_from') is-invalid @enderror" 
-                                        id="valid_from" name="valid_from" value="{{ old('valid_from', $certificate->valid_from->format('Y-m-d')) }}" required>
+                                        id="valid_from" name="valid_from" value="{{ old('valid_from', $certificate->valid_from->format('Y-m-d')) }}" readonly>
                                     @error('valid_from')
                                         <span class="invalid-feedback small">{{ $message }}</span>
                                     @enderror
@@ -95,7 +95,7 @@
                                 <div class="col-sm-6">
                                     <label for="valid_until" class="form-label small">Действителен до *</label>
                                     <input type="date" class="form-control form-control-sm @error('valid_until') is-invalid @enderror" 
-                                        id="valid_until" name="valid_until" value="{{ old('valid_until', $certificate->valid_until->format('Y-m-d')) }}" required>
+                                        id="valid_until" name="valid_until" value="{{ old('valid_until', $certificate->valid_until->format('Y-m-d')) }}" readonly>
                                     @error('valid_until')
                                         <span class="invalid-feedback small">{{ $message }}</span>
                                     @enderror
@@ -339,7 +339,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для загрузки списка эффектов
     function loadAnimationEffects() {
         fetch('{{ route("animation-effects.get") }}')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сети: ' + response.status);
+                }
+                return response.json();
+            })
             .then(data => {
                 effects = data;
                 renderEffectsList(data);
@@ -362,6 +367,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderEffectsList(effects) {
         effectsList.innerHTML = '';
         
+        // Добавляем опцию "Без эффекта"
+        const noEffectCard = document.createElement('div');
+        noEffectCard.className = 'col-6 col-md-4 effect-card' + (selectedEffectId === null ? ' selected' : '');
+        noEffectCard.innerHTML = `
+            <div class="card rounded-3 border-0 shadow-sm" style="cursor: pointer;" onclick="selectEffect(null, 'Без эффекта')">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-ban fa-2x text-secondary mb-2"></i>
+                    <h6 class="card-title fs-6 mb-1">Без эффекта</h6>
+                    <p class="card-text small text-muted">Сертификат без анимации</p>
+                </div>
+            </div>
+        `;
+        effectsList.appendChild(noEffectCard);
+        
+        // Добавляем все доступные эффекты
         effects.forEach(effect => {
             const isSelected = (effect.id === selectedEffectId);
             const effectCard = document.createElement('div');
@@ -371,7 +391,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="card-body text-center">
                         <i class="fa-solid fa-sparkles fa-2x text-primary mb-2"></i>
                         <h6 class="card-title fs-6 mb-1">${effect.name}</h6>
-                        <p class="card-text small text-muted">${effect.description}</p>
+                        <p class="card-text small text-muted">${effect.description || 'Анимационный эффект'}</p>
+                        <div class="particles-preview">${effect.particles ? effect.particles.slice(0, 3).join(' ') : '✨'}</div>
                     </div>
                 </div>
             `;
@@ -388,16 +409,92 @@ document.addEventListener('DOMContentLoaded', function() {
             card.classList.remove('selected');
         });
         
-        const selectedCard = Array.from(document.querySelectorAll('.effect-card')).find(card => {
-            return card.querySelector('.card-title').textContent.trim() === name;
-        });
+        // Находим выбранную карточку и выделяем её
+        const selectedCard = id === null 
+            ? document.querySelector('.effect-card:first-child')
+            : Array.from(document.querySelectorAll('.effect-card')).find(card => 
+                card.querySelector('.card-title').textContent.trim() === name
+              );
         
         if (selectedCard) {
             selectedCard.classList.add('selected');
         }
         
+        // Активируем кнопку подтверждения
         selectEffectButton.disabled = false;
+        
+        // Показываем предпросмотр, если выбран эффект с id
+        if (id !== null) {
+            const effect = effects.find(e => e.id === id);
+            if (effect) {
+                showEffectPreview(effect);
+            }
+        }
     }
+    
+    // Функция для предпросмотра эффекта
+    function showEffectPreview(effect) {
+        // Создаем временный контейнер для предпросмотра эффекта
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'effect-preview-container';
+        previewContainer.style.position = 'absolute';
+        previewContainer.style.top = '0';
+        previewContainer.style.left = '0';
+        previewContainer.style.width = '100%';
+        previewContainer.style.height = '100%';
+        previewContainer.style.pointerEvents = 'none';
+        previewContainer.style.zIndex = '1050';
+        document.body.appendChild(previewContainer);
+        
+        // Создаем частицы для эффекта
+        const particleCount = Math.min(effect.quantity || 15, 20);
+        const particles = Array.isArray(effect.particles) && effect.particles.length > 0
+            ? effect.particles : ['✨'];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            
+            // Случайное расположение
+            particle.style.position = 'absolute';
+            particle.style.left = `${Math.random() * 80 + 10}%`;
+            particle.style.top = `${Math.random() * 40 + 30}%`;
+            
+            // Случайный размер
+            const size = Math.floor(Math.random() * 16) + 16;
+            particle.style.fontSize = `${size}px`;
+            
+            // Анимация
+            particle.style.animation = 'float-preview 2s ease-in-out infinite';
+            
+            // Содержимое частицы
+            const particleText = particles[Math.floor(Math.random() * particles.length)];
+            particle.textContent = particleText;
+            
+            // Добавляем частицу в контейнер
+            previewContainer.appendChild(particle);
+        }
+        
+        // Удаляем предпросмотр через несколько секунд
+        setTimeout(() => {
+            if (previewContainer.parentNode) {
+                previewContainer.parentNode.removeChild(previewContainer);
+            }
+        }, 2000);
+    }
+    
+    // Добавляем обработчик клика для кнопки подтверждения выбора эффекта
+    selectEffectButton.addEventListener('click', function() {
+        // Обновляем скрытое поле с ID выбранного эффекта
+        animationEffectIdInput.value = selectedEffectId || '';
+        
+        // Обновляем отображаемое название эффекта
+        if (selectedEffectId) {
+            const selectedEffect = effects.find(e => e.id === selectedEffectId);
+            selectedEffectNameInput.value = selectedEffect ? selectedEffect.name : 'Выбранный эффект';
+        } else {
+            selectedEffectNameInput.value = 'Без эффекта';
+        }
+    });
     
     // Инициализация при открытии модального окна
     document.getElementById('animationEffectsModal').addEventListener('show.bs.modal', function () {
@@ -408,4 +505,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* Стили для карточек эффектов */
+.effect-card .card {
+    transition: all 0.3s ease;
+    height: 100%;
+    border: 2px solid transparent;
+}
+
+.effect-card.selected .card {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 10px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.particles-preview {
+    font-size: 1.5rem;
+    margin-top: 0.5rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Анимация для предпросмотра */
+@keyframes float-preview {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+    50% { transform: translateY(-15px) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+}
+
+/* Анимация для выбранного эффекта */
+.effect-card.selected .particles-preview {
+    animation: pulse 2.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+}
+</style>
 @endsection

@@ -68,6 +68,7 @@ class CertificatesController extends Controller
             ->when(!Auth::user()->hasRole('admin'), function ($query) {
                 return $query->where('is_premium', false);
             })
+            ->orderBy('created_at', 'desc') // Добавляем сортировку: новые вверху
             ->get();
             
         $categories = TemplateCategory::where('is_active', true)

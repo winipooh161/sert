@@ -75,7 +75,7 @@ class TemplatesController extends Controller
                 }
             }
 
-            // Получаем содержимое HTML файла для поля html_template
+            // Получаем содержимое PHP файла для поля html_template
             $templatePath = public_path($validatedData['template_path']);
             $htmlTemplate = '';
             
@@ -90,7 +90,7 @@ class TemplatesController extends Controller
                 'category_id' => $validatedData['category_id'],
                 'description' => $validatedData['description'] ?? null,
                 'template_path' => $validatedData['template_path'],
-                'html_template' => $htmlTemplate, // Добавляем содержимое HTML файла
+                'html_template' => $htmlTemplate, // Добавляем содержимое PHP файла
                 'is_premium' => $request->has('is_premium'),
                 'is_active' => $request->has('is_active'),
                 'sort_order' => $validatedData['sort_order'] ?? 0,
@@ -149,7 +149,7 @@ class TemplatesController extends Controller
             // Логируем полученные данные для отладки
             Log::info('Template update request data:', $request->all());
 
-            // Получаем содержимое HTML файла для поля html_template
+            // Получаем содержимое PHP файла для поля html_template
             $templatePath = public_path($validatedData['template_path']);
             $htmlTemplate = '';
             
@@ -263,11 +263,12 @@ class TemplatesController extends Controller
             $categoryPath = public_path('templates/' . $category->directory_name);
             
             if (is_dir($categoryPath)) {
-                $htmlFiles = glob($categoryPath . '/*.html');
+                // Изменяем расширение с .html на .php
+                $phpFiles = glob($categoryPath . '/*.php');
                 
-                foreach ($htmlFiles as $file) {
+                foreach ($phpFiles as $file) {
                     $relativePath = 'templates/' . $category->directory_name . '/' . basename($file);
-                    $name = basename($file, '.html');
+                    $name = basename($file, '.php'); // Меняем расширение на .php
                     $name = Str::title(str_replace('-', ' ', $name));
                     $files[$category->id][$relativePath] = $name;
                 }

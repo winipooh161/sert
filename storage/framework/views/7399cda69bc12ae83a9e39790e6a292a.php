@@ -79,7 +79,7 @@
     </div>
     
     <!-- Пагинация -->
-    <div class="mt-4">
+    <div class="mt-4 pagination">
         <?php echo e($templates->links()); ?>
 
     </div>

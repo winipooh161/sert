@@ -31,6 +31,9 @@ class User extends Authenticatable
         'avatar',
         'notification_preferences',
         'company_logo', // Добавляем новое поле
+        'phone_verification_code',
+        'phone_verification_expires_at',
+        'phone_pending_change',
     ];
 
     /**
@@ -52,6 +55,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'notification_preferences' => 'array',
+        'phone_verification_expires_at' => 'datetime',
     ];
 
     /**

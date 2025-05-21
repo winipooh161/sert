@@ -1,9 +1,9 @@
 @extends('layouts.lk')
 
 @section('content')
-<div class="container py-5">
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card border-0 rounded-4 shadow">
                 <div class="card-body p-4">
                     <h2 class="card-title mb-4">Проверка сертификата</h2>
