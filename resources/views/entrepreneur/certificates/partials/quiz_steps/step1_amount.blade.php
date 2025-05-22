@@ -1,4 +1,4 @@
-<div class="quiz-step active" id="quizStep1">
+<div class="quiz-step" id="quizStep1">
     <div class="text-center mb-4">
         <div class="quiz-step-icon mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 p-3">
             <i class="fa-solid fa-money-bill-wave text-primary fs-3"></i>

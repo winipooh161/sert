@@ -28,7 +28,7 @@
         <div class="form-text small">Номер телефона для идентификации получателя</div>
     </div>
     
-    <div class="mb-3">
+    {{-- <div class="mb-3">
         <label for="recipient_email" class="form-label fw-medium mb-2">Email получателя</label>
         <input type="email" class="form-control form-control-lg @error('recipient_email') is-invalid @enderror" 
             id="recipient_email" name="recipient_email" value="{{ old('recipient_email') }}"
@@ -36,7 +36,7 @@
         @error('recipient_email')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-    </div>
+    </div> --}}
     
     <div class="mb-3">
         <label for="message" class="form-label fw-medium mb-2">Сообщение или пожелание</label>

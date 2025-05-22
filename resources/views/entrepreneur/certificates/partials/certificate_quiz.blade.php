@@ -17,20 +17,20 @@
 
             <!-- Контейнер для шагов квиза -->
             <div class="quiz-steps-container">
-                <!-- Шаг 1: Номинал сертификата -->
-                @include('entrepreneur.certificates.partials.quiz_steps.step1_amount')
-                
-                <!-- Шаг 2: Информация о получателе -->
-                @include('entrepreneur.certificates.partials.quiz_steps.step2_recipient')
-                
-                <!-- Шаг 3: Срок действия -->
-                @include('entrepreneur.certificates.partials.quiz_steps.step3_validity')
-                
-                <!-- Шаг 4: Обложка сертификата -->
+                <!-- Шаг 1: Обложка сертификата (остается первым) -->
                 @include('entrepreneur.certificates.partials.quiz_steps.step4_cover')
                 
-                <!-- Шаг 5: Дополнительные функции -->
+                <!-- Шаг 2: Номинал сертификата (был шагом 1) -->
+                @include('entrepreneur.certificates.partials.quiz_steps.step1_amount')
+                
+                <!-- Шаг 3: Срок действия (был шагом 3) -->
+                @include('entrepreneur.certificates.partials.quiz_steps.step3_validity')
+                
+                <!-- Шаг 4: Анимация и дополнительные функции (был шагом 5) -->
                 @include('entrepreneur.certificates.partials.quiz_steps.step5_extras')
+                
+                <!-- Шаг 5: Информация о получателе (был шагом 2) -->
+                @include('entrepreneur.certificates.partials.quiz_steps.step2_recipient')
             </div>
 
             <!-- Кнопки навигации -->
@@ -337,78 +337,78 @@ document.addEventListener('DOMContentLoaded', function() {
                         wasUploaded,
                         isValid: fileUploaded || wasUploaded,
                         fieldValue: field.value,
-                        dataAttr: field.getAttribute('data-file-uploaded')
+                        dataAttr: field.getAttribute('data-file_uploaded')
                     });
                     
-                    if (!fileUploaded && !wasUploaded) {
+                    // Если файл не загружен и не был загружен ранее, помечаем поле как невалидное
+                    if (field.required && !fileUploaded && !wasUploaded) {
                         isValid = false;
                         field.classList.add('is-invalid');
                         
-                        // Если поле находится в неактивном шаге, активируем этот шаг
-                        if (!field.closest('.quiz-step').classList.contains('active')) {
-                            const stepIndex = Array.from(quizSteps).indexOf(field.closest('.quiz-step'));
-                            if (stepIndex !== -1) {
-                                currentStep = stepIndex;
-                                showStep(currentStep);
+                        // Добавляем сообщение об ошибке рядом с полем
+                        const fieldContainer = field.closest('.cover-upload-container') || field.closest('.logo-upload-container');
+                        if (fieldContainer) {
+                            const errorMsg = fieldContainer.querySelector('#cover_error_message') || 
+                                           document.createElement('div');
+                            
+                            if (!fieldContainer.querySelector('#cover_error_message')) {
+                                errorMsg.id = field.id + '_error_message';
+                                errorMsg.classList.add('text-danger', 'small', 'mt-2');
+                                fieldContainer.appendChild(errorMsg);
                             }
+                            
+                            errorMsg.textContent = field.id === 'cover_image' 
+                                ? 'Пожалуйста, выберите изображение для обложки' 
+                                : 'Пожалуйста, выберите логотип';
+                            errorMsg.classList.remove('d-none');
                         }
                     } else {
                         field.classList.remove('is-invalid');
+                        
+                        // Удаляем сообщение об ошибке если оно есть
+                        const fieldContainer = field.closest('.cover-upload-container') || field.closest('.logo_upload-container');
+                        if (fieldContainer) {
+                            const errorMsg = fieldContainer.querySelector(`#${field.id}_error_message`) || 
+                                           fieldContainer.querySelector('.feedback-text');
+                            if (errorMsg) errorMsg.classList.add('d-none');
+                        }
                     }
-                } 
+                }
                 // Обычная проверка для других типов полей
                 else if (!field.value.trim()) {
                     isValid = false;
                     field.classList.add('is-invalid');
-                    
-                    // Если поле находится в неактивном шаге, активируем этот шаг
-                    if (!field.closest('.quiz-step').classList.contains('active')) {
-                        const stepIndex = Array.from(quizSteps).indexOf(field.closest('.quiz-step'));
-                        if (stepIndex !== -1) {
-                            currentStep = stepIndex;
-                            showStep(currentStep);
-                        }
-                    }
                 } else {
                     field.classList.remove('is-invalid');
                 }
             });
         });
         
+        // Если последний шаг невалиден, предотвращаем отправку формы
         if (!isValid) {
             e.preventDefault();
             
-            // Добавляем сообщение об ошибке к текущему шагу
+            // Показываем общее сообщение об ошибке на последнем шаге
             const errorMsg = document.createElement('div');
             errorMsg.classList.add('alert', 'alert-danger', 'mt-3', 'mb-0', 'py-2', 'quiz-error');
-            errorMsg.innerHTML = '<i class="fa-solid fa-exclamation-circle me-2"></i>Пожалуйста, заполните все обязательные поля';
-            
-            // Добавляем сообщение только если его еще нет
-            if (!quizSteps[currentStep].querySelector('.quiz-error')) {
-                quizSteps[currentStep].appendChild(errorMsg);
-            }
+            errorMsg.innerHTML = '<i class="fa-solid fa-exclamation-circle me-2"></i>Пожалуйста, заполните все обязательные поля на последнем шаге';
+            lastStep.appendChild(errorMsg);
             
             // Вибрация для обратной связи об ошибке
             if (window.safeVibrate) {
                 window.safeVibrate([30, 50, 30]);
             }
             
-            return false;
-        }
-        
-        // Перед отправкой формы проверяем все поля загрузки файлов
-        const fileInputs = quizForm.querySelectorAll('input[type="file"][required]');
-        fileInputs.forEach(input => {
-            // Если файл уже загружен (по атрибуту data-file-uploaded), убираем required
-            if (input.getAttribute('data-file-uploaded') === 'true') {
-                input.removeAttribute('required');
+            // Прокрутка к первому невалидному полю на последнем шаге
+            const firstInvalidField = lastStep.querySelector('.is-invalid');
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        });
-        
-        return true;
+        }
     });
     
-    // Инициализируем синхронизацию значений
+    // Синхронизация значений между мобильной и десктопной формами
     syncQuizValues();
 });
 </script>

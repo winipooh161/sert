@@ -16,11 +16,26 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
+     * Указываем, что ID не инкрементируется автоматически
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+    
+    /**
+     * Тип первичного ключа
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
+        'id', // Добавляем id в fillable
         'name',
         'email',
         'password',

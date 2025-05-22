@@ -61,8 +61,8 @@
                                     <span class="badge bg-info text-white small">{{ $template->category->name }}</span>
                                 </div>
                                 <p class="card-text text-muted flex-grow-1 small">{{ Str::limit($template->description, 80) }}</p>
-                                <a href="{{ route('entrepreneur.certificates.create', $template) }}" class="btn btn-primary btn-sm">
-                                    <i class="fa-solid fa-plus me-1 me-sm-2"></i>Выбрать этот шаблон
+                                <a href="{{ route('photo.editor') }}?template={{ $template->id }}" class="btn btn-primary btn-sm">
+                                    <i class="fa-solid fa-camera me-1 me-sm-2"></i>Выбрать и создать фото
                                 </a>
                             </div>
                         </div>
@@ -82,7 +82,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                        <a href="{{ route('entrepreneur.certificates.create', $template) }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ route('photo.editor') }}?template={{ $template->id }}" class="btn btn-sm btn-primary">
                                             Выбрать шаблон
                                         </a>
                                     </div>

@@ -1,4 +1,4 @@
-<div class="mt-4 mb-2">
+{{-- <div class="mt-4 mb-2">
     <h2 class="fs-6 fw-bold text-muted">Итого</h2>
 </div>
 <div class="row">
@@ -35,4 +35,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}

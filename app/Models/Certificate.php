@@ -41,6 +41,13 @@ class Certificate extends Model
         'used_at',
     ];
 
+    protected $casts = [
+        'valid_from' => 'datetime',
+        'valid_until' => 'datetime',
+        'used_at' => 'datetime',
+        'is_percent' => 'boolean',
+    ];
+
     /**
      * Boot the model.
      */

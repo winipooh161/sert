@@ -1,0 +1,1 @@
+<?php /**PATH C:\OSPanel\domains\sert\resources\views\layouts\lk-fullwidth.blade.php ENDPATH**/ ?>

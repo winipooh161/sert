@@ -1,0 +1,1 @@
+<?php /**PATH C:\OSPanel\domains\sert\resources\views\components\pwa-install-banner.blade.php ENDPATH**/ ?>

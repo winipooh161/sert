@@ -17,16 +17,25 @@ document.addEventListener('DOMContentLoaded', function() {
         mainContainer.classList.add('scrolled');
         
         // Запускаем анимационный эффект автоматически при скролле к сертификату
-        // если он не был запущен ранее
         if (!animationTriggered) {
             animationTriggered = true;
-            loadAnimationEffect().then(() => {
-                if (effectData) {
-                    setTimeout(() => {
-                        launchAnimationEffect();
-                    }, 500); // Небольшая задержка для плавности
-                }
-            });
+            
+            // Гарантируем, что effectData будет определена перед использованием
+            if (typeof effectData === 'undefined') {
+                // Если effectData не определена, инициализируем загрузку эффекта
+                loadAnimationEffect().then(() => {
+                    if (effectData) {
+                        setTimeout(() => {
+                            launchAnimationEffect();
+                        }, 500); // Небольшая задержка для плавности
+                    }
+                });
+            } else {
+                // Если effectData уже загружена, сразу запускаем эффект
+                setTimeout(() => {
+                    launchAnimationEffect();
+                }, 500);
+            }
         }
     }
     
@@ -260,7 +269,6 @@ function updateDaysRemaining() {
 updateDaysRemaining();
 
 // Обработчик для анимационного эффекта
-const launchEffectButton = document.getElementById('launchEffectButton');
 const effectContainer = document.getElementById('animationEffectContainer');
 let effectData = null;
 
@@ -268,32 +276,41 @@ let effectData = null;
 async function loadAnimationEffect() {
     try {
         @if(isset($certificate->animation_effect_id) && $certificate->animation_effect_id)
+        console.log('Загружаем эффект ID: {{ $certificate->animation_effect_id }}');
         const response = await fetch('{{ route("animation-effects.get") }}');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
         const effects = await response.json();
+        console.log('Загружены эффекты:', effects);
         effectData = effects.find(effect => effect.id === {{ $certificate->animation_effect_id }});
         
         if (effectData) {
-            console.log('Загружен анимационный эффект:', effectData.name);
+            console.log('Загружен анимационный эффект:', effectData);
+            return true;
         }
+        @else
+        console.log('Сертификат не имеет анимационного эффекта');
         @endif
     } catch (error) {
         console.error('Ошибка при загрузке анимационного эффекта:', error);
     }
+    return false;
 }
 
 // Функция для запуска анимации
 function launchAnimationEffect() {
-    if (!effectData) return;
+    if (!effectData) {
+        console.log('Нет данных для запуска эффекта');
+        return;
+    }
+    
+    console.log('Запуск анимационного эффекта:', effectData.name);
     
     // Очищаем контейнер
-    effectContainer.innerHTML = '';
-    
-    // Получаем параметры эффекта
-    const particles = Array.isArray(effectData.particles) ? effectData.particles : ['✨'];
-    const type = effectData.type || 'emoji';
-    const direction = effectData.direction || 'random';
-    const speed = effectData.speed || 'normal';
-    const quantity = Math.min(effectData.quantity || 50, 100);
+    if (effectContainer) {
+        effectContainer.innerHTML = '';
+    }
     
     // Создаем контейнер для анимации, если его нет
     let animContainer = document.querySelector('.animation-container');
@@ -302,6 +319,18 @@ function launchAnimationEffect() {
         animContainer.className = 'animation-container';
         document.body.appendChild(animContainer);
     }
+    
+    // Очищаем предыдущую анимацию
+    animContainer.innerHTML = '';
+    
+    // Получаем параметры эффекта
+    const particles = Array.isArray(effectData.particles) ? effectData.particles : ['✨'];
+    const type = effectData.type || 'emoji';
+    const direction = effectData.direction || 'random';
+    const speed = effectData.speed || 'normal';
+    const quantity = Math.min(effectData.quantity || 50, 100);
+    
+    console.log(`Создаем ${quantity} частиц типа ${type}`);
     
     // Создаем частицы
     for (let i = 0; i < quantity; i++) {
@@ -365,6 +394,7 @@ function launchAnimationEffect() {
     
     // Плавно показываем анимацию
     setTimeout(() => {
+        console.log('Показываем анимацию');
         animContainer.classList.add('visible');
     }, 50);
     
@@ -380,11 +410,16 @@ function launchAnimationEffect() {
     }, 7000);
 }
 
-// Инициализация
+// Загружаем данные эффекта при инициализации
+loadAnimationEffect();
+
+// Добавляем кнопку для ручного запуска эффекта (если нужно)
+// Проверяем наличие кнопки запуска эффекта
+const launchEffectButton = document.getElementById('launchEffectButton');
+
 if (launchEffectButton) {
-    loadAnimationEffect();
-    
     launchEffectButton.addEventListener('click', function() {
+        console.log('Кнопка запуска эффекта нажата');
         launchAnimationEffect();
         
         // Анимация кнопки при нажатии
@@ -393,5 +428,26 @@ if (launchEffectButton) {
             this.classList.remove('animate__animated', 'animate__rubberBand');
         }, 1000);
     });
+} else {
+    // Если кнопки нет, создаем её
+    const effectBtn = document.createElement('button');
+    effectBtn.id = 'launchEffectButton';
+    effectBtn.className = 'effect-button animate__animated';
+    effectBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i>';
+    effectBtn.title = 'Запустить эффект';
+    
+    effectBtn.addEventListener('click', function() {
+        console.log('Кнопка запуска эффекта нажата');
+        launchAnimationEffect();
+        
+        // Анимация кнопки при нажатии
+        this.classList.add('animate__animated', 'animate__rubberBand');
+        setTimeout(() => {
+            this.classList.remove('animate__animated', 'animate__rubberBand');
+        }, 1000);
+    });
+    
+    // Добавляем кнопку на страницу
+    document.body.appendChild(effectBtn);
 }
 </script>

@@ -395,11 +395,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectEffectButton = document.getElementById('selectEffectButton');
         const animationEffectIdInput = document.getElementById('animation_effect_id');
         const selectedEffectNameInput = document.getElementById('selected_effect_name');
-        let selectedEffectId = null;
-        let effects = [];
         
-        // Делаем эти функции глобальными для доступа из обеих версий
+        // Делаем selectedEffectId глобальной переменной для доступа из разных функций
+        window.selectedEffectId = null;
+        window.effects = [];
+        
+        // Делаем эти функции и переменные глобальными для доступа из обеих версий
         window.selectEffectButton = selectEffectButton;
+        window.animationEffectIdInput = animationEffectIdInput;
+        window.selectedEffectNameInput = selectedEffectNameInput;
         
         // Функция для загрузки списка эффектов
         window.loadAnimationEffects = function() {
@@ -413,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     return response.json();
                 })
                 .then(data => {
-                    effects = data;
+                    window.effects = data;
                     renderEffectsList(data);
                 })
                 .catch(error => {
@@ -583,9 +587,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
             
-            // Сохраняем выбранный эффект
-            selectedEffectId = effectId;
+            // Сохраняем выбранный эффект в глобальную переменную
+            window.selectedEffectId = effectId;
             if (selectEffectButton) selectEffectButton.disabled = false;
+            
+            // Немедленно применяем эффект к полю ввода для надежности
+            if (animationEffectIdInput) {
+                animationEffectIdInput.value = effectId !== null ? effectId : '';
+                console.log('ID эффекта установлен: ', animationEffectIdInput.value);
+            } else {
+                console.error('Элемент animation_effect_id не найден!');
+            }
             
             // Активируем временный предпросмотр эффекта, если он выбран
             if (effectId !== null) {
@@ -657,14 +669,33 @@ document.addEventListener("DOMContentLoaded", function () {
         // Применение выбранного эффекта
         if (selectEffectButton) {
             selectEffectButton.addEventListener('click', function() {
-                if (animationEffectIdInput) animationEffectIdInput.value = selectedEffectId || '';
+                // Находим все элементы снова на тот случай, если они были перерисованы
+                const currentAnimEffectInput = document.getElementById('animation_effect_id');
+                const currentEffectNameInput = document.getElementById('selected_effect_name');
                 
-                if (selectedEffectId && selectedEffectNameInput) {
-                    const selectedEffect = effects.find(effect => effect.id === selectedEffectId);
-                    selectedEffectNameInput.value = selectedEffect ? selectedEffect.name : 'Выбранный эффект';
-                } else if (selectedEffectNameInput) {
-                    selectedEffectNameInput.value = 'Без эффекта';
+                // Обновляем значение поля ID анимации
+                if (currentAnimEffectInput) {
+                    currentAnimEffectInput.value = window.selectedEffectId || '';
+                    console.log('При клике установлен ID эффекта: ', currentAnimEffectInput.value);
+                } else if (animationEffectIdInput) {
+                    animationEffectIdInput.value = window.selectedEffectId || '';
+                    console.log('При клике установлен ID эффекта (из замыкания): ', animationEffectIdInput.value);
+                } else {
+                    console.error('Элементы полей эффекта не найдены!');
                 }
+                
+                // Обновляем отображаемое название
+                if (window.selectedEffectId && (currentEffectNameInput || selectedEffectNameInput)) {
+                    const effectInput = currentEffectNameInput || selectedEffectNameInput;
+                    const selectedEffect = window.effects.find(effect => effect.id === window.selectedEffectId);
+                    effectInput.value = selectedEffect ? selectedEffect.name : 'Выбранный эффект';
+                } else if (currentEffectNameInput || selectedEffectNameInput) {
+                    const effectInput = currentEffectNameInput || selectedEffectNameInput;
+                    effectInput.value = 'Без эффекта';
+                }
+                
+                // Синхронизируем значения в обеих формах
+                syncEffectValuesBetweenForms();
                 
                 // Обратная связь при выборе
                 if (window.safeVibrate) {
@@ -674,14 +705,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Обновить итоговую информацию в шаге 5
                 const summaryEffect = document.getElementById('summary_effect');
                 if (summaryEffect) {
-                    if (selectedEffectId) {
-                        const effectName = selectedEffectNameInput?.value || 'Выбранный эффект';
+                    if (window.selectedEffectId) {
+                        const effectName = currentEffectNameInput?.value || selectedEffectNameInput?.value || 'Выбранный эффект';
                         summaryEffect.innerHTML = `<span class="badge bg-primary">${effectName}</span>`;
                     } else {
                         summaryEffect.innerHTML = `<span class="badge bg-secondary">Нет эффекта</span>`;
                     }
                 }
             });
+        }
+        
+        // Функция для синхронизации значений между мобильной и десктопной формами
+        function syncEffectValuesBetweenForms() {
+            const mobileCertForm = document.getElementById('mobileCertificateForm');
+            const desktopCertForm = document.getElementById('desktopCertificateForm');
+            
+            if (mobileCertForm && desktopCertForm) {
+                const mobileEffectIdInput = mobileCertForm.querySelector('[name="animation_effect_id"]');
+                const desktopEffectIdInput = desktopCertForm.querySelector('[name="animation_effect_id"]');
+                
+                if (mobileEffectIdInput && desktopEffectIdInput) {
+                    mobileEffectIdInput.value = window.selectedEffectId || '';
+                    desktopEffectIdInput.value = window.selectedEffectId || '';
+                }
+            }
         }
         
         // Инициализация при открытии модального окна

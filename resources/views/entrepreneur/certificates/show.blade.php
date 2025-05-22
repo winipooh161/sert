@@ -79,7 +79,18 @@
                             
                             <div class="mb-3">
                                 <span class="d-block text-muted mb-1">Срок действия</span>
-                                <span class="fw-bold">{{ $certificate->valid_from->format('d.m.Y') }} - {{ $certificate->valid_until->format('d.m.Y') }}</span>
+                                <span class="fw-bold">
+                                    @php
+                                        $fromDate = $certificate->valid_from instanceof \Carbon\Carbon 
+                                            ? $certificate->valid_from->format('d.m.Y') 
+                                            : (new \Carbon\Carbon($certificate->valid_from))->format('d.m.Y');
+                                            
+                                        $untilDate = $certificate->valid_until instanceof \Carbon\Carbon 
+                                            ? $certificate->valid_until->format('d.m.Y') 
+                                            : (new \Carbon\Carbon($certificate->valid_until))->format('d.m.Y');
+                                    @endphp
+                                    {{ $fromDate }} - {{ $untilDate }}
+                                </span>
                             </div>
                             
                             @if($certificate->recipient_email)

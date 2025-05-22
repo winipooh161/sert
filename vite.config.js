@@ -8,7 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/lk.css',
                 'resources/js/app.js',
-                'resources/js/sidebar.js',
+                'resources/js/sidebar.js',      'resources/js/photo-editor.js',
                 'resources/js/pwa.js', // Добавляем скрипт PWA
             ],
             refresh: true,

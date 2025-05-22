@@ -77,6 +77,12 @@ Route::prefix('entrepreneur')->name('entrepreneur.')->middleware(['auth', 'role:
     // Добавляем маршрут для dashboard
     Route::get('/dashboard', [EntrepreneurDashboardController::class, 'index'])->name('dashboard');
     
+    // Добавляем маршруты для поиска и ленивой загрузки сертификатов
+    Route::get('/certificates/search', [CertificatesController::class, 'search'])
+        ->name('certificates.search');
+    Route::get('/certificates/load-more', [CertificatesController::class, 'loadMore'])
+        ->name('certificates.load-more');
+    
     // Маршруты для сертификатов
     Route::get('/certificates', [CertificatesController::class, 'index'])->name('certificates.index');
     
@@ -117,18 +123,7 @@ Route::prefix('entrepreneur')->name('entrepreneur.')->middleware(['auth', 'role:
         Route::get('/reports', [AnalyticsController::class, 'reports'])->name('reports');
     });
     
-    // Маршруты для печати сертификатов (предприниматель) - исправлено дублирование префикса
-    Route::get('certificates/{certificate}/print', 
-        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'showOptions'])
-        ->name('certificates.print');
-        
-    Route::post('certificates/{certificate}/print', 
-        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'generatePrintable'])
-        ->name('certificates.print.generate');
-        
-    Route::get('certificates/{certificate}/quick-print', 
-        [App\Http\Controllers\Entrepreneur\CertificatePrintController::class, 'generatePrintable'])
-        ->name('certificates.quick-print');
+  
 });
 
 // Маршруты для профиля (доступны всем авторизованным)
@@ -238,6 +233,24 @@ Route::prefix('telegram')->name('telegram.')->group(function () {
     Route::get('/send-test/{chatId}', [App\Http\Controllers\TelegramBotController::class, 'sendTestMessage'])
         ->name('sendTestMessage');
 });
+
+// Маршруты для фото-редактора - обратите внимание, что для маршрута сохранения изображения не используем middleware auth
+Route::get('/photo-editor', [App\Http\Controllers\PhotoEditorController::class, 'index'])
+    ->name('photo.editor');
+    
+Route::post('/photo-save-to-certificate/{templateId}', [App\Http\Controllers\PhotoEditorController::class, 'saveToCertificate'])
+    ->name('photo.save.to.certificate');
+Route::post('/sticker-upload', [App\Http\Controllers\PhotoEditorController::class, 'uploadSticker'])
+    ->middleware('auth')
+    ->name('photo.sticker.upload');
+Route::post('/project-save', [App\Http\Controllers\PhotoEditorController::class, 'saveProject'])
+    ->middleware('auth')
+    ->name('photo.project.save');
+Route::get('/project-load/{filename}', [App\Http\Controllers\PhotoEditorController::class, 'loadProject'])
+    ->middleware('auth')
+    ->name('photo.project.load');
+Route::get('/filters', [App\Http\Controllers\PhotoEditorController::class, 'getFilters'])
+    ->name('photo.filters');
 
 if (app()->environment('production')) {
     URL::forceScheme('https');

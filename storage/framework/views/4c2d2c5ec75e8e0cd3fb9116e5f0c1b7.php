@@ -56,29 +56,7 @@ unset($__errorArgs, $__bag); ?>
         <div class="form-text small">Номер телефона для идентификации получателя</div>
     </div>
     
-    <div class="mb-3">
-        <label for="recipient_email" class="form-label fw-medium mb-2">Email получателя</label>
-        <input type="email" class="form-control form-control-lg <?php $__errorArgs = ['recipient_email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-            id="recipient_email" name="recipient_email" value="<?php echo e(old('recipient_email')); ?>"
-            placeholder="email@example.com">
-        <?php $__errorArgs = ['recipient_email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
+    
     
     <div class="mb-3">
         <label for="message" class="form-label fw-medium mb-2">Сообщение или пожелание</label>

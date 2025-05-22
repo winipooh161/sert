@@ -97,61 +97,93 @@ class CertificatesController extends Controller
      */
     public function store(Request $request, CertificateTemplate $template)
     {
-        $request->validate([
-            'recipient_name' => 'required|string|max:255',
-            'recipient_phone' => 'required|string|max:20',
-            'recipient_email' => 'nullable|email|max:255',
-            'amount' => 'required|numeric|min:0',
+        // Валидация запроса
+        $validated = $request->validate([
+            'amount' => 'required_if:amount_type,money|integer|min:1',
+            'percent_value' => 'required_if:amount_type,percent|integer|min:1|max:100',
+            'amount_type' => 'required|in:money,percent',
             'valid_from' => 'required|date',
             'valid_until' => 'required|date|after:valid_from',
+            'recipient_name' => 'required|string|max:255',
+            'recipient_phone' => 'required|string|max:255',
+            'recipient_email' => 'nullable|email|max:255',
             'message' => 'nullable|string|max:1000',
-            'custom_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
-            'animation_effect_id' => 'nullable|integer|exists:animation_effects,id', // Добавляем валидацию
+            'temp_cover_path' => 'required|string', // Теперь это поле обязательно
+            'animation_effect_id' => 'nullable|integer|exists:animation_effects,id',
+            'logo_type' => 'required|in:default,custom,none',
+            'custom_logo' => 'required_if:logo_type,custom|nullable|image|max:5120',
         ]);
         
-        // Генерация уникального номера сертификата
-        $certificateNumber = 'CERT-' . strtoupper(Str::random(8));
+        // Генерация уникального номера сертификата перед созданием
+        $certificateNumber = $this->generateCertificateNumber();
         
-        // Определяем логотип компании для сертификата
-        $companyLogo = null;
-        
-        if ($request->logo_type === 'default') {
-            // Используем логотип из профиля пользователя
-            $companyLogo = Auth::user()->company_logo;
-        } elseif ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {
-            // Обрабатываем загрузку пользовательского логотипа
-            $companyLogo = $this->imageService->createLogo($request->file('custom_logo'), 'company_logos');
-        } // Если logo_type === 'none', то оставляем companyLogo = null
-        
-        // Загрузка обложки сертификата (если есть)
-        $coverImagePath = null;
-        if ($request->hasFile('cover_image')) {
-            $coverImagePath = $this->imageService->createCover($request->file('cover_image'), 'certificate_covers');
-        }
-        
-        $certificate = new Certificate([
+        // Подготавливаем данные для создания сертификата
+        $certificateData = [
+            'user_id' => Auth::id(),
+            'certificate_template_id' => $template->id, // Добавляем ID шаблона
             'certificate_number' => $certificateNumber,
+            'amount' => $request->amount_type === 'money' ? $request->amount : $request->percent_value,
+            'is_percent' => $request->amount_type === 'percent',
             'recipient_name' => $request->recipient_name,
             'recipient_email' => $request->recipient_email,
             'recipient_phone' => $request->recipient_phone,
-            'amount' => $request->amount,
             'message' => $request->message,
-            'company_logo' => $companyLogo, // Сохраняем путь к логотипу
             'valid_from' => Carbon::parse($request->valid_from),
             'valid_until' => Carbon::parse($request->valid_until),
             'custom_fields' => $request->custom_fields,
             'status' => 'active',
-            'cover_image' => $coverImagePath ?? null, // Сохраняем путь к обложке
-            'animation_effect_id' => $request->animation_effect_id, // Добавляем поле animation_effect_id
-        ]);
+            'animation_effect_id' => $request->input('animation_effect_id'),
+        ];
         
-        $certificate->user()->associate(Auth::user());
-        $certificate->template()->associate($template);
+        // Создаем сертификат
+        $certificate = Certificate::create($certificateData);
+        
+        // Обработка логотипа
+        if ($request->logo_type === 'default') {
+            // Используем логотип по умолчанию
+            $certificate->company_logo = Auth::user()->company_logo;
+        } elseif ($request->logo_type === 'custom' && $request->hasFile('custom_logo')) {
+            // Обрабатываем загрузку пользовательского логотипа
+            $certificate->company_logo = $this->imageService->createLogo($request->file('custom_logo'), 'company_logos');
+        } else {
+            $certificate->company_logo = null; // Если логотип не нужен
+        }
+        
+        // Обработка изображения обложки - только из фоторедактора
+        if ($request->has('temp_cover_path') && $request->temp_cover_path) {
+            // Используем временное изображение из фоторедактора
+            $tempPath = $request->temp_cover_path;
+            $finalPath = 'certificates/covers/' . basename($tempPath);
+            
+            // Проверка существования файла
+            if (!Storage::disk('public')->exists($tempPath)) {
+                return back()->withInput()->withErrors([
+                    'temp_cover_path' => 'Временное изображение не найдено. Пожалуйста, создайте изображение в фоторедакторе.'
+                ]);
+            }
+            
+            // Копируем файл в постоянное хранилище
+            Storage::disk('public')->copy($tempPath, $finalPath);
+            $certificate->cover_image = $finalPath;
+            
+            // Удаляем временный файл
+            Storage::disk('public')->delete($tempPath);
+        } else {
+            return back()->withInput()->withErrors([
+                'temp_cover_path' => 'Необходимо создать изображение в фоторедакторе.'
+            ]);
+        }
+        
+        // Теперь это не требуется, так как связь уже установлена
+        // $certificate->template()->associate($template);
         $certificate->save();
         
-        return redirect()->route('entrepreneur.certificates.index')
-            ->with('success', 'Сертификат успешно создан.');
+        // Удаляем данные о временном изображении из сессии
+        session()->forget('temp_certificate_cover');
+        
+        // Перенаправление на страницу списка сертификатов
+        return redirect()->route('entrepreneur.certificates.show', $certificate)
+            ->with('success', 'Сертификат успешно создан!');
     }
 
     /**
@@ -356,5 +388,107 @@ class CertificatesController extends Controller
         
         return redirect()->route('entrepreneur.certificates.admin-verify', $certificate)
             ->with('success', 'Сертификат успешно отмечен как использованный.');
+    }
+
+    /**
+     * Поиск сертификатов по номеру телефона или имени получателя
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (empty($query) || strlen($query) < 3) {
+            return response()->json([
+                'certificates' => []
+            ]);
+        }
+        
+        // Определяем, является ли запрос телефоном или именем
+        $isPhone = preg_match('/^[0-9+\-\s()]{3,}$/', $query);
+        
+        // Очищаем телефон от лишних символов для сравнения
+        if ($isPhone) {
+            $cleanedQuery = preg_replace('/[^0-9]/', '', $query);
+        }
+        
+        // Создаем запрос к базе
+        $certificates = Auth::user()->certificates()
+            ->with('template')
+            ->where(function ($q) use ($query, $isPhone, $cleanedQuery) {
+                if ($isPhone) {
+                    // Поиск по телефону с учетом разных форматов
+                    $q->where('recipient_phone', 'like', '%' . $cleanedQuery . '%')
+                      ->orWhere('recipient_phone', 'like', '%' . $query . '%');
+                } else {
+                    // Поиск по имени
+                    $q->where('recipient_name', 'like', '%' . $query . '%')
+                      ->orWhere('certificate_number', 'like', '%' . $query . '%');
+                }
+            })
+            ->latest()
+            ->take(20)
+            ->get();
+            
+        // Форматируем данные для фронтенда
+        $formattedCertificates = $certificates->map(function ($certificate) {
+            return [
+                'id' => $certificate->id,
+                'certificate_number' => $certificate->certificate_number,
+                'recipient_name' => $certificate->recipient_name,
+                'recipient_phone' => $certificate->recipient_phone,
+                'amount' => $certificate->amount,
+                'status' => $certificate->status,
+                'created_at' => $certificate->created_at,
+                'cover_image_url' => $certificate->cover_image_url,
+                'public_url' => route('certificates.public', $certificate->uuid),
+                'template_name' => $certificate->template ? $certificate->template->name : 'Неизвестный шаблон'
+            ];
+        });
+        
+        return response()->json([
+            'certificates' => $formattedCertificates
+        ]);
+    }
+    
+    /**
+     * Ленивая загрузка дополнительных сертификатов при скролле
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function loadMore(Request $request)
+    {
+        $page = $request->get('page', 1);
+        
+        $certificates = Auth::user()->certificates()
+            ->with('template')
+            ->latest()
+            ->paginate(12, ['*'], 'page', $page);
+            
+        // Форматируем данные для фронтенда
+        $formattedCertificates = $certificates->items()->map(function ($certificate) {
+            return [
+                'id' => $certificate->id,
+                'certificate_number' => $certificate->certificate_number,
+                'recipient_name' => $certificate->recipient_name,
+                'recipient_phone' => $certificate->recipient_phone,
+                'amount' => $certificate->amount,
+                'status' => $certificate->status,
+                'created_at' => $certificate->created_at,
+                'cover_image_url' => $certificate->cover_image_url,
+                'public_url' => route('certificates.public', $certificate->uuid),
+                'template_name' => $certificate->template ? $certificate->template->name : 'Неизвестный шаблон'
+            ];
+        });
+        
+        return response()->json([
+            'certificates' => $formattedCertificates,
+            'has_more_pages' => $certificates->hasMorePages(),
+            'current_page' => $certificates->currentPage(),
+            'last_page' => $certificates->lastPage()
+        ]);
     }
 }

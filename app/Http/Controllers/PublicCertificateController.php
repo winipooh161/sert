@@ -17,6 +17,9 @@ class PublicCertificateController extends Controller
     {
         $certificate = Certificate::where('uuid', $uuid)->firstOrFail();
         
+        // Загружаем связанные данные для эффективности
+        $certificate->load(['user', 'template']);
+        
         // Если у сертификата нет обложки, используем запасное изображение
         if (!$certificate->cover_image || !file_exists(public_path('storage/' . $certificate->cover_image))) {
             // Устанавливаем запасное изображение обложки
